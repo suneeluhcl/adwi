@@ -442,7 +442,128 @@ def step_evals() -> dict:
     except Exception as e:
         results["routing_eval"] = f"Error: {e}"
 
+    # Promptfoo eval matrix
+    results["promptfoo"] = step_promptfoo_eval()
+
     return results
+
+
+def step_promptfoo_eval() -> dict:
+    """
+    Run promptfoo against 50 ground-truth intent routing prompts.
+    If precision < 95%, the failure summary is added to Pending User Approval
+    and flagged for aider self-repair.
+    """
+    pf_config = WORKSPACE / "adwi" / "promptfoo-eval.yaml"
+    promptfoo_bin = subprocess.run(["which", "promptfoo"], capture_output=True, text=True).stdout.strip()
+    if not promptfoo_bin:
+        return {"skipped": "promptfoo not installed"}
+    if not pf_config.exists():
+        _write_promptfoo_config(pf_config)
+
+    rc, out, err = _run(
+        [promptfoo_bin, "eval", "--config", str(pf_config), "--output", "/tmp/pf-results.json", "--no-cache"],
+        timeout=300,
+        cwd=str(WORKSPACE),
+    )
+    if rc != 0:
+        return {"error": err[:500] or out[:500]}
+
+    try:
+        with open("/tmp/pf-results.json") as f:
+            pf = json.load(f)
+        stats = pf.get("stats", {})
+        passed  = stats.get("successes", 0)
+        total   = stats.get("successes", 0) + stats.get("failures", 0)
+        pct     = round(passed / total * 100, 1) if total else 0
+        return {"passed": passed, "total": total, "precision_pct": pct, "below_threshold": pct < 95}
+    except Exception as e:
+        return {"parse_error": str(e), "raw": out[:400]}
+
+
+def _write_promptfoo_config(path: Path) -> None:
+    """Generate a 50-case ground-truth routing eval config."""
+    cases = [
+        # File system
+        ("what is using my disk space", "disk_usage"),
+        ("show me the biggest files on my mac", "large_files"),
+        ("find files not accessed in a year", "old_files"),
+        ("are there duplicate photos in my downloads", "duplicates"),
+        ("how should I organize my projects folder", "organize"),
+        ("what can I safely delete to free space", "cleanup"),
+        ("read notes/profile.md", "file_read"),
+        ("find all python files mentioning sqlite", "file_search"),
+        ("list what's in my workspace adwi folder", "file_list"),
+        # Web
+        ("search the web for Ollama latest release", "web_search"),
+        ("search exa for LLM routing papers", "exa_search"),
+        ("tavily search for n8n webhooks tutorial", "tavily_search"),
+        ("scrape https://ollama.com/library and summarize", "firecrawl"),
+        ("browse https://news.ycombinator.com top stories", "browse"),
+        # Memory
+        ("what do you remember about my AI setup", "memory_recall"),
+        ("scan and update your memory from my notes", "memory_scan"),
+        ("how many memories do you have", "memory_stats"),
+        # Obsidian
+        ("search my obsidian vault for automation notes", "obsidian_search"),
+        ("read my obsidian daily note", "obsidian_daily"),
+        # System
+        ("are all my services running", "status"),
+        ("fix adwi it's broken", "self_heal"),
+        ("what should I build next", "what_next"),
+        ("run the daily improvement routine", "daily_improve"),
+        ("how fast is adwi in tokens per second", "benchmark"),
+        ("run a quick python script to check disk", "run_code"),
+        ("check adwi's full health", "doctor"),
+        # Model
+        ("which model is currently active", "model_status"),
+        ("switch to the local model", "use_local"),
+        ("use cloud model for this", "use_cloud"),
+        ("what can you do", "capabilities"),
+        # Git
+        ("show git status", "git_status"),
+        ("commit everything now", "backup_now"),
+        ("when was the last backup", "backup_status"),
+        # Media
+        ("https://youtu.be/dQw4w9WgXcQ", "youtube"),
+        ("generate an image of a sunset", "generate_image"),
+        # Email
+        ("check my gmail", "gmail"),
+        ("show unread emails", "gmail"),
+        # Nightly
+        ("run the nightly maintenance loop", "nightly_run"),
+        ("what did the nightly loop do last night", "nightly_status"),
+        # Voice
+        ("listen to my voice command", "voice_in"),
+        ("read the morning brief out loud", "voice_out"),
+        # Chat
+        ("what is the capital of France", "chat"),
+        ("explain how transformers work", "chat"),
+        ("tell me a joke", "chat"),
+        ("how do I make pasta carbonara", "chat"),
+        ("what's the weather like today", "chat"),
+        ("who wrote hamlet", "chat"),
+        ("translate hello to spanish", "chat"),
+        ("what is 2 plus 2", "chat"),
+    ]
+
+    providers = [{"id": "ollama:llama3.1:8b", "config": {"temperature": 0}}]
+    tests = []
+    for prompt, expected in cases:
+        tests.append({
+            "vars": {"prompt": prompt},
+            "assert": [{"type": "contains", "value": f'"intent": "{expected}"'}],
+        })
+
+    config = {
+        "description": "Adwi intent routing ground truth — 50 cases",
+        "providers": providers,
+        "prompts": [
+            "Classify this message and return JSON with intent and target: {{prompt}}"
+        ],
+        "tests": tests,
+    }
+    path.write_text(json.dumps(config, indent=2), encoding="utf-8")
 
 
 # ── Step 5: Capability sync ───────────────────────────────────────────────────

@@ -43,3 +43,37 @@ services:
       - SEARXNG_BASE_URL=http://localhost:8888/
     volumes:
       - ./searxng-data:/etc/searxng
+
+  phoenix:
+    image: arizephoenix/phoenix:version-8.1.0
+    container_name: suneel-phoenix
+    restart: unless-stopped
+    ports:
+      - "6006:6006"    # Phoenix UI
+      - "4317:4317"    # OTLP gRPC collector
+      - "4318:4318"    # OTLP HTTP collector
+    environment:
+      - PHOENIX_WORKING_DIR=/phoenix
+    volumes:
+      - ./phoenix-data:/phoenix
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: suneel-homeassistant
+    restart: unless-stopped
+    network_mode: host          # required for mDNS / device discovery
+    privileged: true
+    environment:
+      - TZ=America/Chicago
+    volumes:
+      - ./homeassistant-data:/config
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: suneel-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - n8n

@@ -44,6 +44,19 @@ import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Inject adwi venv so markitdown is available for rich document parsing
+_VENV_SITE = Path.home() / "SuneelWorkSpace" / "adwi" / ".venv" / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+if _VENV_SITE.exists() and str(_VENV_SITE) not in sys.path:
+    sys.path.insert(0, str(_VENV_SITE))
+
+try:
+    from markitdown import MarkItDown as _MarkItDown
+    _MARKITDOWN = _MarkItDown()
+    MARKITDOWN_OK = True
+except Exception:
+    _MARKITDOWN = None
+    MARKITDOWN_OK = False
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -65,13 +78,15 @@ DESKTOP     = Path.home() / "Desktop"
 LOG_PATH    = Path("/tmp/overnight-learn.log")
 CHECKPOINT  = Path("/tmp/overnight-learn-checkpoint.json")
 
-# File types to index
+# File types to index — plain text handled directly, rich formats via markitdown
 TARGET_EXTS = {
     ".py", ".js", ".ts", ".go", ".rs", ".java", ".cpp", ".c", ".h",
     ".rb", ".swift", ".kt", ".sh", ".bash", ".zsh",
     ".md", ".txt", ".yaml", ".yml", ".json", ".toml", ".cfg", ".ini",
     ".html", ".css", ".sql",
 }
+# Rich document extensions — parsed by markitdown into clean markdown
+RICH_EXTS = {".pdf", ".docx", ".xlsx", ".pptx", ".csv", ".epub", ".zip"}
 
 # Directories to skip entirely
 SKIP_DIRS = {
@@ -425,6 +440,7 @@ def synthesize_architecture(file_samples: list) -> str:
 # ── File crawling and chunking ────────────────────────────────────────────────
 
 def crawl_workspace(root: Path) -> list:
+    all_exts = TARGET_EXTS | (RICH_EXTS if MARKITDOWN_OK else set())
     files = []
     for path in sorted(root.rglob("*")):
         if out_of_time():
@@ -433,17 +449,35 @@ def crawl_workspace(root: Path) -> list:
             continue
         if any(skip in path.parts for skip in SKIP_DIRS):
             continue
-        if path.suffix.lower() not in TARGET_EXTS:
+        if path.suffix.lower() not in all_exts:
             continue
         try:
             size = path.stat().st_size
         except OSError:
             continue
-        if size < MIN_FILE_BYTES or size > MAX_FILE_BYTES:
+        # Rich docs can be larger (PDFs especially)
+        max_bytes = 5_000_000 if path.suffix.lower() in RICH_EXTS else MAX_FILE_BYTES
+        if size < MIN_FILE_BYTES or size > max_bytes:
             continue
         files.append(path)
-    log(f"Crawled {root}: {len(files)} eligible files")
+    rich_count = sum(1 for f in files if f.suffix.lower() in RICH_EXTS)
+    log(f"Crawled {root}: {len(files)} eligible files ({rich_count} rich docs via markitdown)")
     return files
+
+
+def read_file_content(file_path: Path) -> str:
+    """Read file content — plain text directly, rich formats via markitdown."""
+    suffix = file_path.suffix.lower()
+    if suffix in RICH_EXTS and MARKITDOWN_OK:
+        try:
+            result = _MARKITDOWN.convert(str(file_path))
+            md = result.text_content if hasattr(result, "text_content") else str(result)
+            if md and len(md.strip()) > 40:
+                return md
+        except Exception as e:
+            log(f"  markitdown failed for {file_path.name}: {e} — falling back to text", "WARN")
+    # Plain text fallback
+    return file_path.read_text(encoding="utf-8", errors="ignore")
 
 
 def chunk_text(text: str) -> list:
@@ -720,7 +754,7 @@ def main():
 
             # ── Phase 2: Chunk ────────────────────────────────────────────────
             try:
-                raw_text = file_path.read_text(encoding="utf-8", errors="ignore")
+                raw_text = read_file_content(file_path)
             except Exception as e:
                 log(f"  skip {rel}: {e}", "WARN")
                 done_files.add(str(file_path))

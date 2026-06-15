@@ -96,3 +96,88 @@
 - [ ] Load com.suneel.obsidian-bridge LaunchAgent: `launchctl load ~/Library/LaunchAgents/com.suneel.obsidian-bridge.plist`
 - [ ] Run `/web-search ollama release notes` from adwi to verify SearXNG wiring
 - [ ] Run `/obsidian-search local AI` to verify vault bridge
+
+---
+
+## 2026-06-15 — 5-Pillar Architecture Upgrade
+
+### Pillar A: NLU Upgrade (Structured Intent Classification)
+- Swapped `MODEL_FAST` from `qwen3:0.6b` → `llama3.1:8b` (already available, 4.9GB)
+- Added Ollama native JSON schema `format` parameter to `_ollama_chat()` for constrained decoding
+- Built comprehensive `_ALL_INTENTS` enum (55 intents covering all 80+ commands)
+- `_INTENT_JSON_SCHEMA` passed to every NLU call — model physically cannot output an invalid intent token
+- 4-layer classification: YouTube/image detect → regex prefilter → llama3.1:8b structured → qwen3:0.6b fallback
+- Enhanced regex prefilter: added `memory_recall` pattern for "what do you remember about X"
+- Added `instructor` library via adwi/.venv for optional enhanced structured outputs
+- Wired 20+ new intents into `dispatch_natural()` (voice_in/out, obsidian_read/write, backup_*, nightly_*, etc.)
+
+### Pillar B: iPhone Control Plane
+- Added `homeassistant` and `cloudflared` services to docker-compose.yml
+- Tailscale already installed — user needs `sudo tailscale up` + browser auth
+- Created `bin/start-homeassistant` helper script
+- Created `adwi/iphone-control-plane.md` — complete step-by-step guide:
+  * Home Assistant setup on :8123
+  * Tailscale mesh VPN for remote access
+  * Cloudflare Tunnel for inbound webhooks (via CLOUDFLARE_TUNNEL_TOKEN in config/.env)
+  * 3 n8n webhook workflows (morning brief, pending approvals, force nightly)
+  * Siri Shortcuts specs for "Run Morning Brief", "What Needs Approval?", "Force Maintenance"
+  * Apple Watch complication setup
+  * HA rest_command configuration
+
+### Pillar C: Local Voice I/O Pipeline
+- Created `adwi/voice.py` — full STT/TTS pipeline:
+  * STT: faster-whisper (base.en, int8, CoreML-optimized) via `transcribe()`
+  * TTS: piper-tts (en_US-lessac-medium, auto-downloads ~63MB model) via `speak()`
+  * Recording: `record_mic()` via sox (brew install sox)
+- Added commands to adwi_cli.py: `/voice-in`, `/listen`, `/voice-out`, `/voice-brief`
+- Wired into NLU: `voice_in` and `voice_out` intents dispatch to voice commands
+- Packages installed in adwi/.venv: faster-whisper==1.2.1, piper-tts==1.4.2
+
+### Pillar D: Deep Agent Observability
+- Added `arize-phoenix:version-8.1.0` to docker-compose.yml (ports: 6006 UI, 4317 gRPC, 4318 HTTP)
+- OpenTelemetry SDK already installed (opentelemetry-api, sdk, exporter-otlp-grpc)
+- Added `_otel_span()` context manager to adwi_cli.py — no-op when Phoenix is down
+- Instrumented `classify_intent()` with `classify_intent` OTel span including input text + model
+- Added `_latency_ms` to every classification result for latency tracking
+- Added `step_promptfoo_eval()` to nightly.py:
+  * 50 ground-truth intent routing test cases (auto-generated to adwi/promptfoo-eval.yaml)
+  * Runs via `promptfoo eval` (installed globally via npm)
+  * If precision < 95%: flagged in Pending User Approval section of morning brief
+- Created `bin/start-phoenix` helper
+
+### Pillar E: Multi-Modal Document Indexing
+- Added `markitdown==0.1.6` to adwi/.venv
+- Added `RICH_EXTS = {".pdf", ".docx", ".xlsx", ".pptx", ".csv", ".epub", ".zip"}` to overnight_learn.py
+- `crawl_workspace()` now includes rich formats when markitdown is available
+- Created `read_file_content()` — dispatches to markitdown for rich formats, text for rest
+- Rich docs allow up to 5MB (vs 180KB for plain text)
+- Main indexing loop now calls `read_file_content(file_path)` instead of direct `read_text()`
+
+### New Files
+- `adwi/voice.py` — Voice I/O module
+- `adwi/iphone-control-plane.md` — iPhone setup guide
+- `adwi/.venv/` — Python venv with instructor, markitdown, faster-whisper, piper-tts, arize-phoenix
+- `adwi/promptfoo-eval.yaml` — Auto-generated on first nightly run
+- `bin/start-phoenix` — Start Phoenix dashboard
+- `bin/start-homeassistant` — Start Home Assistant
+
+### Updated Files
+- `adwi/adwi_cli.py` — Pillar A NLU, Pillar C voice commands, Pillar D OTel instrumentation
+- `adwi/overnight_learn.py` — Pillar E markitdown integration
+- `adwi/nightly.py` — Pillar D promptfoo eval step
+- `local-ai-stack/docker-compose.yml` — Phoenix, Home Assistant, cloudflared containers
+- `bin/adwi` — Now uses venv python if available
+- `config/.env` — Added HA token, cloudflare tunnel token, Phoenix URL placeholders
+
+### Port Assignments (new)
+- :6006 — Arize Phoenix UI
+- :4317 — OTLP gRPC (Phoenix)
+- :4318 — OTLP HTTP (Phoenix)
+- :8123 — Home Assistant (pending `docker compose up -d homeassistant`)
+
+### Requires User Action
+1. `sudo tailscale up` — authenticate Tailscale for remote access
+2. `docker compose up -d homeassistant` → visit :8123 → create HA account → add token to config/.env
+3. Cloudflare Tunnel: get token from dash.cloudflare.com → add CLOUDFLARE_TUNNEL_TOKEN to config/.env
+4. Install sox for mic recording: `brew install sox`
+5. iPhone: install Tailscale app + HA companion app (see iphone-control-plane.md)

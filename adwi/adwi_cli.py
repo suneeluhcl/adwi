@@ -2,7 +2,7 @@
 """
 Adwi — Suneel's Local AI Operating Assistant
 Natural language interface: just talk, Adwi figures out what to do.
-Models: adwi:latest (30.5B reasoning) + qwen3:0.6b (instant NLU) + minicpm-v (local vision)
+Models: adwi:latest (30.5B reasoning) + llama3.1:8b (NLU) + minicpm-v (local vision)
 Workspace: /Users/MAC/SuneelWorkSpace
 """
 import base64
@@ -18,6 +18,11 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
+# Inject adwi venv so instructor/markitdown/faster-whisper are available
+_VENV_SITE = Path.home() / "SuneelWorkSpace" / "adwi" / ".venv" / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+if _VENV_SITE.exists() and str(_VENV_SITE) not in sys.path:
+    sys.path.insert(0, str(_VENV_SITE))
+
 try:
     from prompt_toolkit import PromptSession
     from prompt_toolkit.history import FileHistory
@@ -27,6 +32,47 @@ try:
     PROMPT_TOOLKIT = True
 except ImportError:
     PROMPT_TOOLKIT = False
+
+# Optional: instructor for structured LLM outputs
+try:
+    import instructor
+    from openai import OpenAI as _OpenAI
+    _INSTRUCTOR_CLIENT = instructor.from_openai(
+        _OpenAI(base_url="http://127.0.0.1:11434/v1", api_key="ollama"),
+        mode=instructor.Mode.JSON,
+    )
+    INSTRUCTOR_OK = True
+except Exception:
+    INSTRUCTOR_OK = False
+
+# Optional: OpenTelemetry tracing → Arize Phoenix (:4318)
+try:
+    from opentelemetry import trace as _otel_trace
+    from opentelemetry.sdk.trace import TracerProvider as _TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor as _BatchSpanProcessor
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as _OTLPExporter
+    _tp = _TracerProvider()
+    _tp.add_span_processor(_BatchSpanProcessor(
+        _OTLPExporter(endpoint="http://127.0.0.1:4317", insecure=True)
+    ))
+    _otel_trace.set_tracer_provider(_tp)
+    _tracer = _otel_trace.get_tracer("adwi")
+    OTEL_OK = True
+except Exception:
+    _tracer = None
+    OTEL_OK = False
+
+
+def _otel_span(name: str, attrs: dict | None = None):
+    """Context manager — no-op when Phoenix is unavailable."""
+    if _tracer:
+        span = _tracer.start_span(name)
+        if attrs:
+            for k, v in attrs.items():
+                span.set_attribute(k, str(v))
+        return _otel_trace.use_span(span, end_on_exit=True)
+    import contextlib
+    return contextlib.nullcontext()
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 HOME          = Path.home()
@@ -56,10 +102,11 @@ CONFIG_ENV       = BASE / "config" / ".env"
 
 # Model identifiers
 MODEL_MAIN    = "adwi:latest"          # 30.5B MoE — reasoning, long context
-MODEL_FAST    = "qwen3:0.6b"           # 522MB — instant NLU classification
+MODEL_FAST    = "llama3.1:8b"          # 4.9GB — structured NLU classification
 MODEL_VISION  = "minicpm-v:latest"     # 5.5GB — local vision
 MODEL_EMBED   = "nomic-embed-text"     # embeddings
 CLOUD_DEFAULT = "models/gemini-2.5-flash"
+MODEL_NLU_FALLBACK = "qwen3:0.6b"     # ultra-fast fallback if llama3.1:8b is cold
 
 # Paths that are NEVER readable even with full-home access
 HARD_BLOCKED = [
@@ -375,6 +422,7 @@ _REGEX_INTENTS = [
     (re.compile(r"gmail\b", re.I), "gmail"),
     # Memory ledger
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
+    (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
     # Semantic router
@@ -486,10 +534,12 @@ def run_shell(cmd_str, timeout=60) -> str:
 
 # ── AI Model calls ────────────────────────────────────────────────────────────
 
-def _ollama_chat(model, messages, stream=False, max_tokens=None, temperature=0.25, ctx=131072):
+def _ollama_chat(model, messages, stream=False, max_tokens=None, temperature=0.25, ctx=131072, json_schema=None):
     opts = {"temperature": temperature, "num_ctx": ctx}
     if max_tokens: opts["num_predict"] = max_tokens
     payload = {"model": model, "messages": messages, "stream": stream, "think": False, "options": opts}
+    if json_schema:
+        payload["format"] = json_schema  # Ollama native structured output
     req = urllib.request.Request(
         "http://127.0.0.1:11434/api/chat",
         data=json.dumps(payload).encode(),
@@ -503,78 +553,135 @@ def strip_think(t):
     if "</think>" in t: t = t.split("</think>", 1)[-1]
     return t.strip()
 
-# ── Intent classification (qwen3:0.6b — instant) ─────────────────────────────
-INTENT_SCHEMA = """Classify the user message. Return ONLY valid JSON, nothing else.
+# ── Intent classification (llama3.1:8b + Ollama JSON schema enforcement) ───────
 
-Intents:
-disk_usage    - storage overview, what's using space, how full is disk
-large_files   - find files bigger than X, what are the biggest files
-old_files     - files not opened/used in a long time, stale files
-duplicates    - find duplicate or identical files, copies
-organize      - suggest how to organize a folder or restructure files
-cleanup       - what can I delete, safe to remove, declutter, free space
-file_read     - show/read/open a specific file (extract path into target)
-file_search   - search for files by name or content (extract query)
-file_list     - list what's in a folder (extract path into target)
-youtube       - YouTube URL or video summary request
-image         - analyze image, screenshot, photo (extract path into target)
-status        - check health, is everything running, system check
-self_heal     - fix, repair, restart, something broken
-what_next     - roadmap, what to build next, suggestions for improvement
-daily_improve - daily routine, daily improvement run
-sync          - sync knowledge, sync files to Open WebUI
-model_status  - which model is active, model routing info
-use_local     - switch to local model, go offline
-use_cloud     - switch to cloud model
-capabilities  - what can you do, list capabilities
-rag_search    - search my notes, what do I know about X, find in local knowledge
-browse        - browse/fetch a website URL (not YouTube)
-git_status    - check git status, commits, repo changes
-generate_image - generate/draw/create an image with AI
-run_code      - run/execute Python code or a script
-benchmark     - benchmark Adwi speed, test performance, tokens per second
-gmail         - check email, show inbox, read gmail, any new emails
-chat          - anything else: questions, conversation, explanations
+# All valid intent tokens — Ollama constrained decoding guarantees one of these
+_ALL_INTENTS = [
+    # File system
+    "disk_usage", "large_files", "old_files", "duplicates",
+    "organize", "cleanup", "file_read", "file_search", "file_list",
+    # Media
+    "youtube", "image", "generate_image",
+    # System
+    "status", "self_heal", "what_next", "daily_improve", "benchmark",
+    "run_code", "doctor",
+    # Model / routing
+    "model_status", "use_local", "use_cloud", "capabilities",
+    # Knowledge & memory
+    "rag_search", "memory_recall", "memory_scan", "memory_stats",
+    "memory_context",
+    # Web
+    "browse", "web_search", "exa_search", "tavily_search", "firecrawl",
+    # Obsidian vault
+    "obsidian_search", "obsidian_read", "obsidian_write", "obsidian_daily",
+    # Git & backup
+    "git_status", "backup_now", "backup_status", "backup_log",
+    # Comms
+    "gmail",
+    # n8n / automation
+    "sync",
+    # Nightly
+    "nightly_status", "nightly_run",
+    # Repair & eval
+    "patch_adwi", "inspect_code", "test_adwi", "eval_routing", "eval_adwi",
+    "learn_from_error", "export_training",
+    # Route / misc
+    "route", "github_connected", "trusted_roots",
+    "extract_ideas", "implement_idea", "tool_roadmap",
+    # Voice (Pillar C)
+    "voice_in", "voice_out",
+    # Catch-all
+    "chat",
+]
 
-JSON: {"intent":"<intent>","target":"<path, URL, or query if mentioned, else null>"}
-Examples:
-user: "what is eating my disk space?" -> {"intent":"disk_usage","target":null}
-user: "find files bigger than 1GB in Downloads" -> {"intent":"large_files","target":"/Users/MAC/Downloads"}
-user: "read my notes/profile.md" -> {"intent":"file_read","target":"/Users/MAC/SuneelWorkSpace/notes/suneel-local-ai-profile.md"}
-user: "https://youtu.be/abc" -> {"intent":"youtube","target":"https://youtu.be/abc"}"""
+# Ollama-native JSON Schema (constrains token decoding — no hallucinated intents)
+_INTENT_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "intent":     {"type": "string", "enum": _ALL_INTENTS},
+        "target":     {"type": ["string", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "tasks":      {"type": "array", "items": {"type": "string"}, "maxItems": 5},
+    },
+    "required": ["intent", "target"],
+}
+
+_INTENT_SYSTEM = (
+    "You are Adwi's intent classifier. Map the user message to ONE intent. Rules:\n"
+    "- 'memory_recall': user asks what you remember, know, or recall about something personal to their setup\n"
+    "- 'disk_usage': ONLY for storage/disk space questions, NOT general RAM/CPU questions\n"
+    "- 'chat': factual questions, general knowledge, hardware specs, anything not matching a specific tool\n"
+    "- 'web_search': explicitly requests internet/web search\n"
+    "- 'status': asks if services/systems are running or healthy\n"
+    "- Extract target as file path, URL, or search query when clearly present, else null.\n"
+    "- Return valid JSON only, no explanation."
+)
 
 def classify_intent(text: str) -> dict:
-    """Classify user intent: regex pre-filter → qwen3:0.6b model fallback."""
-    # 1. Instant checks (no model needed)
+    """Classify user intent: regex pre-filter → llama3.1:8b with JSON schema enforcement."""
+    import time as _time
+    _t0 = _time.monotonic()
+
+    # 1. Instant checks (no model call needed)
     yt = extract_youtube_url(text)
     if yt: return {"intent": "youtube", "target": yt}
     img = extract_image_path(text)
     if img: return {"intent": "image", "target": img}
 
-    # 2. Regex pre-filter — fast, handles common phrases the tiny model misses
+    # 2. Regex pre-filter — zero-latency for common phrases
     pre = _regex_prefilter(text)
     if pre: return {"intent": pre, "target": None}
 
-    msgs = [
-        {"role": "system", "content": INTENT_SCHEMA},
-        {"role": "user",   "content": text},
-    ]
-    req = _ollama_chat(MODEL_FAST, msgs, stream=False, max_tokens=60, temperature=0, ctx=512)
+    # 3. Structured LLM call with JSON schema enforcement
+    with _otel_span("classify_intent", {"input.text": text[:200], "model": MODEL_FAST}):
+        msgs = [
+            {"role": "system", "content": _INTENT_SYSTEM},
+            {"role": "user",   "content": text},
+        ]
+        req = _ollama_chat(
+            MODEL_FAST, msgs,
+            stream=False, max_tokens=120, temperature=0, ctx=2048,
+            json_schema=_INTENT_JSON_SCHEMA,
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw = json.load(resp).get("message", {}).get("content", "{}")
+            raw = strip_think(raw)
+            m = re.search(r"\{.*\}", raw, re.S)
+            if m:
+                result = json.loads(m.group(0))
+                if result.get("intent") not in _ALL_INTENTS:
+                    result["intent"] = "chat"
+                t = result.get("target")
+                if t and not t.startswith("/") and not t.startswith("http"):
+                    guessed = Path(HOME / t).expanduser()
+                    if guessed.exists(): result["target"] = str(guessed)
+                result["_latency_ms"] = int((_time.monotonic() - _t0) * 1000)
+                return result
+        except Exception:
+            pass
+
+    # 4. Fallback: ultra-fast qwen3:0.6b
+    _fallback_schema = (
+        "Return JSON only: {\"intent\": one of [" +
+        ", ".join(f'"{i}"' for i in _ALL_INTENTS[:20]) +
+        ", ...], \"target\": null or string}. User: " + text
+    )
+    req2 = _ollama_chat(MODEL_NLU_FALLBACK, [{"role":"user","content":_fallback_schema}],
+                        stream=False, max_tokens=60, temperature=0, ctx=512)
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req2, timeout=8) as resp:
             raw = json.load(resp).get("message", {}).get("content", "{}")
         raw = strip_think(raw)
-        # Extract JSON from response (model might wrap it)
         m = re.search(r"\{.*\}", raw, re.S)
         if m:
             result = json.loads(m.group(0))
-            # Resolve relative paths
-            if result.get("target") and not result["target"].startswith("/") and not result["target"].startswith("http"):
-                guessed = Path(HOME / result["target"]).expanduser()
-                if guessed.exists(): result["target"] = str(guessed)
-            return result
+            if result.get("intent") in _ALL_INTENTS:
+                result["_latency_ms"] = int((_time.monotonic() - _t0) * 1000)
+                return result
     except Exception:
         pass
+
     return {"intent": "chat", "target": None}
 
 # ── Local streaming (adwi:latest) ─────────────────────────────────────────────
@@ -3840,6 +3947,63 @@ def cmd_nightly_run() -> None:
     cprint(f"\n  {'✓ Done' if r.returncode == 0 else '⚠ Finished with errors'}. Use /nightly-log to see the report.", GREEN if r.returncode == 0 else YELLOW)
 
 
+# ── Voice I/O commands (Pillar C) ────────────────────────────────────────────
+def cmd_voice_in() -> None:
+    """Record mic, transcribe with faster-whisper, dispatch as natural language."""
+    adwi_head("Voice input — speak now")
+    try:
+        from adwi.voice import cmd_voice_in_impl
+    except ImportError:
+        try:
+            import importlib.util, sys as _sys
+            spec = importlib.util.spec_from_file_location("voice", ADWI_DIR / "voice.py")
+            _mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(_mod)
+            cmd_voice_in_impl = _mod.cmd_voice_in_impl
+        except Exception as e:
+            cprint(f"  Voice module unavailable: {e}", RED)
+            return
+    text = cmd_voice_in_impl()
+    if text:
+        cprint(f"\n  Heard: {CYAN}{text}{RESET}", "")
+        dispatch_natural(text)
+    else:
+        cprint("  No speech detected.", YELLOW)
+
+
+def cmd_voice_out(text: str = "") -> None:
+    """Synthesize text to speech via piper-tts and play via afplay."""
+    if not text.strip():
+        text = input(f"  {CYAN}Text to speak:{RESET} ").strip()
+    if not text:
+        return
+    adwi_head("Voice output")
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("voice", ADWI_DIR / "voice.py")
+        _mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_mod)
+        _mod.cmd_voice_out_impl(text)
+        cprint("  Done.", GREEN)
+    except Exception as e:
+        cprint(f"  TTS unavailable: {e}", RED)
+
+
+def cmd_voice_brief() -> None:
+    """Read the morning brief aloud via piper-tts."""
+    brief = Path.home() / "Desktop" / "morning_brief.md"
+    if not brief.exists():
+        cprint("  No morning brief found at ~/Desktop/morning_brief.md", YELLOW)
+        return
+    content = brief.read_text(encoding="utf-8")
+    # Strip markdown headers/bullets for cleaner speech
+    clean = re.sub(r"^#+\s*", "", content, flags=re.M)
+    clean = re.sub(r"^[-*]\s*", "", clean, flags=re.M)
+    clean = re.sub(r"`[^`]*`", "", clean)
+    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
+    cmd_voice_out(clean[:3000])  # cap to avoid 20-min sessions
+
+
 # ── Aliases for preserved commands (/gemini, /owui) ──────────────────────────
 def _alias_gemini(prompt: str = "") -> None:
     """Alias: /gemini — explicitly use Gemini cloud for a prompt."""
@@ -4019,6 +4183,51 @@ def dispatch_natural(text: str):
             cmd_gmail(query="after:yesterday before:today")
         else:
             cmd_gmail()
+    elif intent == "memory_context":
+        q = target or re.sub(r"^(memory context|context for|show context)\s*", "", text, flags=re.I).strip()
+        cmd_memory_context(q)
+    elif intent == "nightly_status":
+        cmd_nightly_status()
+    elif intent == "nightly_run":
+        cmd_nightly_run()
+    elif intent == "patch_adwi":
+        hint = re.sub(r"^(patch|fix|repair|heal)\s*(adwi)?\s*", "", text, flags=re.I).strip()
+        cmd_patch_adwi(hint)
+    elif intent == "doctor":
+        cmd_doctor()
+    elif intent == "exa_search":
+        q = target or re.sub(r"^(exa|search exa)\s*", "", text, flags=re.I).strip()
+        cmd_exa_search(q)
+    elif intent == "tavily_search":
+        q = target or re.sub(r"^(tavily|search tavily)\s*", "", text, flags=re.I).strip()
+        cmd_tavily_search(q)
+    elif intent == "firecrawl":
+        cmd_firecrawl(target or "")
+    elif intent == "obsidian_read":
+        cmd_obsidian_read(target or "")
+    elif intent == "obsidian_write":
+        cmd_obsidian_write(target or "")
+    elif intent == "obsidian_daily":
+        cmd_obsidian_daily()
+    elif intent == "backup_now":
+        cmd_backup_now()
+    elif intent == "backup_status":
+        cmd_backup_status()
+    elif intent == "backup_log":
+        cmd_backup_log()
+    elif intent == "voice_in":
+        cmd_voice_in()
+    elif intent == "voice_out":
+        q = target or re.sub(r"^(speak|say|read aloud|voice out)\s*", "", text, flags=re.I).strip()
+        cmd_voice_out(q)
+    elif intent == "extract_ideas":
+        cmd_extract_ideas(target or "")
+    elif intent == "trusted_roots":
+        cmd_trusted_roots()
+    elif intent == "eval_routing":
+        cmd_eval_routing()
+    elif intent == "eval_adwi":
+        cmd_eval_adwi()
     else:
         ask_adwi(text)
 
@@ -4214,6 +4423,11 @@ def handle(line: str) -> bool:
         arg = line[12:].strip()
         cmd_nightly_log(int(arg) if arg.isdigit() else 0)
     elif line == "/nightly-run": cmd_nightly_run()
+    # ── Voice I/O (Pillar C) ──
+    elif line in ("/voice-in", "/voice", "/listen"): cmd_voice_in()
+    elif line.startswith("/voice-out "): cmd_voice_out(line[11:].strip())
+    elif line == "/voice-out": cmd_voice_out()
+    elif line == "/voice-brief": cmd_voice_brief()
     # ── Aliases ──
     elif line.startswith("/gemini"): _alias_gemini(line[7:].strip())
     elif line.startswith("/owui"):   _alias_owui(line[5:].strip())

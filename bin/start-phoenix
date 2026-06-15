@@ -1,0 +1,11 @@
+#!/bin/zsh
+# Start Arize Phoenix observability dashboard
+echo "Starting Arize Phoenix on :6006 …"
+cd "$HOME/SuneelWorkSpace/local-ai-stack"
+docker compose up -d phoenix
+echo ""
+echo "Phoenix UI:   http://localhost:6006"
+echo "OTLP gRPC:    localhost:4317"
+echo "OTLP HTTP:    localhost:4318"
+echo ""
+echo "Traces from adwi are sent automatically when Phoenix is running."
