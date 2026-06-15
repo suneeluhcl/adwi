@@ -82,6 +82,9 @@ ollama-blobs/
 *.pid
 local-command-api/api.pid
 mcp-servers/workspace.db
+adwi/memory.db
+adwi/knowledge.db
+adwi/rag-db/
 bin/*.backup.*
 
 # ── Misc ─────────────────────────────────────────────────────────────

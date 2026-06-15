@@ -49,6 +49,10 @@ IMG_GEN_DIR   = NOTES / "generated-images"
 MCP_CONFIG    = HOME / ".config" / "mcp" / "servers.json"
 CLI_FILE      = ADWI_DIR / "adwi_cli.py"     # self-reference for repair commands
 TRACE_DIR     = NOTES / "adwi-trace-logs"   # activity trace logs
+OBSIDIAN_VAULT   = BASE / "obsidian-vault"
+OBSIDIAN_BRIDGE  = "http://127.0.0.1:5056"
+SEARXNG_URL      = "http://127.0.0.1:8888"
+CONFIG_ENV       = BASE / "config" / ".env"
 
 # Model identifiers
 MODEL_MAIN    = "adwi:latest"          # 30.5B MoE — reasoning, long context
@@ -78,8 +82,29 @@ HARD_BLOCKED = [
 IMAGE_EXTS = {".jpg",".jpeg",".png",".gif",".webp",".bmp",".tiff",".tif",".heic",".heif"}
 TEXT_EXTS  = {".md",".txt",".json",".yml",".yaml",".py",".sh",".js",".ts",".env",".toml",".cfg",".ini",".xml",".csv",".log",".zsh",".bash"}
 
-for d in [LOG_DIR, NOTES, KNOWLEDGE_DIR, ADWI_DIR]:
+for d in [LOG_DIR, NOTES, KNOWLEDGE_DIR, ADWI_DIR, OBSIDIAN_VAULT]:
     d.mkdir(parents=True, exist_ok=True)
+
+# Load optional config/.env (non-fatal — keys override module-level defaults)
+def _load_config_env():
+    if not CONFIG_ENV.exists():
+        return
+    try:
+        for raw in CONFIG_ENV.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k = k.strip(); v = v.strip().strip('"').strip("'")
+            if k and v:
+                os.environ.setdefault(k, v)
+    except Exception:
+        pass
+
+_load_config_env()
+# Allow runtime override of service URLs via env
+SEARXNG_URL     = os.environ.get("SEARXNG_URL",      SEARXNG_URL)
+OBSIDIAN_BRIDGE = os.environ.get("OBSIDIAN_BRIDGE_URL", OBSIDIAN_BRIDGE)
 
 if not ROUTING_FILE.exists():
     ROUTING_FILE.write_text(
@@ -314,6 +339,12 @@ _REGEX_INTENTS = [
     # RAG / knowledge search
     (re.compile(r"(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
+    # Web search (SearXNG)
+    (re.compile(r"(search the web|web search|google|search online|look up online|find online|search internet).{0,50}", re.I), "web_search"),
+    (re.compile(r"(what('s| is) (the latest|new in|current).{0,30}(release|version|update|news|changelog))", re.I), "web_search"),
+    # Obsidian vault
+    (re.compile(r"(obsidian|vault|my notes?).{0,20}(search|find|look up|what do i have)", re.I), "obsidian_search"),
+    (re.compile(r"(open|read|show).{0,10}(obsidian|vault|note).{0,30}", re.I), "obsidian_search"),
     # Browse / fetch URL
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
     # GitHub repo visibility — must come BEFORE git_status and github_connected
@@ -1187,6 +1218,181 @@ def cmd_rag_index(quiet=False) -> None:
     db_file.write_text(json.dumps({"docs": docs}), encoding="utf-8")
     if not quiet:
         cprint(f"  ✓ RAG index: {new_count} new, {len(docs)-new_count} cached, {len(docs)} total", GREEN)
+
+# ── Web Search (SearXNG) ──────────────────────────────────────────────────────
+
+def _searxng_search(query: str, max_results: int = 8) -> list:
+    """Query local SearXNG instance. Returns list of {title, url, content} dicts."""
+    import urllib.parse
+    params = urllib.parse.urlencode({
+        "q": query, "format": "json", "language": "en",
+        "engines": "google,duckduckgo,bing", "safesearch": "0",
+    })
+    url = f"{SEARXNG_URL}/search?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Adwi/1.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            data = json.loads(r.read())
+        results = []
+        for item in data.get("results", [])[:max_results]:
+            results.append({
+                "title":   item.get("title", ""),
+                "url":     item.get("url", ""),
+                "content": item.get("content", "")[:400],
+            })
+        return results
+    except Exception as e:
+        return [{"title": "SearXNG error", "url": "", "content": str(e)}]
+
+
+def cmd_web_search(query: str = "") -> None:
+    """Search the web via local SearXNG and summarize top results with adwi:latest."""
+    if not query:
+        query = input(f"  {CYAN}Web search:{RESET} ").strip()
+    if not query:
+        return
+    adwi_head(f"Web search: {query[:60]}")
+    activity_start(query, "Web Search")
+
+    results = _searxng_search(query)
+    if not results:
+        cprint("  No results returned from SearXNG", YELLOW)
+        activity_done("no results")
+        return
+
+    for i, r in enumerate(results, 1):
+        cprint(f"  {GREEN}[{i}]{RESET} {r['title']}", "")
+        cprint(f"       {GRAY}{r['url']}{RESET}", "")
+        if r["content"]:
+            cprint(f"       {r['content'][:120]}", GRAY)
+
+    # Let adwi synthesize the results
+    ctx = "\n\n".join(
+        f"[{i}] {r['title']}\nURL: {r['url']}\n{r['content']}"
+        for i, r in enumerate(results, 1)
+    )
+    print()
+    stream_local(
+        f"Query: {query}\n\nSearch results:\n{ctx}\n\n"
+        "Synthesize the key findings from these search results. "
+        "Be specific, cite URLs where relevant, and flag anything actionable.",
+        system="You are Adwi. Summarize web search results factually and concisely.",
+    )
+    activity_done(f"{len(results)} results")
+    log_action("web_search", f"Query: {query}\n{ctx[:1000]}")
+
+
+# ── Obsidian Vault Access ─────────────────────────────────────────────────────
+
+def _obsidian_api(method: str, route: str, body: dict | None = None) -> dict:
+    """Call the local Obsidian Bridge API. Returns parsed JSON or error dict."""
+    url = OBSIDIAN_BRIDGE + route
+    try:
+        data = json.dumps(body).encode("utf-8") if body else None
+        req  = urllib.request.Request(
+            url, data=data, method=method,
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return json.loads(r.read())
+    except urllib.error.URLError:
+        return {"error": f"Obsidian Bridge not reachable at {OBSIDIAN_BRIDGE} — run: bin/start-obsidian-bridge"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _obsidian_local_search(query: str, max_results: int = 15) -> list:
+    """Full-text search vault .md files directly (no bridge needed)."""
+    q       = query.lower()
+    results = []
+    for md in sorted(OBSIDIAN_VAULT.rglob("*.md")):
+        try:
+            text = md.read_text(encoding="utf-8", errors="ignore")
+            if q in text.lower():
+                idx     = text.lower().find(q)
+                start   = max(0, idx - 80)
+                snippet = text[start : idx + 200].replace("\n", " ").strip()
+                results.append({"path": str(md.relative_to(OBSIDIAN_VAULT)), "snippet": snippet})
+                if len(results) >= max_results:
+                    break
+        except Exception:
+            continue
+    return results
+
+
+def cmd_obsidian_search(query: str = "") -> None:
+    """Full-text search across all Obsidian vault notes."""
+    if not query:
+        query = input(f"  {CYAN}Vault search:{RESET} ").strip()
+    if not query:
+        return
+    adwi_head(f"Obsidian search: {query[:60]}")
+    hits = _obsidian_local_search(query)
+    if not hits:
+        cprint("  No matching notes in vault", GRAY); return
+    for h in hits:
+        cprint(f"  {GREEN}{h['path']}{RESET}", "")
+        cprint(f"    {GRAY}{h['snippet'][:140]}{RESET}", "")
+    cprint(f"\n  {len(hits)} note(s) matched — use /obsidian-read <path> to open", GRAY)
+
+
+def cmd_obsidian_read(rel_path: str = "") -> None:
+    """Read a note from the Obsidian vault by relative path."""
+    if not rel_path:
+        rel_path = input(f"  {CYAN}Note path (e.g. knowledge/foo.md):{RESET} ").strip()
+    if not rel_path:
+        return
+    adwi_head(f"Obsidian: {rel_path}")
+    result = _obsidian_api("GET", f"/read?path={urllib.parse.quote(rel_path)}")
+    if "error" in result:
+        cprint(f"  ✗ {result['error']}", RED); return
+    cprint(f"  {GRAY}Modified: {result.get('modified','?')}{RESET}", "")
+    print()
+    print(result.get("content", ""))
+
+
+def cmd_obsidian_write(args: str = "") -> None:
+    """Write or append to an Obsidian vault note.
+    Usage: /obsidian-write [path] [-- content]
+    """
+    adwi_head("Obsidian: write note")
+    if " -- " in args:
+        rel_path, content = args.split(" -- ", 1)
+    else:
+        rel_path = args.strip() or input(f"  {CYAN}Note path:{RESET} ").strip()
+        content  = input(f"  {CYAN}Content (single line):{RESET} ").strip()
+    if not rel_path or not content:
+        cprint("  Usage: /obsidian-write knowledge/my-note.md -- content here", YELLOW); return
+    result = _obsidian_api("POST", "/append", {"path": rel_path.strip(), "content": content})
+    if "error" in result:
+        cprint(f"  ✗ {result['error']}", RED)
+    else:
+        cprint(f"  ✓ Appended {result.get('total_bytes', '?')} bytes → {rel_path.strip()}", GREEN)
+
+
+def cmd_obsidian_daily(content: str = "") -> None:
+    """Append a timestamped entry to today's Obsidian daily note."""
+    if not content:
+        content = input(f"  {CYAN}Entry:{RESET} ").strip()
+    if not content:
+        return
+    ts      = datetime.now().strftime("%H:%M")
+    entry   = f"\n## {ts}\n{content}\n"
+    result  = _obsidian_api("POST", "/daily-note", {"content": entry})
+    if "error" in result:
+        cprint(f"  ✗ {result['error']}", RED)
+    else:
+        cprint(f"  ✓ Added to daily note → {result.get('daily_note', '?')}", GREEN)
+
+
+# ── import for obsidian URL quoting ──────────────────────────────────────────
+import urllib.parse as _urlparse_mod
+# Bind to local name used inside _obsidian_api and cmd_obsidian_read
+try:
+    import urllib.parse
+except ImportError:
+    pass
+
 
 def cmd_rag_search(query: str, top_k: int = 5) -> None:
     """Semantic search over local notes, then answer using retrieved context."""
@@ -3168,13 +3374,16 @@ def cmd_memory_scan() -> None:
 
 
 def cmd_memory_recall(query: str = "") -> None:
-    """Semantic search over the memory ledger."""
+    """Semantic search over memory ledger AND Obsidian vault markdown files."""
     if not query:
         query = input(f"  {CYAN}Recall query:{RESET} ").strip()
     if not query:
         return
     adwi_head(f"Memory recall: {query[:60]}")
     activity_start(f"recall: {query[:60]}", "Memory Recall")
+    total = 0
+
+    # ── Layer 1: memory.db ledger ─────────────────────────────────────────────
     try:
         mod  = _memory_mod()
         mem  = mod.AdwiMemory()
@@ -3182,18 +3391,61 @@ def cmd_memory_recall(query: str = "") -> None:
         if not hits:
             hits = mem.recall_keyword(query)
         mem.close()
-        if not hits:
-            cprint("  No matching memories found in ledger", GRAY)
-            cprint("  Run /memory-scan first to index your workflow", GRAY)
-            activity_done("no matches")
-            return
-        for h in hits:
-            score = f"{h['score']:.2f}" if h["score"] > 0 else " kw"
-            cprint(f"  [{score}] {h['source']:8s} {h['ts'][:10]}  {h['content'][:130]}", CYAN)
-        activity_done(f"{len(hits)} memories recalled")
+        if hits:
+            cprint(f"\n  {CYAN}── Memory Ledger ──{RESET}", "")
+            for h in hits:
+                score = f"{h['score']:.2f}" if h["score"] > 0 else " kw"
+                cprint(f"  [{score}] {h['source']:8s} {h['ts'][:10]}  {h['content'][:120]}", CYAN)
+            total += len(hits)
     except Exception as e:
-        activity_error(str(e))
-        cprint(f"  ✗ {e}", RED)
+        cprint(f"  ⚠ ledger error: {e}", YELLOW)
+
+    # ── Layer 2: knowledge.db Q&A pairs ──────────────────────────────────────
+    try:
+        import sqlite3, math
+        kdb = ADWI_DIR / "knowledge.db"
+        if kdb.exists():
+            qemb = _embed(query)
+            if qemb:
+                def _cos(a, b):
+                    d = sum(x*y for x,y in zip(a,b))
+                    return d / (math.sqrt(sum(x*x for x in a)) * math.sqrt(sum(x*x for x in b)) + 1e-9)
+                con  = sqlite3.connect(str(kdb))
+                rows = con.execute(
+                    "SELECT question, answer, file_path, embedding FROM qa_pairs "
+                    "WHERE embedding IS NOT NULL LIMIT 2000"
+                ).fetchall()
+                con.close()
+                scored = sorted(
+                    [(row, _cos(qemb, json.loads(row[3]))) for row in rows],
+                    key=lambda x: x[1], reverse=True,
+                )
+                top = [(r, s) for r, s in scored[:5] if s >= 0.35]
+                if top:
+                    cprint(f"\n  {GREEN}── Knowledge DB Q&A ──{RESET}", "")
+                    for (q_text, a_text, fp, _), score in top:
+                        cprint(f"  [{score:.2f}] {Path(fp).name:<30} {q_text[:90]}", GREEN)
+                        cprint(f"         {GRAY}{a_text[:150]}{RESET}", "")
+                    total += len(top)
+    except Exception as e:
+        cprint(f"  ⚠ knowledge.db: {e}", YELLOW)
+
+    # ── Layer 3: Obsidian vault .md files (direct file scan) ─────────────────
+    vault_hits = _obsidian_local_search(query, max_results=8)
+    if vault_hits:
+        cprint(f"\n  {YELLOW}── Obsidian Vault ──{RESET}", "")
+        for h in vault_hits:
+            cprint(f"  {YELLOW}vault:{RESET} {h['path']}", "")
+            cprint(f"    {GRAY}{h['snippet'][:140]}{RESET}", "")
+        total += len(vault_hits)
+
+    if total == 0:
+        cprint("  No matching memories found in ledger, knowledge DB, or vault", GRAY)
+        cprint("  Run /memory-scan first to index your workflow", GRAY)
+        activity_done("no matches")
+        return
+
+    activity_done(f"{total} results across ledger + knowledge DB + vault")
 
 
 def cmd_memory_stats() -> None:
@@ -3386,6 +3638,7 @@ def dispatch_natural(text: str):
         "backup": "GitHub Backup",
         "memory_scan": "Memory Scan", "memory_recall": "Memory Recall",
         "memory_stats": "Memory Stats", "route": "Semantic Router",
+        "web_search": "Web Search", "obsidian_search": "Obsidian Vault Search",
     }
     if intent != "chat" and intent in _ACTION_LABELS:
         activity_start(text, _ACTION_LABELS[intent])
@@ -3462,6 +3715,12 @@ def dispatch_natural(text: str):
     elif intent == "rag_search":
         q = target or text
         cmd_rag_search(q)
+    elif intent == "web_search":
+        q = target or re.sub(r"^(search the web for|web search|google|search online for|look up online|find online)\s*", "", text, flags=re.I).strip()
+        cmd_web_search(q or text)
+    elif intent == "obsidian_search":
+        q = target or re.sub(r"^(obsidian|vault|my notes?|open|read|show)\s*", "", text, flags=re.I).strip()
+        cmd_obsidian_search(q or text)
     elif intent == "browse":
         url = target or text
         cmd_browse(url)
@@ -3603,6 +3862,16 @@ def handle(line: str) -> bool:
     elif line.startswith("/rag "): cmd_rag_search(line[5:].strip())
     elif line == "/rag": cmd_rag_search(input(f"  {CYAN}Search query:{RESET} ").strip())
     elif line.startswith("/browse "): cmd_browse(line[8:].strip())
+    elif line.startswith("/web-search "): cmd_web_search(line[12:].strip())
+    elif line == "/web-search": cmd_web_search()
+    elif line.startswith("/obsidian-search "): cmd_obsidian_search(line[17:].strip())
+    elif line == "/obsidian-search": cmd_obsidian_search()
+    elif line.startswith("/obsidian-read "): cmd_obsidian_read(line[15:].strip())
+    elif line == "/obsidian-read": cmd_obsidian_read()
+    elif line.startswith("/obsidian-write "): cmd_obsidian_write(line[16:].strip())
+    elif line == "/obsidian-write": cmd_obsidian_write()
+    elif line.startswith("/obsidian-daily "): cmd_obsidian_daily(line[16:].strip())
+    elif line == "/obsidian-daily": cmd_obsidian_daily()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()

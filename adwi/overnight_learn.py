@@ -9,16 +9,16 @@ ZERO pip installs required — uses only Python stdlib + Ollama's HTTP API.
 HOW TO RUN (pick one and go to sleep):
 
   Foreground (watch it work):
-      python3 ~/SuneelWorkSpace/overnight_learn.py
+      python3 ~/SuneelWorkSpace/adwi/overnight_learn.py
 
   Background (close lid and sleep):
-      nohup python3 ~/SuneelWorkSpace/overnight_learn.py \
+      nohup python3 ~/SuneelWorkSpace/adwi/overnight_learn.py \
             > /tmp/overnight-learn.log 2>&1 &
       echo "Running as PID $! — check: tail -f /tmp/overnight-learn.log"
 
   tmux (safer for long runs):
       tmux new -s overnight
-      python3 ~/SuneelWorkSpace/overnight_learn.py
+      python3 ~/SuneelWorkSpace/adwi/overnight_learn.py
       # Ctrl+B then D to detach safely
 
 Check progress any time:
@@ -350,8 +350,8 @@ def generate_qa(chunk_text: str, file_path: str, n: int = QUESTIONS_PER_CHUNK) -
             raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
             raw = re.sub(r"\s*```\s*$", "", raw, flags=re.MULTILINE)
 
-            # Extract the JSON array from the response
-            m = re.search(r"\[[\s\S]*?\]", raw)
+            # Extract the JSON array from the response (greedy — grab the full array)
+            m = re.search(r"\[[\s\S]*\]", raw)
             if not m:
                 # Try to find individual objects and reconstruct
                 objs = re.findall(r'\{[^{}]+\}', raw)
