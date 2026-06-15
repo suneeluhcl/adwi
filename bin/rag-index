@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+"""Rebuild the Adwi RAG notes index. Callable from n8n or command line."""
+import subprocess, sys, os
+
+os.environ.setdefault("PATH", "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin")
+
+result = subprocess.run(
+    ["python3", os.path.expanduser("~/SuneelWorkSpace/adwi/adwi_cli.py"), "--daily-improve"],
+    capture_output=False, text=True, timeout=300,
+    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"},
+)
+
+# Directly run the rag_index function via python -c
+result = subprocess.run(
+    ["python3", "-c",
+     "import sys; sys.path.insert(0,'/Users/MAC/SuneelWorkSpace/adwi');"
+     "import adwi_cli; adwi_cli.cmd_rag_index()"],
+    capture_output=True, text=True, timeout=300,
+    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"},
+)
+print(result.stdout or "")
+if result.stderr: print("[stderr]", result.stderr[:500], file=sys.stderr)
+sys.exit(result.returncode)

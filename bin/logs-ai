@@ -1,0 +1,3 @@
+#!/bin/zsh
+cd "$HOME/SuneelWorkSpace/local-ai-stack"
+docker compose logs --tail=120

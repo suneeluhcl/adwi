@@ -1,0 +1,105 @@
+#!/bin/zsh
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: summarize-url <url>"
+  echo "Example: summarize-url https://ollama.com/blog"
+  exit 1
+fi
+
+URL="$1"
+
+python3 - "$URL" <<'PY'
+import html
+import json
+import re
+import sys
+import urllib.request
+import urllib.parse
+
+url = sys.argv[1]
+
+class SimpleHTMLTextExtractor:
+    def __init__(self):
+        self.text_parts = []
+
+    def feed(self, raw_html):
+        raw_html = re.sub(r"(?is)<script.*?>.*?</script>", " ", raw_html)
+        raw_html = re.sub(r"(?is)<style.*?>.*?</style>", " ", raw_html)
+        raw_html = re.sub(r"(?is)<noscript.*?>.*?</noscript>", " ", raw_html)
+        raw_html = re.sub(r"(?is)<header.*?>.*?</header>", " ", raw_html)
+        raw_html = re.sub(r"(?is)<footer.*?>.*?</footer>", " ", raw_html)
+        raw_html = re.sub(r"(?is)<nav.*?>.*?</nav>", " ", raw_html)
+        raw_html = re.sub(r"(?s)<[^>]+>", " ", raw_html)
+        raw_html = html.unescape(raw_html)
+        raw_html = re.sub(r"[ \t\r\f\v]+", " ", raw_html)
+        raw_html = re.sub(r"\n+", "\n", raw_html)
+        return raw_html.strip()
+
+try:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 SuneelLocalAI/1.0"
+        }
+    )
+    with urllib.request.urlopen(req, timeout=30) as response:
+        content_type = response.headers.get("Content-Type", "")
+        raw = response.read(2_000_000)
+except Exception as e:
+    print("ERROR: Could not fetch URL.")
+    print(str(e))
+    sys.exit(1)
+
+try:
+    page = raw.decode("utf-8", errors="replace")
+except Exception:
+    page = raw.decode(errors="replace")
+
+text = SimpleHTMLTextExtractor().feed(page)
+text = text[:18000]
+
+prompt = f"""
+You are Suneel's local AI webpage summarizer.
+
+Summarize the webpage below.
+
+Rules:
+1. Be accurate and do not invent facts.
+2. If the page text is unclear or incomplete, say so.
+3. Separate the answer into:
+   - What this page is about
+   - Key points
+   - Useful details
+   - Reliability notes
+4. Include the source URL.
+
+Source URL:
+{url}
+
+Extracted webpage text:
+{text}
+"""
+
+payload = {
+    "model": "adwi:latest",
+    "prompt": prompt,
+    "stream": False,
+    "options": {"temperature": 0.2, "num_ctx": 131072}
+}
+
+try:
+    req = urllib.request.Request(
+        "http://127.0.0.1:11434/api/generate",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(req, timeout=300) as response:
+        result = json.load(response)
+except Exception as e:
+    print("ERROR: Could not call Ollama.")
+    print(str(e))
+    sys.exit(1)
+
+print(result.get("response", "").strip())
+PY

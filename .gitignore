@@ -78,6 +78,12 @@ ollama-blobs/
 *.swp
 *.swo
 
+# ── Runtime state files ──────────────────────────────────────────────
+*.pid
+local-command-api/api.pid
+mcp-servers/workspace.db
+bin/*.backup.*
+
 # ── Misc ─────────────────────────────────────────────────────────────
 *.log
 *.tmp

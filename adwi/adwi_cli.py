@@ -2844,6 +2844,94 @@ def cmd_backup_audit() -> None:
             cprint(f"  {GREEN}✓ No secrets detected in staged files{RESET}", "")
 
 
+# ── Nightly improvement commands ──────────────────────────────────────────────
+
+def cmd_nightly_status() -> None:
+    """Show LaunchAgent status and when it last ran."""
+    adwi_head("Nightly improvement status")
+    import subprocess as _sp
+
+    # LaunchAgent
+    r = _sp.run(["launchctl", "list", "com.suneel.adwi-nightly"],
+                capture_output=True, text=True)
+    if "Label" in r.stdout:
+        cprint(f"  {GREEN}✓ LaunchAgent loaded{RESET} — runs daily at 2:00 AM", "")
+        for ln in r.stdout.splitlines():
+            if "PID" in ln or "LastExit" in ln:
+                cprint(f"    {ln.strip()}", GRAY)
+    else:
+        cprint(f"  {YELLOW}⚠ LaunchAgent not loaded{RESET}", "")
+        cprint(f"    Run: launchctl load ~/Library/LaunchAgents/com.suneel.adwi-nightly.plist", GRAY)
+
+    # Most recent log
+    log_dir = NOTES / "nightly-improvement-logs"
+    if log_dir.exists():
+        logs = sorted(log_dir.glob("nightly-*.md"))
+        if logs:
+            last = logs[-1]
+            cprint(f"\n  {BOLD}Last run:{RESET} {last.name}", "")
+            cprint(f"  Use /nightly-log to read the full report.", GRAY)
+        else:
+            cprint(f"\n  No nightly logs yet — first run at 2 AM tonight.", GRAY)
+    else:
+        cprint(f"\n  No logs yet.", GRAY)
+
+    # Pending improvements
+    pending = NOTES / "adwi-pending-improvements.md"
+    if pending.exists():
+        lines = pending.read_text(encoding="utf-8").splitlines()
+        count = sum(1 for l in lines if l.startswith("## "))
+        cprint(f"\n  {BOLD}Pending improvements:{RESET} {count} sessions logged", "")
+        cprint(f"  File: notes/adwi-pending-improvements.md", GRAY)
+
+
+def cmd_nightly_log(n: int = 0) -> None:
+    """Show the most recent nightly improvement report (or the nth most recent)."""
+    adwi_head("Nightly improvement log")
+    log_dir = NOTES / "nightly-improvement-logs"
+    if not log_dir.exists() or not list(log_dir.glob("nightly-*.md")):
+        cprint("  No nightly logs yet — runs at 2 AM.", GRAY)
+        return
+    logs = sorted(log_dir.glob("nightly-*.md"))
+    idx = -(n + 1)
+    try:
+        target = logs[idx]
+    except IndexError:
+        target = logs[-1]
+    cprint(f"  {GRAY}{target}{RESET}", "")
+    cprint("", "")
+    content = target.read_text(encoding="utf-8")
+    # Show up to 120 lines
+    for line in content.splitlines()[:120]:
+        cprint(f"  {line}", "")
+    if len(content.splitlines()) > 120:
+        cprint(f"\n  {GRAY}... ({len(content.splitlines())-120} more lines) — open the file to read all{RESET}", "")
+
+
+def cmd_nightly_run() -> None:
+    """Manually trigger the nightly improvement loop (with confirmation)."""
+    adwi_head("Run nightly improvement now")
+    cprint("  This will run all 6 steps immediately:", GRAY)
+    cprint("    1. Services health check", GRAY)
+    cprint("    2. Review repair logs + journal", GRAY)
+    cprint("    3. AI skill discovery (adwi:latest)", GRAY)
+    cprint("    4. Routing evals + syntax check", GRAY)
+    cprint("    5. Capability sync", GRAY)
+    cprint("    6. Git commit + push", GRAY)
+    cprint(f"\n  Report → notes/nightly-improvement-logs/", GRAY)
+    ans = input(f"\n  {YELLOW}Run nightly improvement now? (y/n):{RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled.", GRAY)
+        return
+    import subprocess as _sp
+    cprint(f"\n  {CYAN}Starting... (this takes 2-5 min){RESET}", "")
+    r = _sp.run(
+        ["python3", str(ADWI_DIR / "nightly.py")],
+        cwd=str(BASE), timeout=600
+    )
+    cprint(f"\n  {'✓ Done' if r.returncode == 0 else '⚠ Finished with errors'}. Use /nightly-log to see the report.", GREEN if r.returncode == 0 else YELLOW)
+
+
 # ── Aliases for preserved commands (/gemini, /owui) ──────────────────────────
 def _alias_gemini(prompt: str = "") -> None:
     """Alias: /gemini — explicitly use Gemini cloud for a prompt."""
@@ -3121,6 +3209,12 @@ def handle(line: str) -> bool:
     elif line == "/backup-disable": cmd_backup_disable()
     elif line == "/backup-log": cmd_backup_log()
     elif line == "/backup-audit": cmd_backup_audit()
+    # ── Nightly improvement ──
+    elif line == "/nightly-status": cmd_nightly_status()
+    elif line.startswith("/nightly-log"):
+        arg = line[12:].strip()
+        cmd_nightly_log(int(arg) if arg.isdigit() else 0)
+    elif line == "/nightly-run": cmd_nightly_run()
     # ── Aliases ──
     elif line.startswith("/gemini"): _alias_gemini(line[7:].strip())
     elif line.startswith("/owui"):   _alias_owui(line[5:].strip())
@@ -3231,6 +3325,11 @@ You can say things like:
   /extract-ideas [src]       Extract implementable ideas from URL/file/text
   /implement-idea [src]      Build plan + implement idea with confirmation
   /tool-roadmap              Show Phase 5 tool stack (active vs planned)
+
+{BOLD}Nightly Improvement (2 AM auto-run):{RESET}
+  /nightly-status            LaunchAgent status, last run, pending improvements
+  /nightly-log [n]           Read most recent (or nth) nightly report
+  /nightly-run               Trigger nightly loop right now (with confirm)
 
 {BOLD}GitHub Backup:{RESET}
   /backup-status             Git status, remote, last commit, LaunchAgent

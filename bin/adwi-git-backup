@@ -1,0 +1,42 @@
+#!/bin/bash
+# Adwi auto-backup script — run by LaunchAgent every 30 minutes.
+# Only commits if there are actual changes and secret scan passes.
+set -euo pipefail
+
+WORKSPACE="/Users/MAC/SuneelWorkSpace"
+LOG_DIR="$WORKSPACE/notes/git-backup-logs"
+STAMP=$(date +%Y%m%d-%H%M%S)
+LOG="$LOG_DIR/$STAMP-git-backup.md"
+
+mkdir -p "$LOG_DIR"
+cd "$WORKSPACE"
+
+echo "# Adwi Auto-Backup — $(date)" > "$LOG"
+
+# Quick secret scan on changed files
+if git status --short | grep -q "^[AM]"; then
+    if git diff --cached | grep -qE 'sk-[A-Za-z0-9]{20}|OPENWEBUI_API_KEY=|GITHUB_TOKEN=|gho_[A-Za-z0-9]{36}|-----BEGIN.*PRIVATE'; then
+        echo "SECRET SCAN FAILED — aborting auto-backup" >> "$LOG"
+        exit 1
+    fi
+fi
+
+# Stage safe files (never secrets/)
+git add adwi/ bin/adwi bin/mcp-status bin/adwi-git-backup \
+    "notes/ADWI-START-HERE.md" "notes/adwi-learning-journal.md" \
+    "notes/adwi-mistakes-and-fixes.md" "notes/adwi-capability-roadmap.md" \
+    "notes/adwi-repair-logs/" "notes/system-inspections/" \
+    ".gitignore" "README.md" "BACKUP_MANIFEST.md" 2>/dev/null || true
+
+# Check if anything staged
+if ! git diff --cached --quiet; then
+    git commit -m "adwi auto-backup $(date '+%Y-%m-%d %H:%M')" >> "$LOG" 2>&1
+    REMOTE=$(git remote | head -1)
+    if [ -n "$REMOTE" ]; then
+        git push "$REMOTE" HEAD >> "$LOG" 2>&1 && echo "pushed" >> "$LOG"
+    else
+        echo "no remote — committed locally only" >> "$LOG"
+    fi
+else
+    echo "nothing to commit" >> "$LOG"
+fi

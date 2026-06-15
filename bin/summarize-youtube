@@ -1,0 +1,149 @@
+#!/bin/zsh
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: summarize-youtube <youtube-url>"
+  echo "Example: summarize-youtube 'https://www.youtube.com/watch?v=VIDEO_ID'"
+  exit 1
+fi
+
+URL="$1"
+WORKDIR="$(mktemp -d)"
+OUT="$WORKDIR/video"
+
+cleanup() {
+  rm -rf "$WORKDIR"
+}
+trap cleanup EXIT
+
+echo "=== FETCHING VIDEO INFO ==="
+TITLE="$(yt-dlp --no-playlist --print "%(title)s" "$URL" 2>/dev/null || echo "Unknown title")"
+CHANNEL="$(yt-dlp --no-playlist --print "%(channel)s" "$URL" 2>/dev/null || echo "Unknown channel")"
+
+echo "Title: $TITLE"
+echo "Channel: $CHANNEL"
+echo ""
+
+echo "=== FETCHING CAPTIONS / TRANSCRIPT ==="
+yt-dlp \
+  --no-playlist \
+  --skip-download \
+  --write-sub \
+  --write-auto-sub \
+  --sub-langs "en.*" \
+  --sub-format "vtt" \
+  -o "$OUT.%(ext)s" \
+  "$URL" >/tmp/summarize-youtube-yt-dlp.log 2>&1 || true
+
+SUBFILE="$(find "$WORKDIR" -type f \( -name "*.vtt" -o -name "*.srt" \) | head -1)"
+
+if [ -z "$SUBFILE" ]; then
+  echo "ERROR: No English subtitles/captions found for this video."
+  echo ""
+  echo "yt-dlp log:"
+  cat /tmp/summarize-youtube-yt-dlp.log
+  exit 1
+fi
+
+echo "Transcript file: $SUBFILE"
+echo ""
+
+python3 - "$URL" "$TITLE" "$CHANNEL" "$SUBFILE" <<'PY'
+import json
+import re
+import sys
+import urllib.request
+
+url, title, channel, subfile = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+
+with open(subfile, "r", encoding="utf-8", errors="replace") as f:
+    raw = f.read()
+
+# Clean WebVTT/SRT captions
+raw = re.sub(r"WEBVTT.*?\n", "", raw, flags=re.I | re.S)
+raw = re.sub(r"Kind:.*?\n", "", raw)
+raw = re.sub(r"Language:.*?\n", "", raw)
+raw = re.sub(r"\d{1,6}\n", "", raw)
+raw = re.sub(r"\d\d:\d\d:\d\d\.\d{3}\s+-->\s+\d\d:\d\d:\d\d\.\d{3}.*", "", raw)
+raw = re.sub(r"\d\d:\d\d:\d\d,\d{3}\s+-->\s+\d\d:\d\d:\d\d,\d{3}.*", "", raw)
+raw = re.sub(r"<[^>]+>", "", raw)
+raw = re.sub(r"&amp;", "&", raw)
+raw = re.sub(r"&lt;", "<", raw)
+raw = re.sub(r"&gt;", ">", raw)
+raw = re.sub(r"\n{2,}", "\n", raw)
+lines = [line.strip() for line in raw.splitlines() if line.strip()]
+
+# Remove adjacent duplicate caption fragments
+deduped = []
+for line in lines:
+    if not deduped or deduped[-1] != line:
+        deduped.append(line)
+
+transcript = " ".join(deduped)
+transcript = re.sub(r"\s+", " ", transcript).strip()
+
+if not transcript:
+    print("ERROR: Transcript was empty after cleaning.")
+    sys.exit(1)
+
+# Keep prompt manageable for the current model
+transcript_for_model = transcript[:28000]
+
+prompt = f"""
+You are Suneel's local AI YouTube summarizer.
+
+Summarize this YouTube video using only the transcript text below.
+
+Rules:
+1. Do not invent facts.
+2. If the transcript is incomplete, repetitive, auto-generated, or unclear, say so in Reliability notes.
+3. Separate the answer into:
+   - Video identity
+   - Main summary
+   - Key points
+   - Practical takeaways
+   - Does it make sense?
+   - What Suneel could apply locally
+   - Reliability notes
+4. If the video gives advice that could affect files, security, finances, privacy, or system settings, recommend reviewing carefully before applying.
+5. Include the source URL.
+
+Video title:
+{title}
+
+Channel:
+{channel}
+
+Source URL:
+{url}
+
+Transcript:
+{transcript_for_model}
+"""
+
+payload = {
+    "model": "adwi:latest",
+    "prompt": prompt,
+    "stream": False,
+    "options": {
+        "temperature": 0.2,
+        "num_ctx": 131072
+    }
+}
+
+req = urllib.request.Request(
+    "http://127.0.0.1:11434/api/generate",
+    data=json.dumps(payload).encode("utf-8"),
+    headers={"Content-Type": "application/json"}
+)
+
+try:
+    with urllib.request.urlopen(req, timeout=600) as response:
+        result = json.load(response)
+except Exception as e:
+    print("ERROR: Could not call Ollama.")
+    print(str(e))
+    sys.exit(1)
+
+print(result.get("response", "").strip())
+PY
