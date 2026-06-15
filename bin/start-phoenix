@@ -1,11 +1,28 @@
 #!/bin/zsh
-# Start Arize Phoenix observability dashboard
-echo "Starting Arize Phoenix on :6006 …"
-cd "$HOME/SuneelWorkSpace/local-ai-stack"
-docker compose up -d phoenix
-echo ""
-echo "Phoenix UI:   http://localhost:6006"
-echo "OTLP gRPC:    localhost:4317"
-echo "OTLP HTTP:    localhost:4318"
-echo ""
-echo "Traces from adwi are sent automatically when Phoenix is running."
+# Start Arize Phoenix observability dashboard (runs from adwi venv, not Docker)
+VENV="$HOME/SuneelWorkSpace/adwi/.venv/bin/python3"
+PHOENIX_PID_FILE="/tmp/adwi-phoenix.pid"
+
+if [[ -f "$PHOENIX_PID_FILE" ]]; then
+    pid=$(cat "$PHOENIX_PID_FILE")
+    if kill -0 "$pid" 2>/dev/null; then
+        echo "Phoenix already running (PID $pid)"
+        echo "  UI: http://localhost:6006"
+        exit 0
+    fi
+fi
+
+echo "Starting Arize Phoenix …"
+PHOENIX_WORKING_DIR="$HOME/.adwi-phoenix" \
+    nohup "$VENV" -m phoenix.server.main serve \
+        > /tmp/adwi-phoenix.log 2>&1 &
+echo $! > "$PHOENIX_PID_FILE"
+sleep 3
+if curl -s http://localhost:6006/ > /dev/null 2>&1; then
+    echo "  ✓ Phoenix UI:  http://localhost:6006"
+    echo "  ✓ OTLP gRPC:   localhost:4317"
+    echo "  ✓ OTLP HTTP:   localhost:4318"
+    echo "  PID: $(cat $PHOENIX_PID_FILE)"
+else
+    echo "  Starting … check: tail -f /tmp/adwi-phoenix.log"
+fi
