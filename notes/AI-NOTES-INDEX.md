@@ -1,0 +1,128 @@
+# Suneel AI Notes Index
+
+Generated: Sun Jun 14 17:43:20 CDT 2026
+
+Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
+
+## Markdown and Text Notes
+
+- **ADWI START HERE**
+  - File: `ADWI-START-HERE.md`
+- **Suneel AI Notes Index**
+  - File: `AI-NOTES-INDEX.md`
+- **START HERE - Suneel Local AI Current Setup**
+  - File: `START-HERE-SUNEEL-LOCAL-AI.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-090813-92408-status.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-090939-92408-search.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-091000-92408-read.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-091023-92408-watcher-status.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-091428-641-search.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-091555-4166-search.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-091646-8298-search.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-092839-25723-openwebui-models.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-095324-86131-model-status.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-095423-91315-model-status.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-095528-92276-model-status.md`
+- **Adwi Action Log**
+  - File: `adwi-action-logs/20260614-095623-92276-status.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230458-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230544-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230622-11628-27374-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230622-11706-8305-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230658-12485-9968-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230838-16361-30830-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-230945-18993-17952-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-231245-23858-14910-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-231406-26038-26477-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-231440-26807-24172-command-output.md`
+- **Command Output Clipboard Log**
+  - File: `clipboard-command-logs/20260613-231532-29952-22553-command-output.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-192609-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-193349-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-193632-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-194926-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-195617-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-195945-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-210442-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-211205-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260613-211505-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260614-174319-ai-status.md`
+- **Suneel Local AI Learning Journal**
+  - File: `local-ai-learning-journal.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260613-194925-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260613-195149-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260613-195616-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260613-195944-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260614-174318-auto-ai-maintenance.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-225453-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-225544-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-225906-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-230041-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-231007-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260613-231554-openwebui-sync.md`
+- **Reliable Web Research Prompt**
+  - File: `reliable-web-research-prompt.md`
+- **Adwi Self-Heal Log**
+  - File: `self-heal-logs/20260613-210438-adwi-self-heal.md`
+- **Adwi Self-Heal Log**
+  - File: `self-heal-logs/20260613-211202-adwi-self-heal.md`
+- **Adwi Self-Heal Log**
+  - File: `self-heal-logs/20260613-211501-adwi-self-heal.md`
+- **Suneel Local AI Profile**
+  - File: `suneel-local-ai-profile.md`
+- **Suneel Natural Chat System Prompt**
+  - File: `suneel-natural-chat-system-prompt.md`
+- **Saved Local Task Plan**
+  - File: `task-plans/20260613-200904-task-plan.md`
+- **Saved Local Task Plan**
+  - File: `task-plans/20260613-204609-task-plan.md`
+- **Local AI Agents In 26 Minutes**
+  - File: `youtube-summaries/20260613-174715-local-ai-agents-in-26-minutes.md`
+
+## Suggested Use
+
+- Use this index to understand what local AI memory files exist.
+- Add important new summaries and reports into the notes folder.
+- Re-run `index-ai-notes` after saving new notes.

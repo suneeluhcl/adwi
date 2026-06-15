@@ -1,0 +1,658 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-14",
+  "workspace": "/Users/MAC/SuneelWorkSpace",
+  "capabilities": [
+    {
+      "name": "Natural Chat (Cloud)",
+      "command": "/cloud <prompt>  or just type",
+      "description": "Chat with Gemini via Open WebUI for complex reasoning",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Natural Chat (Local)",
+      "command": "/local <prompt>  or /use-local then type",
+      "description": "Chat with adwi:latest (Qwen3 MoE 30.5B, 131K ctx) fully offline with streaming",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Cloud Reasoning",
+      "command": "/reason <task>",
+      "description": "Force Gemini cloud for complex multi-step reasoning tasks",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Plan Review",
+      "command": "/review-plan <idea>",
+      "description": "Ask Gemini to review and critique a proposed plan or idea",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Image Analysis",
+      "command": "/image <path>  or  /screenshot-analyze <path>",
+      "description": "Analyze an image using Gemini vision via Open WebUI. Extracts text, describes content, suggests actions.",
+      "risk": "low",
+      "allowed_paths": [
+        "/Users/MAC/SuneelWorkSpace",
+        "/Users/MAC/Desktop",
+        "/Users/MAC/Documents",
+        "/Users/MAC/Downloads"
+      ],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "YouTube Summarize",
+      "command": "/youtube <url>  or paste URL",
+      "description": "Summarize a YouTube video using captions. Auto-detected when you paste a YouTube URL.",
+      "risk": "low",
+      "allowed_paths": [
+        "notes/youtube-summaries",
+        "open-webui-knowledge-upload"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "YouTube Save to Knowledge",
+      "command": "/save-youtube <url>",
+      "description": "Summarize and save a YouTube video to notes and Open WebUI Knowledge",
+      "risk": "low",
+      "allowed_paths": [
+        "notes/youtube-summaries",
+        "open-webui-knowledge-upload"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "URL Summarize",
+      "command": "/url <url>",
+      "description": "Fetch and summarize a webpage using adwi local model",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "File Search",
+      "command": "/search <term>",
+      "description": "Search text in all approved workspace files",
+      "risk": "low",
+      "allowed_paths": [
+        "/Users/MAC/SuneelWorkSpace",
+        "/Users/MAC/Desktop",
+        "/Users/MAC/Documents",
+        "/Users/MAC/Downloads"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "File Read",
+      "command": "/read <path>",
+      "description": "Read the first 400 lines of an allowed file",
+      "risk": "low",
+      "allowed_paths": [
+        "/Users/MAC/SuneelWorkSpace",
+        "/Users/MAC/Desktop",
+        "/Users/MAC/Documents",
+        "/Users/MAC/Downloads"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Stack Status",
+      "command": "/status  or  check my setup",
+      "description": "Check health of Ollama, Docker, Open WebUI, n8n, SearXNG, Safe Command API",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Self Heal",
+      "command": "/self-heal  or  fix my setup",
+      "description": "Safe automatic repair: restarts Ollama, Docker stack, Command API, refreshes notes",
+      "risk": "medium",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/self-heal-logs",
+      "status": "active"
+    },
+    {
+      "name": "Knowledge Sync",
+      "command": "/sync-knowledge  or  sync my knowledge",
+      "description": "Sync files from open-webui-knowledge-upload folder into Open WebUI Knowledge base",
+      "risk": "low",
+      "allowed_paths": [
+        "open-webui-knowledge-upload"
+      ],
+      "uses_secrets": true,
+      "logs": "notes/open-webui-sync-logs",
+      "status": "active"
+    },
+    {
+      "name": "Daily Improve",
+      "command": "/daily-improve",
+      "description": "Daily improvement routine: status check, review logs, analyze failures, suggest upgrades, update journal, sync knowledge",
+      "risk": "low",
+      "allowed_paths": [
+        "notes"
+      ],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "What Should I Build Next",
+      "command": "/what-next  or  what should I build next",
+      "description": "Review capability roadmap, recent logs, and suggest next improvements",
+      "risk": "low",
+      "allowed_paths": [
+        "notes"
+      ],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Capability Registry",
+      "command": "/capabilities  or  /capability-status",
+      "description": "List all Adwi capabilities with status and risk levels",
+      "risk": "low",
+      "allowed_paths": [
+        "adwi/capabilities.json"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Add Capability Plan",
+      "command": "/add-capability-plan <idea>",
+      "description": "Plan a new capability: Adwi will evaluate, propose implementation steps, and add to roadmap",
+      "risk": "low",
+      "allowed_paths": [
+        "notes/adwi-capability-roadmap.md"
+      ],
+      "uses_secrets": true,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Model Status",
+      "command": "/model-status",
+      "description": "Show current model routing (cloud vs local, which model)",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Watcher Status",
+      "command": "/watcher-status",
+      "description": "Check if Open WebUI Knowledge auto-watcher is running",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Add Root",
+      "command": "/add-root",
+      "description": "Adwi command /add-root",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Benchmark",
+      "command": "/benchmark",
+      "description": "Adwi command /benchmark",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Browse",
+      "command": "/browse",
+      "description": "Adwi command /browse",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Capability Audit",
+      "command": "/capability-audit",
+      "description": "Adwi command /capability-audit",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Capability Status",
+      "command": "/capability-status",
+      "description": "Adwi command /capability-status",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Cleanup",
+      "command": "/cleanup",
+      "description": "Adwi command /cleanup",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Disk",
+      "command": "/disk",
+      "description": "Adwi command /disk",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Duplicates",
+      "command": "/duplicates",
+      "description": "Adwi command /duplicates",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Fix Error",
+      "command": "/fix-error",
+      "description": "Adwi command /fix-error",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Generate Image",
+      "command": "/generate-image",
+      "description": "Adwi command /generate-image",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Git",
+      "command": "/git",
+      "description": "Adwi command /git",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail",
+      "command": "/gmail",
+      "description": "Adwi command /gmail",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Auth",
+      "command": "/gmail-auth",
+      "description": "Adwi command /gmail-auth",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Read",
+      "command": "/gmail-read",
+      "description": "Adwi command /gmail-read",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Summary",
+      "command": "/gmail-summary",
+      "description": "Adwi command /gmail-summary",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Help",
+      "command": "/help",
+      "description": "Adwi command /help",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Image Save",
+      "command": "/image-save",
+      "description": "Adwi command /image-save",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Inbox",
+      "command": "/inbox",
+      "description": "Adwi command /inbox",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Inspect Code",
+      "command": "/inspect-code",
+      "description": "Adwi command /inspect-code",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Journal",
+      "command": "/journal",
+      "description": "Adwi command /journal",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Large Files",
+      "command": "/large-files",
+      "description": "Adwi command /large-files",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Learn From Last Error",
+      "command": "/learn-from-last-error",
+      "description": "Adwi command /learn-from-last-error",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "List",
+      "command": "/list",
+      "description": "Adwi command /list",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Mcp",
+      "command": "/mcp",
+      "description": "Adwi command /mcp",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Mcp Setup",
+      "command": "/mcp-setup",
+      "description": "Adwi command /mcp-setup",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Mistakes",
+      "command": "/mistakes",
+      "description": "Adwi command /mistakes",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Models",
+      "command": "/models",
+      "description": "Adwi command /models",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Old Files",
+      "command": "/old-files",
+      "description": "Adwi command /old-files",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Organize",
+      "command": "/organize",
+      "description": "Adwi command /organize",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Patch Adwi",
+      "command": "/patch-adwi",
+      "description": "Adwi command /patch-adwi",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Rag",
+      "command": "/rag",
+      "description": "Adwi command /rag",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Rag Index",
+      "command": "/rag-index",
+      "description": "Adwi command /rag-index",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Repair Adwi",
+      "command": "/repair-adwi",
+      "description": "Adwi command /repair-adwi",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Roadmap",
+      "command": "/roadmap",
+      "description": "Adwi command /roadmap",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Run Bash",
+      "command": "/run-bash",
+      "description": "Adwi command /run-bash",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Run Python",
+      "command": "/run-python",
+      "description": "Adwi command /run-python",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Run Safe",
+      "command": "/run-safe",
+      "description": "Adwi command /run-safe",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Screenshot Analyze",
+      "command": "/screenshot-analyze",
+      "description": "Adwi command /screenshot-analyze",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Secrets Status",
+      "command": "/secrets-status",
+      "description": "Adwi command /secrets-status",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Set Cloud Model",
+      "command": "/set-cloud-model",
+      "description": "Adwi command /set-cloud-model",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Test Adwi",
+      "command": "/test-adwi",
+      "description": "Adwi command /test-adwi",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Use Cloud",
+      "command": "/use-cloud",
+      "description": "Adwi command /use-cloud",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Use Local",
+      "command": "/use-local",
+      "description": "Adwi command /use-local",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    }
+  ]
+}
