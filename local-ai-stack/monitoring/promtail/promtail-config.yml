@@ -1,0 +1,71 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Adwi system log (main structured log)
+  - job_name: adwi-system-log
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: adwi
+          stream: system
+          __path__: /mnt/logs/adwi_system_log.md
+    pipeline_stages:
+      - regex:
+          expression: '(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
+      - timestamp:
+          source: ts
+          format: '2006-01-02 15:04:05'
+
+  # Nightly loop logs (one file per night)
+  - job_name: adwi-nightly
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: adwi
+          stream: nightly
+          __path__: /mnt/notes/nightly-improvement-logs/*.md
+    pipeline_stages:
+      - multiline:
+          firstline: '^# Adwi Nightly'
+          max_wait_time: 3s
+
+  # Backup log stream
+  - job_name: adwi-git-backup
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: adwi
+          stream: backup
+          __path__: /mnt/notes/git-backup-logs/*.md
+
+  # Trace logs (per-action detail)
+  - job_name: adwi-traces
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: adwi
+          stream: trace
+          __path__: /mnt/notes/adwi-trace-logs/*.json
+    pipeline_stages:
+      - json:
+          expressions:
+            goal: goal
+            action: action
+            result: result
+
+  # Auto-backup shell output
+  - job_name: adwi-backup-shell
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: adwi
+          stream: backup-shell
+          __path__: /tmp/adwi-git-backup.log

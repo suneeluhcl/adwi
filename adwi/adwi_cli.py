@@ -29,9 +29,12 @@ try:
     from prompt_toolkit.key_binding import KeyBindings
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.styles import Style
+    from prompt_toolkit.completion import Completer, Completion
+    from prompt_toolkit.document import Document as _PTDocument
     PROMPT_TOOLKIT = True
 except ImportError:
     PROMPT_TOOLKIT = False
+    Completer = object   # stub so class body parses cleanly without prompt_toolkit
 
 # Optional: instructor for structured LLM outputs
 try:
@@ -336,6 +339,138 @@ DENY_PAT = re.compile(
     re.I,
 )
 def denied(t): return bool(DENY_PAT.search(str(t or "")))
+
+# ── Phase 3: Three-tier risk classification for all CLI commands ───────────────
+_RISK_BLOCKED_RE = re.compile(
+    r"rm\s+-rf|git\s+push\s+--force|DROP\s+TABLE|/etc/|/private/|/System/"
+    r"|~/\.ssh|~/\.aws|secrets/|format\s+disk|diskutil\s+erase",
+    re.I,
+)
+_RISK_REVIEW_RE = re.compile(
+    r"git\s+commit\b|git\s+push\b|docker\s+compose\s+(down|rm)\b|brew\s+uninstall"
+    r"|pip\s+uninstall|rm\s+-r(?!f)|chmod\b|chown\b|pkill\b|launchctl\s+(un)?load",
+    re.I,
+)
+
+def _classify_cli_risk(cmd: str) -> str:
+    """Phase 3 gate: BLOCKED | REVIEW-REQUIRED | SAFE."""
+    if denied(cmd) or _RISK_BLOCKED_RE.search(cmd):
+        return "BLOCKED"
+    if _RISK_REVIEW_RE.search(cmd):
+        return "REVIEW-REQUIRED"
+    return "SAFE"
+
+def _rich_permission_gate(action_label: str, cmd: str, why: str) -> bool:
+    """Phase 2 interactive permission gate used across all CLI commands."""
+    W = 64
+    print(f"\n  ╭{'─' * W}╮")
+    print(f"  │  \033[1m\033[33mAction Required\033[0m{'':<{W - 17}}│")
+    print(f"  │{'─' * W}│")
+    print(f"  │  \033[1mWhy:\033[0m{'':<{W - 6}}│")
+    import textwrap as _tw
+    for line in _tw.wrap(why, width=W - 4):
+        print(f"  │  \033[90m{line:<{W-4}}\033[0m│")
+    print(f"  │{'─' * W}│")
+    print(f"  │  \033[1mAction [{action_label}]:\033[0m{'':<{W - len(f'Action [{action_label}]:') - 2}}│")
+    for line in (cmd if isinstance(cmd, list) else [cmd]):
+        print(f"  │  \033[36m{('$ ' + line)[:W-4]:<{W-4}}\033[0m│")
+    print(f"  ╰{'─' * W}╯")
+    print(f"\n  \033[33mAllow Adwi to execute this action? (y/n):\033[0m ", end="", flush=True)
+    try:
+        ans = input().strip().lower()
+        return ans in ("y", "yes")
+    except (EOFError, KeyboardInterrupt):
+        return False
+
+# ── Phase 4: Live self-heal for approved CLI commands ─────────────────────────
+def _cli_live_heal(error_output: str) -> bool:
+    """
+    Phase 4: intercept a runtime error from an approved command.
+    Invokes aider non-interactively, runs tests, returns True if healed.
+    """
+    import traceback as _tb
+    import textwrap as _tw
+
+    # Identify files to patch
+    workspace = Path.home() / "SuneelWorkSpace"
+    adwi_dir  = workspace / "adwi"
+    files: list[Path] = []
+    for m in re.finditer(r'File "([^"]+\.py)"', error_output):
+        p = Path(m.group(1))
+        try:
+            p.resolve().relative_to(workspace.resolve())
+            if p.exists() and "test_" not in p.name:
+                files.append(p)
+        except ValueError:
+            pass
+    files = list(dict.fromkeys(files))[:4]
+
+    print(f"\n  \033[33m⚕  Runtime error intercepted — attempting live self-heal …\033[0m")
+    if not files:
+        print(f"  \033[90mNo workspace source files in traceback — showing error instead.\033[0m")
+        cprint(error_output[:800], YELLOW)
+        return False
+
+    print(f"  \033[90mTargeting: {', '.join(f.name for f in files)}\033[0m")
+
+    aider_bin = Path.home() / ".local" / "bin" / "aider"
+    if not aider_bin.exists():
+        print(f"  \033[33maider not found — showing error.\033[0m")
+        cprint(error_output[:800], YELLOW)
+        return False
+
+    prompt_txt = (
+        f"[Adwi live self-heal] Runtime error from approved command:\n\n"
+        f"```\n{error_output[:2000]}\n```\n\n"
+        "Fix the minimum lines needed. Do not add features or change passing behaviour."
+    )
+    aider_cmd = [
+        str(aider_bin),
+        "--model", "ollama/adwi:latest",
+        "--no-git", "--yes-always", "--no-pretty", "--no-stream",
+        "--message", prompt_txt,
+    ] + [str(f) for f in files]
+
+    env = {
+        **os.environ,
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
+        "OLLAMA_API_BASE": "http://127.0.0.1:11434",
+    }
+    print(f"  \033[90mInvoking aider …\033[0m")
+    try:
+        r = subprocess.run(
+            aider_cmd, capture_output=True, text=True, timeout=300,
+            cwd=str(workspace), env=env,
+        )
+        if r.returncode != 0:
+            print(f"  \033[33mAider returned non-zero — patch may be incomplete.\033[0m")
+    except subprocess.TimeoutExpired:
+        print(f"  \033[33mAider timed out.\033[0m")
+        return False
+    except Exception as e:
+        print(f"  \033[33mAider error: {e}\033[0m")
+        return False
+
+    # Verify with tests
+    print(f"  \033[32mAider complete — verifying …\033[0m")
+    evals = adwi_dir / "evals"
+    if evals.exists() and any(evals.glob("test_*.py")):
+        test_cmd = ["python3", "-m", "pytest", str(evals), "-x", "--tb=short", "-q"]
+    else:
+        test_cmd = ["python3", "-m", "py_compile", str(adwi_dir / "adwi_cli.py")]
+    try:
+        tr = subprocess.run(test_cmd, capture_output=True, text=True, timeout=90,
+                           cwd=str(workspace), env=env)
+        if tr.returncode == 0:
+            print(f"  \033[32m✓ Verification passed — heal confirmed.\033[0m")
+            return True
+        else:
+            print(f"  \033[33mVerification still failing after patch.\033[0m")
+            cprint((tr.stdout + tr.stderr)[:400], YELLOW)
+            return False
+    except Exception as e:
+        print(f"  \033[33mVerification error: {e}\033[0m")
+        return False
 
 def is_hard_blocked(path: Path) -> bool:
     try:
@@ -1862,7 +1997,7 @@ def _extract_code(text: str) -> str:
     return m.group(1).strip() if m else text.strip()
 
 def cmd_run_python(raw: str) -> None:
-    """Run Python code with user confirmation and 30s timeout."""
+    """Run Python code — Phase 2 gate + Phase 4 live heal on error."""
     import tempfile
     code = _extract_code(raw)
     if not code:
@@ -1876,8 +2011,13 @@ def cmd_run_python(raw: str) -> None:
         cprint(f"  … ({code.count(chr(10))+1} lines total)", GRAY)
     print(f"{GRAY}──────────────────────────────────────────────────{RESET}\n")
 
-    ans = input(f"  {YELLOW}Run this? (y/n){RESET} ").strip().lower()
-    if ans not in ("y","yes"):
+    # Phase 2: use rich gate with why-explanation
+    approved = _rich_permission_gate(
+        "PYTHON",
+        code.splitlines()[0][:80] + (" …" if "\n" in code else ""),
+        "Execute this Python code in an isolated temporary file to perform the requested operation.",
+    )
+    if not approved:
         cprint("  Cancelled.", GRAY); return
 
     with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False, encoding="utf-8") as f:
@@ -1888,8 +2028,31 @@ def cmd_run_python(raw: str) -> None:
             ["python3", tmp], capture_output=True, text=True, timeout=30,
             env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
         )
+        combined_err = (r.stderr or "").strip()
         if r.stdout: print(r.stdout)
-        if r.stderr: cprint(r.stderr[:1000], YELLOW)
+        if combined_err:
+            # Phase 4: try to heal before showing raw traceback
+            patchable = any(t in combined_err for t in (
+                "Traceback (most recent call last)", "ModuleNotFoundError",
+                "ImportError", "AttributeError", "TypeError", "NameError",
+            ))
+            if patchable and r.returncode != 0:
+                healed = _cli_live_heal(combined_err)
+                if healed:
+                    # Retry once after heal
+                    r2 = subprocess.run(
+                        ["python3", tmp], capture_output=True, text=True, timeout=30,
+                        env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+                    )
+                    if r2.stdout: print(r2.stdout)
+                    if r2.stderr: cprint(r2.stderr[:500], YELLOW)
+                    cprint(f"\n  exit {r2.returncode}", GRAY)
+                    log_action("run-python", f"code:\n{code}\n\n[healed]\nstdout:\n{r2.stdout}\nstderr:\n{r2.stderr}")
+                    return
+                else:
+                    cprint(combined_err[:1000], YELLOW)
+            else:
+                cprint(combined_err[:1000], YELLOW)
         cprint(f"\n  exit {r.returncode}", GRAY)
         log_action("run-python", f"code:\n{code}\n\nstdout:\n{r.stdout}\nstderr:\n{r.stderr}")
     except subprocess.TimeoutExpired:
@@ -1900,28 +2063,76 @@ def cmd_run_python(raw: str) -> None:
         Path(tmp).unlink(missing_ok=True)
 
 def cmd_run_bash(raw: str) -> None:
-    """Run a shell command with confirmation. Blocks destructive patterns."""
+    """Run a shell command — Phase 3 risk gate + Phase 2 rich gate + Phase 4 live heal."""
     cmd = raw.strip()
     if not cmd:
         cprint("  No command given.", YELLOW); return
-    if denied(cmd):
-        cprint("  Blocked: command matches destructive/financial deny pattern.", RED); return
+
+    # Phase 3: three-tier classification
+    risk = _classify_cli_risk(cmd)
+    if risk == "BLOCKED":
+        cprint(f"  {RED}Blocked: command matches destructive/financial deny pattern.{RESET}", ""); return
 
     adwi_head("Run bash")
-    cprint(f"  $ {cmd}", CYAN)
-    ans = input(f"\n  {YELLOW}Run this? (y/n){RESET} ").strip().lower()
-    if ans not in ("y","yes"):
-        cprint("  Cancelled.", GRAY); return
+
+    if risk == "REVIEW-REQUIRED":
+        # Phase 2: rich permission gate with WHY explanation
+        # Ask the fast model for a one-line why
+        try:
+            import urllib.request as _ur, json as _j
+            _payload = _j.dumps({
+                "model": "llama3.1:8b",
+                "messages": [
+                    {"role": "user", "content": f"/no_think\nIn one sentence, why would someone run this shell command: `{cmd[:200]}`"}
+                ],
+                "stream": False, "options": {"temperature": 0.1, "num_predict": 60},
+            }).encode()
+            _req = _ur.Request("http://127.0.0.1:11434/api/chat", data=_payload,
+                               headers={"Content-Type": "application/json"})
+            with _ur.urlopen(_req, timeout=12) as _r:
+                why = _j.loads(_r.read())["message"]["content"].strip().splitlines()[0]
+        except Exception:
+            why = "This command requires elevated access or makes persistent changes."
+
+        approved = _rich_permission_gate("SHELL", cmd, why)
+        if not approved:
+            cprint("  Cancelled.", GRAY); return
+    else:
+        # SAFE: simple confirmation (no LLM roundtrip)
+        cprint(f"  $ {cmd}", CYAN)
+        ans = input(f"\n  {YELLOW}Run this? (y/n){RESET} ").strip().lower()
+        if ans not in ("y", "yes"):
+            cprint("  Cancelled.", GRAY); return
 
     try:
         r = subprocess.run(
             cmd, shell=True, capture_output=True, text=True, timeout=60,
             env={**os.environ, "PATH": f"{BIN}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"}
         )
-        out = (r.stdout or "") + (("\n[stderr] " + r.stderr) if r.stderr else "")
-        print(redact(out))
+        combined_out = (r.stdout or "") + (("\n[stderr] " + r.stderr) if r.stderr else "")
+        combined_err = (r.stderr or "").strip()
+
+        # Phase 4: intercept patchable runtime errors
+        patchable = any(t in combined_err for t in (
+            "Traceback (most recent call last)", "ModuleNotFoundError", "ImportError",
+            "AttributeError", "TypeError", "NameError", "SyntaxError",
+        ))
+        if patchable and r.returncode != 0:
+            healed = _cli_live_heal(combined_err)
+            if healed:
+                r2 = subprocess.run(
+                    cmd, shell=True, capture_output=True, text=True, timeout=60,
+                    env={**os.environ, "PATH": f"{BIN}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"}
+                )
+                out2 = (r2.stdout or "") + (("\n[stderr] " + r2.stderr) if r2.stderr else "")
+                print(redact(out2))
+                cprint(f"\n  exit {r2.returncode}", GRAY)
+                log_action("run-bash", f"cmd: {cmd}\n\n[healed]\n{redact(out2)}")
+                return
+
+        print(redact(combined_out))
         cprint(f"\n  exit {r.returncode}", GRAY)
-        log_action("run-bash", f"cmd: {cmd}\n\n{redact(out)}")
+        log_action("run-bash", f"cmd: {cmd}\n\n{redact(combined_out)}")
     except subprocess.TimeoutExpired:
         cprint("  Timed out (60s).", YELLOW)
     except Exception as e:
@@ -4609,21 +4820,53 @@ def _list_models():
 # ── Prompt session ────────────────────────────────────────────────────────────
 def make_session():
     kb = KeyBindings()
+
     @kb.add("enter")
     @kb.add("c-s")
     def submit(e): e.current_buffer.validate_and_handle()
-    @kb.add("escape","enter")    # Option+Enter / Alt+Enter on Mac
+
+    @kb.add("escape", "enter")   # Option+Enter / Alt+Enter on Mac → newline
     def newline(e): e.current_buffer.insert_text("\n")
+
     @kb.add("c-d")
     def ctrl_d(e):
-        if e.current_buffer.text.strip(): e.current_buffer.validate_and_handle()
-        else: raise EOFError
-    style = Style.from_dict({"prompt":"#00bcd4 bold","bottom-toolbar":"bg:#111 #555"})
-    toolbar = "  Enter=send  ·  Option+Enter=newline  ·  /help  ·  /exit  "
+        if e.current_buffer.text.strip():
+            e.current_buffer.validate_and_handle()
+        else:
+            raise EOFError
+
+    style = Style.from_dict({
+        # Prompt
+        "prompt":                                "#00bcd4 bold",
+        # Status bar
+        "bottom-toolbar":                        "bg:#111111 #555555",
+        # Completion dropdown
+        "completion-menu.completion":            "bg:#1c1c2e #9090cc",
+        "completion-menu.completion.current":    "bg:#00bcd4 #000000 bold",
+        # Meta column (right-side description)
+        "completion-menu.meta.completion":       "bg:#111122 #555577",
+        "completion-menu.meta.completion.current": "bg:#008fa8 #ddeeff",
+        # Scrollbar
+        "scrollbar.background":                  "bg:#1c1c2e",
+        "scrollbar.button":                      "bg:#00bcd4",
+    })
+
+    toolbar = (
+        "  /  = command menu  ·  Tab = complete  ·  ↑↓ = history  ·  "
+        "Option+Enter = newline  ·  /help  ·  /exit"
+    )
+
     return PromptSession(
-        history=FileHistory(str(HISTORY_FILE)), key_bindings=kb, style=style,
-        multiline=True, prompt_continuation=lambda *a: "  … ",
-        bottom_toolbar=HTML(f"<b>{toolbar}</b>"), mouse_support=False,
+        history=FileHistory(str(HISTORY_FILE)),
+        key_bindings=kb,
+        style=style,
+        multiline=True,
+        prompt_continuation=lambda *a: "  … ",
+        bottom_toolbar=HTML(f"<b>{toolbar}</b>"),
+        mouse_support=False,
+        completer=SlashCommandCompleter(),
+        complete_while_typing=True,
+        complete_in_thread=True,   # run completion in background thread → no input lag
     )
 
 # ── Help ──────────────────────────────────────────────────────────────────────
@@ -4734,6 +4977,116 @@ You can say things like:
 
 {BOLD}Input:{RESET} Enter=send · Option+Enter=newline · Ctrl+S=send · ↑↓=history
 """.strip()
+
+# ── Slash-command completion registry ────────────────────────────────────────
+# Two-pass build:
+#   Pass 1 — HELP string  → rich descriptions (source of truth for docs)
+#   Pass 2 — CLI source   → picks up every elif branch not yet in HELP
+# Result is always complete and stays in sync automatically.
+def _build_slash_commands() -> dict[str, tuple[str, str]]:
+    """Return {'/cmd': ('description', '/cmd [args]')}."""
+    out: dict[str, tuple[str, str]] = {}
+
+    # Pass 1: HELP string → commands with descriptions
+    for line in HELP.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("/"):
+            continue
+        parts = re.split(r"\s{2,}", stripped, maxsplit=1)
+        if len(parts) < 2:
+            continue
+        cmd_part, desc = parts[0].strip(), parts[1].strip()
+        for token in re.findall(r"/[\w/-]+", cmd_part):
+            if token not in out:
+                out[token] = (desc, cmd_part)
+
+    # Pass 2: scan the CLI source for elif branches not covered by HELP
+    # Matches:  elif line == "/cmd"   and  elif line.startswith("/cmd")
+    try:
+        src = Path(__file__).read_text(encoding="utf-8")
+        for m in re.finditer(r'(?:line == |startswith\()"(/[\w/-]+)', src):
+            cmd = m.group(1)
+            if cmd not in out:
+                # Humanise the command name as a fallback description
+                desc = cmd.lstrip("/").replace("-", " ").title()
+                out[cmd] = (desc, cmd)
+    except Exception:
+        pass
+
+    return out
+
+SLASH_COMMANDS: dict[str, tuple[str, str]] = _build_slash_commands()
+
+def _fuzzy_score(query: str, target: str) -> int:
+    """
+    Return a relevance score for how well `query` matches `target` (0 = no match).
+
+    Algorithm (substring-based — no false-positive subsequence noise):
+      100  prefix match: target starts with query
+       50  substring match: query appears anywhere inside target
+        0  no match
+
+    Within each tier, word-boundary matches get +10 so e.g. "/back" ranks
+    "/backup-now" above "/rag-index" even if both contain the chars.
+    """
+    if not query:
+        return 50  # empty partial → show all
+    if query not in target:
+        return 0
+    score = 100 if target.startswith(query) else 50
+    # Bonus: match starts on a word boundary (after '-' or at position 0)
+    idx = target.index(query)
+    if idx == 0 or target[idx - 1] == "-":
+        score += 10
+    return score
+
+
+class SlashCommandCompleter(Completer):
+    """
+    Dropdown completer that activates the instant the input line starts with '/'.
+
+    Behaviour:
+    - Typing '/'      → shows all commands (alphabetical)
+    - Typing '/mem'   → /memory-recall, /memory-scan (prefix → substring order)
+    - Typing '/back'  → /backup-* commands
+    - Typing '/mem r' → no completions (argument space started)
+    - Tab / ↑↓        → navigate and accept
+    """
+
+    def get_completions(self, document: "_PTDocument", complete_event):  # type: ignore[override]
+        text = document.text_before_cursor
+
+        # Only activate when the input line itself starts with '/'
+        if not text.startswith("/"):
+            return
+
+        partial = text[1:].lower()
+
+        # Stop completing once the user starts typing arguments
+        if " " in partial:
+            return
+
+        # Score every command and collect matches
+        scored: list[tuple[int, str]] = []
+        for cmd in SLASH_COMMANDS:
+            s = _fuzzy_score(partial, cmd[1:].lower())
+            if s > 0:
+                scored.append((s, cmd))
+
+        # Best score first; ties broken alphabetically
+        scored.sort(key=lambda x: (-x[0], x[1]))
+
+        for _, cmd in scored:
+            desc, usage = SLASH_COMMANDS[cmd]
+            display_extra = usage[len(cmd):].strip()
+            display_text  = cmd + (f" {display_extra}" if display_extra else "")
+            yield Completion(
+                text=cmd,
+                start_position=-len(text),    # replace entire '/partial' typed so far
+                display=display_text,
+                display_meta=desc[:58],
+            )
+
 
 # ── Banner ────────────────────────────────────────────────────────────────────
 def print_banner():

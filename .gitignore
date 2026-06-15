@@ -51,6 +51,9 @@ local-ai-stack/qdrant-data/
 local-ai-stack/data/
 mcp-servers/qdrant-data/
 
+# ── Home Assistant runtime data ──────────────────────────────────────
+local-ai-stack/homeassistant-data/
+
 # ── High-volume log directories ──────────────────────────────────────
 notes/clipboard-command-logs/
 notes/open-webui-sync-logs/

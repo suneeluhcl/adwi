@@ -16,6 +16,7 @@
     "/capability-status",
     "/cleanup",
     "/cloud <prompt>  or just type",
+    "/cmd",
     "/daily-improve",
     "/disk",
     "/doctor",
@@ -140,27 +141,27 @@
     [
       "prometheus",
       "9090",
-      "Up 40 minutes"
+      "Up About an hour"
     ],
     [
       "loki",
       "3100",
-      "Up 40 minutes"
+      "Up About an hour"
     ],
     [
       "grafana",
       "4000",
-      "Up 40 minutes"
+      "Up About an hour"
     ],
     [
       "node-exporter",
       "9100",
-      "Up 40 minutes"
+      "Up About an hour"
     ],
     [
       "cadvisor",
       "9101",
-      "Up 40 minutes (healthy)"
+      "Up About an hour (healthy)"
     ]
   ],
   "launchagents": [
@@ -201,5 +202,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-15",
-  "_hash": "c044ccae732b7d32"
+  "_hash": "1876e24c24efe6c5"
 }

@@ -630,7 +630,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 ### CLI Commands
 
 <!-- AUTO:COMMANDS -->
-**120 registered commands.** Key groups:
+**121 registered commands.** Key groups:
 
 **add**: `/add-capability-plan <idea>`  `/add-root`
 
@@ -649,6 +649,8 @@ Dashboard: http://localhost:4000 (user: suneel)
 **cleanup**: `/cleanup`
 
 **cloud <prompt>  or just type**: `/cloud <prompt>  or just type`
+
+**cmd**: `/cmd`
 
 **daily**: `/daily-improve`
 

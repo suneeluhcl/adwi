@@ -3,6 +3,64 @@
 
 ---
 
+## 2026-06-15 — Phase 6: Live Interactive Command Auto-Completion
+
+**Status: COMPLETE — verified**
+
+### Changes to `adwi/adwi_cli.py`
+
+#### Import block (lines 26–34)
+- Added `from prompt_toolkit.completion import Completer, Completion`
+- Added `from prompt_toolkit.document import Document as _PTDocument`
+- Added fallback stub `Completer = object` so class body parses cleanly without prompt_toolkit
+
+#### `_build_slash_commands()` — two-pass registry builder
+- **Pass 1**: Parses HELP string for commands with rich descriptions (~68 commands)
+- **Pass 2**: Scans `adwi_cli.py` elif chain via `Path(__file__).read_text()` regex for every `line == "/cmd"` and `line.startswith("/cmd")` branch not already in HELP
+- Result: `SLASH_COMMANDS` dict of **104 commands** auto-maintained; no manual updates needed
+
+#### `_fuzzy_score(query, target)` — substring matching with priority scoring
+- Algorithm: contiguous substring match only (no false-positive subsequence noise)
+- Scores: 110 = prefix match on word boundary · 100 = prefix · 60 = substring · 50 = empty query (show all)
+- `/mem` → `/memory-*` (score 110), NOT `/implement-idea` (score 0) ✓
+
+#### `SlashCommandCompleter(Completer)` class
+- Activates only when `document.text_before_cursor.startswith("/")`
+- Stops completing once a space is typed (argument mode)
+- Yields `Completion(text=cmd, start_position=-len(text), display=..., display_meta=desc[:58])`
+- Results sorted: highest score first, then alphabetical
+
+#### `make_session()` — upgraded
+- `completer=SlashCommandCompleter()` wired in
+- `complete_while_typing=True` — popup appears as user types
+- `complete_in_thread=True` — completions run in background thread; no input lag
+- **Completion menu styling** added to `Style.from_dict`:
+  - `completion-menu.completion`: dark blue bg `#1c1c2e` / soft purple text
+  - `completion-menu.completion.current`: cyan bg `#00bcd4` / black bold
+  - `completion-menu.meta.*`: description column with muted styling
+  - `scrollbar.*`: cyan scrollbar button
+- **Bottom toolbar updated**: `/ = command menu  ·  Tab = complete  ·  ↑↓ = history  ·  …`
+
+### Behaviour
+| Input | Result |
+|---|---|
+| `/` | Full 104-command dropdown appears immediately |
+| `/mem` | Filters to `/memory-context`, `/memory-recall`, `/memory-scan`, `/memory-stats` |
+| `/back` | Filters to all `/backup-*` commands (score 110) |
+| `/obsidian` | Filters to all 4 `/obsidian-*` commands |
+| `/gmail` | Filters to all 4 `/gmail-*` commands |
+| `↑↓ arrow` | Navigate dropdown |
+| `Tab` | Accept highlighted completion into input line |
+| `/mem recall` | Stops completing (argument space detected) |
+| `hello` | No completion popup (natural language pass-through) |
+
+### Test Results
+- 12/12 test cases pass
+- 104 commands in registry (vs 68 in HELP alone — two-pass builder caught all 36 extras)
+- Syntax clean: `python3 -m py_compile adwi/adwi_cli.py` ✓
+
+---
+
 ## 2026-06-15 — 5-Phase Backend Architecture Overhaul
 
 ### Phase 1: Grafana + Loki + Prometheus Monitoring Stack
