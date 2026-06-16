@@ -53,13 +53,23 @@ INTENT_SYSTEM = (
     "   'gmail'          : questions about email, inbox, messages\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
+    "                      NEVER for: 'generate a summary', 'generate a report', 'generate a plan',\n"
+    "                      'generate a list', 'generate a todo list', 'generate code', 'generate ideas'\n"
+    "                      → those are 'nightly_status', 'what_next', 'run_code', or 'chat'.\n"
+    "                      ONLY use when prompt explicitly asks for an image/picture/photo/drawing.\n"
     "   'web_search'     : explicit request for internet/web search\n"
     "   'status'         : asks if services/systems are running or healthy (shallow check)\n"
-    "   'doctor'         : deep full-system health check — 'run doctor', 'full health check', 'deep diagnostic'.\n"
+    "   'doctor'         : deep full-system health check.\n"
+    "                      REQUIRES explicit depth keyword: 'run doctor', 'full health check',\n"
+    "                      'deep diagnostic', 'thorough check', 'complete health check'.\n"
+    "                      'stack health check' or bare 'health check' alone → use 'status'.\n"
     "   'daily_improve'  : run the daily self-improvement routine. NOT patch_adwi (code changes via aider).\n"
     "   'patch_adwi'     : apply code-level changes to adwi source via aider. ONLY 'aider', 'patch adwi',\n"
     "                      'apply patches', 'run aider', 'self-patch'. NOT daily_improve or fix_error.\n"
     "   'what_next'      : user asks for AI-suggested next improvements or features to build.\n"
+    "                      ALSO: 'how should I improve adwi', 'what code changes would make adwi better',\n"
+    "                      'what should I refactor in adwi', 'generate a todo list for adwi' → what_next.\n"
+    "                      NOT 'patch_adwi' (aider code changes). NOT 'daily_improve' (runs routine).\n"
     "   'inspect_code'   : read and explain an adwi source file — 'inspect', 'find bugs in', 'code review adwi'.\n"
     "   'youtube'        : summarise or transcribe a YouTube video. 'youtube' + URL or 'summarise/transcript/video'.\n"
     "   'obsidian_search': search the user's personal Obsidian vault. PREFERRED over 'memory_recall'\n"
@@ -80,6 +90,9 @@ INTENT_SYSTEM = (
     "   'use_local'      : switch to a local Ollama model.\n"
     "   'use_cloud'      : switch to a cloud API model (gemini, gpt, openai, claude).\n"
     "   'git_status'     : git queries — branches, commits, diffs, staged/unstaged changes.\n"
+    "   'memory_context' : show the current session memory/context summary.\n"
+    "                      'show context', 'show my context', 'what context do you have',\n"
+    "                      'current session context', 'context summary', 'show me the context'.\n"
     "   'chat'           : DEFAULT for everything else — advisory, explanations, comparisons, how-to.\n"
     "4. arguments  — {path, query, url, size_mb, days, description, target} — omit inapplicable keys.\n"
     "Return valid JSON only — no markdown fences, no prose."
@@ -112,6 +125,13 @@ REGEX_INTENTS = [
     (re.compile(r"\b(repeated|appear.{0,10}more\s+than\s+once)\b.{0,30}(files?|photos?|images?)?\b", re.I), "duplicates"),
     (re.compile(r"\bdedupe\b.{0,30}(workspace|folder|files?|photos?)?\b", re.I), "duplicates"),
     (re.compile(r"\bdup(l?i?k|l?ic|l?ik)at", re.I), "duplicates"),
+    # FIX-CLEAN-004: cleanup BEFORE organize steals "clean up…folder"
+    (re.compile(r"\bclean\s*up\b.{0,40}(my\s+)?(downloads?|desktop|cache|temp|trash|junk)\b", re.I), "cleanup"),
+    (re.compile(r"\bremove\b.{0,20}\b(unneeded|unnecessary|useless|unwanted|redundant)\b", re.I), "cleanup"),
+    (re.compile(r"\b(suggest|find|show)\b.{0,20}\bthings?\b.{0,25}\b(i\s+(can|could|should)\s+)?(remove|delete|trash|get\s+rid\s+of)\b", re.I), "cleanup"),
+    # FIX-NOTES-001: "find/search notes about X" → obsidian_search BEFORE rag_search
+    (re.compile(r"\b(find|search)\s+(for\s+)?notes?\b.{0,20}\b(about|on|regarding)\b", re.I), "obsidian_search"),
+    (re.compile(r"\bsearch\s+(for\s+)?notes?\s+for\b", re.I), "obsidian_search"),
     (re.compile(r"(organiz|tidy|restructure|better structure|sort out|clean up).{0,30}(folder|file|download|desktop|document)", re.I), "organize"),
     # FIX-ORG-002: sort/arrange/structure synonyms — BEFORE file_search
     (re.compile(r"\b(sort|arrange|bring\s+order\s+to)\b.{0,30}(my\s+)?(files?|folders?|downloads?)\b", re.I), "organize"),
@@ -143,6 +163,9 @@ REGEX_INTENTS = [
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
+    # FIX-FR-001: "cat memory.py", "read config file"
+    (re.compile(r"\bcat\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg)\b", re.I), "file_read"),
+    (re.compile(r"\bread\b.{0,30}\b(the\s+)?(main|config|configuration|settings?)\s+(python\s+)?(file|script)\b", re.I), "file_read"),
     (re.compile(r"\b(run doctor|doctor mode)\b", re.I), "doctor"),
     (re.compile(r"\b(full|deep|thorough|complete)\b.{0,15}\b(health.?check|diagnostic)\b", re.I), "doctor"),
     (re.compile(r"\brun\b.{0,15}\b(full\s+)?(diagnostic|health.?check)\b", re.I), "doctor"),
@@ -156,12 +179,19 @@ REGEX_INTENTS = [
     (re.compile(r"\bnothing\b.{0,20}(working|running|connecting)\b.{0,20}(fix|repair|help)\b", re.I), "self_heal"),
     (re.compile(r"\b(repair|fix)\b.{0,15}\b(broken\s+containers?|local\s+ai|local\s+stack|my\s+local\s+ai)\b", re.I), "self_heal"),
     (re.compile(r"\badwi\b.{0,5}(self\s+repair|self.?fix)\b", re.I), "self_heal"),
-    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive)\b", re.I), "status"),
+    # FIX-STATUS-002: "anything down", "is X available"
+    (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
+    (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|service|stack)\b.{0,15}\b(available|up|running|reachable|responding)\b", re.I), "status"),
+    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive|available)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
     (re.compile(r"(what|what.s).{0,20}(next|build|improve|add|create).{0,20}(adwi|setup|ai|local)", re.I), "what_next"),
     (re.compile(r"(suggest|recommend).{0,20}(next|improvement|feature|capability)", re.I), "what_next"),
     (re.compile(r"\b(adwi|local.?ai|my.?ai).{0,30}(improvement|enhancement|feature|idea|roadmap)\b", re.I), "what_next"),
     (re.compile(r"\bnext.{0,20}(feature|capability|improvement).{0,20}(adwi|ai|local|stack)\b", re.I), "what_next"),
+    # FIX-WHAT-002: advisory improvement → what_next BEFORE daily_improve
+    (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}(improv|refactor|enhanc|optimiz).{0,20}\badwi\b", re.I), "what_next"),
+    (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
+    (re.compile(r"\bgenerate\b.{0,20}\b(todo|to.?do|task)\s+(list|items?)\b.{0,20}\badwi\b", re.I), "what_next"),
     (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
     # FIX-BROWSE-001: URL/domain visit patterns BEFORE web_search
@@ -174,8 +204,15 @@ REGEX_INTENTS = [
     # FIX-WEB-001: "look up X" patterns — BEFORE model_status
     (re.compile(r"\blook\s+up\b.{0,40}(version|guide|tutorial|how[\s-]to|docs?|documentation|performance|benchmark|comparison|ranking|list)\b", re.I), "web_search"),
     (re.compile(r"\bfind\b.{0,20}(the\s+)?(current|latest)\b.{0,20}\bversion\b.{0,30}\b(llama|ollama|qwen|mistral|phi|gemma|python|node)\b", re.I), "web_search"),
+    # FIX-WEB-002: "search for the latest X" / "search for information about X"
+    (re.compile(r"\bsearch\s+(for\s+)?(the\s+)?(latest|current|recent|newest)\b", re.I), "web_search"),
+    (re.compile(r"\bsearch\s+for\b.{0,30}\b(information|info|details?|news|updates?|tutorial|guide|docs?)\b", re.I), "web_search"),
     (re.compile(r"\b(daily.?note|today.{0,5}note|obsidian.{0,5}daily)\b", re.I), "obsidian_daily"),
     (re.compile(r"\bopen\b.{0,15}\btoday.{0,5}\bnote\b", re.I), "obsidian_daily"),
+    # FIX-OBS-002: entry/log/journal synonyms + "dailly" typo
+    (re.compile(r"\b(show|read|open)\b.{0,15}\bmy\s+daily\s+(log|note|journal|entry|notes?)\b", re.I), "obsidian_daily"),
+    (re.compile(r"\btoday.{0,5}\b(obsidian\s+)?(entry|journal|log)\b", re.I), "obsidian_daily"),
+    (re.compile(r"\bda[il]{2,4}y\s+(note|entry|journal|log)\b", re.I), "obsidian_daily"),
     (re.compile(r"(obsidian|vault|my notes?).{0,20}(search|find|look up|what do i have)", re.I), "obsidian_search"),
     (re.compile(r"(open|read|show).{0,10}(obsidian|vault|note).{0,30}", re.I), "obsidian_search"),
     (re.compile(r"\bsearch\b.{0,20}\b(obsidian|vault)\b", re.I), "obsidian_search"),
@@ -183,6 +220,11 @@ REGEX_INTENTS = [
     (re.compile(r"(summar|transcri|explain).{0,20}\byoutube\b", re.I), "youtube"),
     (re.compile(r"\b(yt\s+video|youtu\.be|youtube\.com)\b", re.I), "youtube"),
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
+    # FIX-NIGHT-001: "generate summary of logs", bare "nightly", "last thing that ran"
+    (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(logs?|nightly|daily|adwi)\b", re.I), "nightly_status"),
+    (re.compile(r"\bgenerate\b.{0,15}\bmy\s+daily\s+report\b", re.I), "nightly_status"),
+    (re.compile(r"^nightly\s*$", re.I), "nightly_status"),
+    (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered)\b", re.I), "nightly_status"),
     (re.compile(r"\b(nightly|night.?run)\b.{0,20}(status|log|report|last run|results?)\b", re.I), "nightly_status"),
     (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
     (re.compile(r"\bnightly.{0,10}log\b", re.I), "nightly_status"),
@@ -212,6 +254,10 @@ REGEX_INTENTS = [
     (re.compile(r"\bgetting\s+(a\s+)?\d{3}\b", re.I), "fix_error"),
     (re.compile(r"\b(fix|help.{0,5}fix)\s+this\s+(error|exception|bug)\b", re.I), "fix_error"),
     (re.compile(r"\[Errno\s+\d+\]", re.I), "fix_error"),
+    # FIX-EVAL-003: routing eval BEFORE test_adwi steals "test adwi routing"
+    (re.compile(r"\b(test|check|evaluate|verify)\b.{0,15}\b(adwi\s+)?routing\b", re.I), "eval_routing"),
+    (re.compile(r"\b(run|start|trigger|evaluate)\b.{0,20}\brouting\s+(eval(uation)?|tests?)\b", re.I), "eval_routing"),
+    (re.compile(r"\badwi\b.{0,10}\beval\b.{0,10}\brouting\b", re.I), "eval_routing"),
     (re.compile(r"\b(run|start|trigger).{0,15}(routing.?tests?|eval.?routing|routing eval)\b", re.I), "eval_routing"),
     (re.compile(r"\b(run|start).{0,15}\b(adwi.?eval|eval.?adwi)\b", re.I), "eval_adwi"),
     (re.compile(r"\bevaluate\b.{0,10}\badwi\b", re.I), "eval_adwi"),
@@ -238,9 +284,18 @@ REGEX_INTENTS = [
     (re.compile(r"\b(what.{0,10}(last|did).{0,10}commit|current branch|git\s+(stat|branch))\b", re.I), "git_status"),
     (re.compile(r"\brepo\b.{0,15}\b(clean|dirty|status|changes)\b", re.I), "git_status"),
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
-    (re.compile(r"(run|execute|test).{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
+    # FIX-PATCH-002: self-improve/code-improvement → patch_adwi BEFORE run_code
+    (re.compile(r"\b(self.?improv|auto.?improv).{0,15}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}(self.?improv|autonomous\s*(code\s*)?improv)", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}\bcode\s+improv", re.I), "patch_adwi"),
+    # FIX-RC-001: \b around "test" prevents "latest" substring false positive
+    (re.compile(r"\b(run|execute|test)\b.{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
-    (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail)\b", re.I), "gmail"),
+    # FIX-GMAIL-002: typos, "messages" synonym, reversed word order
+    (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
+    (re.compile(r"\binbox\b.{0,15}\b(check|status|new|unread|count|messages?)\b", re.I), "gmail"),
+    (re.compile(r"\b(gm[i]?al|emial)\b", re.I), "gmail"),
+    (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail|emial|emil)\b", re.I), "gmail"),
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
@@ -253,6 +308,13 @@ REGEX_INTENTS = [
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
     (re.compile(r"memory\s+(statistics|metrics|size|count|entries|records)\b", re.I), "memory_stats"),
+    # FIX-MEMST-001: "how many X in memory"
+    (re.compile(r"\bhow\s+many\b.{0,20}\b(things?|entries?|items?|records?)\b.{0,20}\bin\s+(your\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
+    (re.compile(r"\b(entries?|items?|records?)\s+in\s+(your\s+|my\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
+    (re.compile(r"\bmemry\s+(stats?|status|count|size)\b", re.I), "memory_stats"),
+    # FIX-MEMCTX-001: memory_context regex (was missing entirely)
+    (re.compile(r"\b(show|display|what.{0,10}(is|do\s+you\s+have))\b.{0,20}\b(session\s+)?context\b", re.I), "memory_context"),
+    (re.compile(r"\bcontext\b.{0,20}\b(summary|dump|snapshot|right\s+now|currently)\b", re.I), "memory_context"),
     (re.compile(r"route (this|the|my)?\s*(query|question|request|command)\b", re.I), "route"),
     (re.compile(r"which tool (should|would|to) (handle|use for|run)\b", re.I), "route"),
 ]

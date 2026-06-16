@@ -540,7 +540,7 @@ _REGEX_INTENTS = [
     (re.compile(r"\bdup(l?i?k|l?ic|l?ik)at", re.I), "duplicates"),
 
     # FIX-CLEAN-004: "clean up downloads/cache/trash" → cleanup BEFORE organize steals "clean up…folder"
-    (re.compile(r"\bclean\s*up\b.{0,40}(my\s+)?(download|desktop|cache|temp|trash|junk)\b", re.I), "cleanup"),
+    (re.compile(r"\bclean\s*up\b.{0,40}(my\s+)?(downloads?|desktop|cache|temp|trash|junk)\b", re.I), "cleanup"),
     (re.compile(r"\bremove\b.{0,20}\b(unneeded|unnecessary|useless|unwanted|redundant)\b", re.I), "cleanup"),
     (re.compile(r"\b(suggest|find|show)\b.{0,20}\bthings?\b.{0,25}\b(i\s+(can|could|should)\s+)?(remove|delete|trash|get\s+rid\s+of)\b", re.I), "cleanup"),
     # FIX-NOTES-001: "find/search notes about X" → obsidian_search BEFORE rag_search swallows it
@@ -625,7 +625,7 @@ _REGEX_INTENTS = [
     (re.compile(r"\bnext.{0,20}(feature|capability|improvement).{0,20}(adwi|ai|local|stack)\b", re.I), "what_next"),
 
     # FIX-WHAT-002: advisory improvement questions → what_next BEFORE daily_improve
-    (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}\b(improv|refactor|enhanc|optimiz)\b.{0,20}\badwi\b", re.I), "what_next"),
+    (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}(improv|refactor|enhanc|optimiz).{0,20}\badwi\b", re.I), "what_next"),
     (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
     (re.compile(r"\bgenerate\b.{0,20}\b(todo|to.?do|task)\s+(list|items?)\b.{0,20}\badwi\b", re.I), "what_next"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
@@ -672,7 +672,7 @@ _REGEX_INTENTS = [
 
     # ── Nightly maintenance ──────────────────────────────────────────────────────
     # FIX-NIGHT-001: "generate a summary of logs" / bare "nightly" / "last thing that ran"
-    (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(log|nightly|daily|adwi)\b", re.I), "nightly_status"),
+    (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(logs?|nightly|daily|adwi)\b", re.I), "nightly_status"),
     (re.compile(r"\bgenerate\b.{0,15}\bmy\s+daily\s+report\b", re.I), "nightly_status"),
     (re.compile(r"^nightly\s*$", re.I), "nightly_status"),
     (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered)\b", re.I), "nightly_status"),
@@ -759,9 +759,9 @@ _REGEX_INTENTS = [
 
     # ── Code execution ───────────────────────────────────────────────────────────
     # FIX-PATCH-002: "run code improvement" / "self-improve adwi" → patch_adwi BEFORE run_code steals them
-    (re.compile(r"\b(self.?improv|auto.?improv)\b.{0,20}\badwi\b", re.I), "patch_adwi"),
-    (re.compile(r"\b(run|execute)\b.{0,15}\b(self.?improv|autonomous\s+(code\s+)?improv)\b", re.I), "patch_adwi"),
-    (re.compile(r"\b(run|execute)\b.{0,15}\bcode\s+(improv|enhanc|fix)\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(self.?improv|auto.?improv).{0,15}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}(self.?improv|autonomous\s*(code\s*)?improv)", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}\bcode\s+improv", re.I), "patch_adwi"),
     # run_code: added \b around "test" to prevent "latest" ⊇ "test" false positive (FIX-RC-001)
     (re.compile(r"\b(run|execute|test)\b.{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
 
