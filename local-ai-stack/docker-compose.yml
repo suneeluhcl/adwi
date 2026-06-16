@@ -9,6 +9,7 @@ services:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - WEBUI_AUTH=True
       - ENABLE_SIGNUP=True
+      - ADWI_LOCAL_SECRET=${ADWI_LOCAL_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -30,6 +31,7 @@ services:
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://localhost:5678/
       - N8N_SECURE_COOKIE=false
+      - ADWI_LOCAL_SECRET=${ADWI_LOCAL_SECRET:-}
     volumes:
       - ./n8n-data:/home/node/.n8n
 

@@ -14,8 +14,15 @@ which runs on the Mac host (accessible from Docker containers).
 
 import urllib.request
 import json
+import os
 
 COMMAND_API = "http://host.docker.internal:5055"
+_SECRET = os.environ.get("ADWI_LOCAL_SECRET", "")
+
+
+def _api_request(url: str) -> urllib.request.Request:
+    headers = {"X-Adwi-Secret": _SECRET} if _SECRET else {}
+    return urllib.request.Request(url, headers=headers)
 
 
 class AdwiStatusTool:
@@ -27,7 +34,7 @@ class AdwiStatusTool:
     def run(self) -> str:
         """Check if local AI services are healthy."""
         try:
-            req = urllib.request.Request(f"{COMMAND_API}/status-ai")
+            req = _api_request(f"{COMMAND_API}/status-ai")
             with urllib.request.urlopen(req, timeout=30) as r:
                 data = json.load(r)
                 return data.get("stdout", "Status check complete.")
@@ -44,7 +51,7 @@ class AdwiMaintenanceTool:
     def run(self) -> str:
         """Run the daily AI maintenance workflow."""
         try:
-            req = urllib.request.Request(f"{COMMAND_API}/auto-ai-maintenance")
+            req = _api_request(f"{COMMAND_API}/auto-ai-maintenance")
             with urllib.request.urlopen(req, timeout=300) as r:
                 data = json.load(r)
                 return data.get("stdout", "Maintenance complete.")[:2000]
@@ -61,7 +68,7 @@ class AdwiSelfHealTool:
     def run(self) -> str:
         """Run self-heal to fix broken services."""
         try:
-            req = urllib.request.Request(f"{COMMAND_API}/adwi-self-heal")
+            req = _api_request(f"{COMMAND_API}/adwi-self-heal")
             with urllib.request.urlopen(req, timeout=300) as r:
                 data = json.load(r)
                 return data.get("stdout", "Self-heal complete.")[:2000]
@@ -78,7 +85,7 @@ class AdwiRagIndexTool:
     def run(self) -> str:
         """Rebuild the RAG index from local notes."""
         try:
-            req = urllib.request.Request(f"{COMMAND_API}/rag-index")
+            req = _api_request(f"{COMMAND_API}/rag-index")
             with urllib.request.urlopen(req, timeout=300) as r:
                 data = json.load(r)
                 return data.get("stdout", "RAG index rebuilt.")[:1000]
@@ -95,7 +102,7 @@ class AdwiGitStatusTool:
     def run(self) -> str:
         """Check git status across all workspace repos."""
         try:
-            req = urllib.request.Request(f"{COMMAND_API}/git-status-workspace")
+            req = _api_request(f"{COMMAND_API}/git-status-workspace")
             with urllib.request.urlopen(req, timeout=30) as r:
                 data = json.load(r)
                 return data.get("stdout", "Git status complete.")[:3000]
