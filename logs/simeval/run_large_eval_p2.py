@@ -201,7 +201,7 @@ REGEX_INTENTS = [
     (re.compile(r"\b(inspect|review).{0,15}(adwi_cli|nightly\.py|memory\.py|backup\.py|grader\.py)\b", re.I), "inspect_code"),
     (re.compile(r"\b(find bugs in|check for bugs in|code review).{0,20}\badwi\b", re.I), "inspect_code"),
     # FIX-ERR-002: pasted exceptions and HTTP error codes
-    (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError)\b", re.I), "fix_error"),
+    (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError)\b\s*:", re.I), "fix_error"),
     (re.compile(r"\b(getting|seeing|got)\b.{0,20}\b(error|exception|traceback)\b", re.I), "fix_error"),
     (re.compile(r"\b\d{3}\s+(not found|bad gateway|forbidden|service unavailable|unauthorized|too many requests|internal server error)\b", re.I), "fix_error"),
     (re.compile(r"\bgetting\s+(a\s+)?\d{3}\b", re.I), "fix_error"),
