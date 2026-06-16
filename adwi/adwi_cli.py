@@ -508,6 +508,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(top \d+|find).{0,20}(big(gest)?|large(st)?|heavy).{0,20}files?\b", re.I), "large_files"),
     # NHR-001: additional synonyms — beat file_search on "fat/oversized files"
     (re.compile(r"\b(fat|oversize|oversized|bulky|enormous|massive|hefty)\b.{0,30}\bfiles?\b", re.I), "large_files"),
+    # FIX-LF-001: space consumer / room / size-threshold patterns
+    (re.compile(r"\b(top|bulk|biggest|heaviest)\b.{0,20}\bspace\s+(consumer|user|hog)s?\b", re.I), "large_files"),
+    (re.compile(r"\bfiles?\b.{0,30}(take\s+up|taking\s+up|using)\b.{0,20}(the\s+)?most\s+(room|space|storage)\b", re.I), "large_files"),
+    (re.compile(r"\b(which|what)\b.{0,10}files?\b.{0,30}(use|take|using|taking).{0,10}(the\s+)?most\s+(space|room)\b", re.I), "large_files"),
+    (re.compile(r"\bfiles?\b.{0,20}exceed(ing)?\b.{0,10}\d+\s*(gb|mb|gigabyte|megabyte)\b", re.I), "large_files"),
 
     # ── Disk / space (narrowed to disk/space/storage objects only) ───────────────
     (re.compile(r"(biggest|largest|heaviest|most space|taking up|using up|eating up).{0,40}(disk|storage|space)\b", re.I), "disk_usage"),
@@ -521,14 +526,27 @@ _REGEX_INTENTS = [
     (re.compile(r"files?.{0,20}(not|never).{0,20}(used|opened).{0,20}(year|month|day)", re.I), "old_files"),
     # File-first ordering: "files I haven't opened/used in a year"
     (re.compile(r"\bfiles?\b.{0,30}(haven.t|not).{0,5}(opened|used|accessed|touched)\b", re.I), "old_files"),
+    # FIX-OLD-001: archaic/abandoned/leftover synonyms
+    (re.compile(r"\b(archaic|abandoned|obsolete|leftover|outdated|legacy)\b.{0,30}(files?|data|stuff)?\b", re.I), "old_files"),
+    (re.compile(r"\bhaven.t.{0,10}(used|opened|accessed|touched)\b.{0,30}(this\s+year|in\s+(a|one|two|several)\s+year)\b", re.I), "old_files"),
 
     # ── Duplicates ───────────────────────────────────────────────────────────────
     (re.compile(r"(duplicate|identical|same file|copy|copies|redundant)", re.I), "duplicates"),
     # NHR-001: additional synonyms — beat file_search on "find cloned/deduped files"
     (re.compile(r"\b(clone|cloned|dedup|deduplicat|same.content|bit.for.bit|identical.content)\b.{0,20}files?\b", re.I), "duplicates"),
+    # FIX-DUP-001: "repeated" / "appear more than once" / "dedupe" / typos
+    (re.compile(r"\b(repeated|appear.{0,10}more\s+than\s+once)\b.{0,30}(files?|photos?|images?)?\b", re.I), "duplicates"),
+    (re.compile(r"\bdedupe\b.{0,30}(workspace|folder|files?|photos?)?\b", re.I), "duplicates"),
+    (re.compile(r"\bdup(l?i?k|l?ic|l?ik)at", re.I), "duplicates"),
 
     # ── Organize ─────────────────────────────────────────────────────────────────
     (re.compile(r"(organiz|tidy|restructure|better structure|sort out|clean up).{0,30}(folder|file|download|desktop|document)", re.I), "organize"),
+    # FIX-ORG-002: sort/arrange/structure synonyms — BEFORE file_search
+    (re.compile(r"\b(sort|arrange|bring\s+order\s+to)\b.{0,30}(my\s+)?(files?|folders?|downloads?)\b", re.I), "organize"),
+    (re.compile(r"\b(suggest|recommend)\b.{0,20}(a\s+)?(folder|file|project)\s*(structure|hierarchy|layout|organization)\b", re.I), "organize"),
+    (re.compile(r"\bfile\s+organization\b", re.I), "organize"),
+    (re.compile(r"\b(help\s+me\s+)?(organize|structure|arrange)\b.{0,20}(my\s+)?notes?\s*folder\b", re.I), "organize"),
+    (re.compile(r"\b(oragnaize|organzie|oragnize)\b", re.I), "organize"),
 
     # ── Cleanup suggestions ──────────────────────────────────────────────────────
     (re.compile(r"(what|which).{0,20}(can|should|could|to).{0,20}(delete|remove|trash|clear|get rid)", re.I), "cleanup"),
@@ -546,6 +564,13 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(safe.deletion|deletion.candidate|safe.to.delete|safe.to.remove)\b", re.I), "cleanup"),
     (re.compile(r"\bfree up\b.{0,20}(space|storage|disk|drive)\b", re.I), "cleanup"),
     (re.compile(r"\b(prune|purge|wipe|clear)\b.{0,20}(files?|folder|cache|temp|log)\b", re.I), "cleanup"),
+    # FIX-CLEANUP-003: deletion-suggestion / throw-away / clear-out patterns
+    (re.compile(r"\b(throw|toss)\s*away\b.{0,30}(files?|stuff|things?|data)?\b", re.I), "cleanup"),
+    (re.compile(r"\b(deletion|removal)\s+(suggestions?|candidates?|ideas?|list)\b", re.I), "cleanup"),
+    (re.compile(r"\b(find|show|list)\b.{0,20}\b(deletable|removable|unneeded|unnecessary)\s+(files?|things?|stuff)\b", re.I), "cleanup"),
+    (re.compile(r"\bwhat\b.{0,15}\b(to|can|should)\s+(throw|trash|nuke|discard)\b", re.I), "cleanup"),
+    (re.compile(r"\b(clear|clean)\s*out\b", re.I), "cleanup"),
+    (re.compile(r"\b(cleaup|cleanup\s+suggestion|cleanup\s+idea)\b", re.I), "cleanup"),
     (re.compile(r"\b(find|search for|locate|look for)\b.{0,20}\bfiles?\b", re.I), "file_search"),
     (re.compile(r"\bfind (all |every )?.{0,10}\.(py|js|ts|yaml|yml|json|txt|md|sh|toml)\b", re.I), "file_search"),
     (re.compile(r"\bls\b", re.I), "file_list"),
@@ -569,6 +594,11 @@ _REGEX_INTENTS = [
     (re.compile(r"(something|things|everything).{0,20}(broken|not working|failing|crashed)", re.I), "self_heal"),
     (re.compile(r"\b(repair|fix|heal)\b.{0,15}\b(yourself|itself|adwi|setup|system|stack)(\s|$)", re.I), "self_heal"),
     (re.compile(r"\bself.?heal\b", re.I), "self_heal"),
+    # FIX-HEAL-001: "service is down fix it" and "repair my local AI" patterns
+    (re.compile(r"\b(services?|containers?|docker|ollama|stack)\b.{0,15}\bdown\b.{0,20}\b(fix|repair|restart)\b", re.I), "self_heal"),
+    (re.compile(r"\bnothing\b.{0,20}(working|running|connecting)\b.{0,20}(fix|repair|help)\b", re.I), "self_heal"),
+    (re.compile(r"\b(repair|fix)\b.{0,15}\b(broken\s+containers?|local\s+ai|local\s+stack|my\s+local\s+ai)\b", re.I), "self_heal"),
+    (re.compile(r"\badwi\b.{0,5}(self\s+repair|self.?fix)\b", re.I), "self_heal"),
 
     # ── Status (Bug 1: word boundaries stop substring false positives) ────────────
     # \b prevents "is" matching in "list", "down" matching in "downloads", etc.
@@ -586,9 +616,18 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
 
+    # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
+    (re.compile(r"\b(visit|browse\s+to|navigate\s+to)\b.{0,50}(https?://|\.(com|io|org|dev|net|ai|co|app))\b", re.I), "browse"),
+    (re.compile(r"\bfetch\b.{0,40}(https?://|content\s+of\s+https?://)", re.I), "browse"),
+    (re.compile(r"\b(open|go\s+to)\b.{0,20}(the\s+)?(homepage|website)\b.{0,40}https?://", re.I), "browse"),
+    (re.compile(r"\bdownload\b.{0,30}(from\s+the\s+web|a\s+file\s+from\s+https?://)", re.I), "browse"),
+
     # ── Web search ───────────────────────────────────────────────────────────────
     (re.compile(r"(search the web|web search|google|search online|look up online|find online|search internet).{0,50}", re.I), "web_search"),
     (re.compile(r"(what('s| is) (the latest|new in|current).{0,30}(release|version|update|news|changelog))", re.I), "web_search"),
+    # FIX-WEB-001: "look up X guide/version/performance" patterns — BEFORE model_status
+    (re.compile(r"\blook\s+up\b.{0,40}(version|guide|tutorial|how[\s-]to|docs?|documentation|performance|benchmark|comparison|ranking|list)\b", re.I), "web_search"),
+    (re.compile(r"\bfind\b.{0,20}(the\s+)?(current|latest)\b.{0,20}\bversion\b.{0,30}\b(llama|ollama|qwen|mistral|phi|gemma|python|node)\b", re.I), "web_search"),
 
     # ── Obsidian daily — BEFORE obsidian_search (Bug 4: daily-note guard) ────────
     (re.compile(r"\b(daily.?note|today.{0,5}note|obsidian.{0,5}daily)\b", re.I), "obsidian_daily"),
@@ -642,11 +681,28 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(inspect|review).{0,15}(adwi_cli|nightly\.py|memory\.py|backup\.py|grader\.py)\b", re.I), "inspect_code"),
     (re.compile(r"\b(find bugs in|check for bugs in|code review).{0,20}\badwi\b", re.I), "inspect_code"),
 
+    # ── Fix error / exception — catches pasted tracebacks and HTTP error codes ────
+    (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError)\b", re.I), "fix_error"),
+    (re.compile(r"\b(getting|seeing|got)\b.{0,20}\b(error|exception|traceback)\b", re.I), "fix_error"),
+    (re.compile(r"\b\d{3}\s+(not found|bad gateway|forbidden|service unavailable|unauthorized|too many requests|internal server error)\b", re.I), "fix_error"),
+    (re.compile(r"\bgetting\s+(a\s+)?\d{3}\b", re.I), "fix_error"),
+    (re.compile(r"\b(fix|help.{0,5}fix)\s+this\s+(error|exception|bug)\b", re.I), "fix_error"),
+    (re.compile(r"\[Errno\s+\d+\]", re.I), "fix_error"),
+
     # ── Eval / test ──────────────────────────────────────────────────────────────
     (re.compile(r"\b(run|start|trigger).{0,15}(routing.?tests?|eval.?routing|routing eval)\b", re.I), "eval_routing"),
     (re.compile(r"\b(run|start).{0,15}\b(adwi.?eval|eval.?adwi)\b", re.I), "eval_adwi"),
     (re.compile(r"\bevaluate\b.{0,10}\badwi\b", re.I), "eval_adwi"),
+    # FIX-EVAL-002: "eval adwi pls", "start evaluation", "run eval" patterns
+    (re.compile(r"\beval\s+adwi\b", re.I), "eval_adwi"),
+    (re.compile(r"\bstart\b.{0,20}\b(adwi\s+)?(evaluation|eval)\b", re.I), "eval_adwi"),
+    (re.compile(r"\b(run|execute|start)\b.{0,10}\beval\b(?!\s*[_\-]?\s*routing)", re.I), "eval_adwi"),
     (re.compile(r"\b(run|execute).{0,15}(adwi.?tests?|test.?adwi)\b", re.I), "test_adwi"),
+    # FIX-TEST-002: "test adwi", "run tests", "test suite" patterns
+    (re.compile(r"\btest\b.{0,10}\badwi\b", re.I), "test_adwi"),
+    (re.compile(r"\b(run|execute).{0,15}(the\s+)?(unit\s*tests?|test\s*suite|adwi\s*tests?)\b", re.I), "test_adwi"),
+    (re.compile(r"\b(adwi).{0,10}\btest\s*(run|suite|pass|fail)?\b", re.I), "test_adwi"),
+    (re.compile(r"^(run|execute)\s+tests?\s*(please|pls)?\s*$", re.I), "test_adwi"),
 
     # ── GitHub repo visibility — BEFORE git_status and github_connected ───────────
     (re.compile(r"(make|set|change|convert).{0,20}(git.?repo|repo|repository).{0,20}(public|private|open source)", re.I), "github_visibility"),
@@ -682,6 +738,11 @@ _REGEX_INTENTS = [
 
     # ── Memory ledger ────────────────────────────────────────────────────────────
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
+    # FIX-MEMSCAN-002: refresh/rebuild/rescan and "memory scan X" patterns
+    (re.compile(r"\b(refresh|rebuild|rescan|reindex)\b.{0,20}\b(memory|knowledge|index|ledger)\b", re.I), "memory_scan"),
+    (re.compile(r"\bindex\b.{0,20}\b(terminal\s+history|history|session|conversation)\b", re.I), "memory_scan"),
+    (re.compile(r"\bmemory\s+(scan|update|rescan|refresh|rebuild)\b", re.I), "memory_scan"),
+    (re.compile(r"\bscan\s+mem\w*\b", re.I), "memory_scan"),
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
