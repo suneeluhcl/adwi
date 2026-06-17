@@ -677,5 +677,94 @@ class TestGmailRoutingPhases4to7(unittest.TestCase):
         self.assertNotEqual(result, "gmail_attach_file")
 
 
+class TestGmailRoutingPhase8(unittest.TestCase):
+    """Phase 8 — undo, remove_attachment, send_email NLU patterns. No Ollama."""
+
+    # ── gmail_undo ─────────────────────────────────────────────────────────────
+
+    def test_bare_undo(self):
+        self.assertEqual(_classify("undo"), "gmail_undo")
+
+    def test_undo_that(self):
+        self.assertEqual(_classify("undo that"), "gmail_undo")
+
+    def test_undo_the_archive(self):
+        self.assertEqual(_classify("undo the archive"), "gmail_undo")
+
+    def test_undo_that_trash(self):
+        self.assertEqual(_classify("undo that trash"), "gmail_undo")
+
+    def test_undo_last_action(self):
+        self.assertEqual(_classify("undo last action"), "gmail_undo")
+
+    def test_bring_back_those(self):
+        self.assertEqual(_classify("bring back those emails"), "gmail_undo")
+
+    def test_restore_those_emails(self):
+        self.assertEqual(_classify("restore those emails"), "gmail_undo")
+
+    def test_undo_not_cancel(self):
+        result = _classify("undo")
+        self.assertEqual(result, "gmail_undo")
+        self.assertNotEqual(result, "gmail_cancel")
+
+    # ── gmail_remove_attachment ─────────────────────────────────────────────
+
+    def test_remove_pdf_from_draft(self):
+        self.assertEqual(_classify("remove the PDF from the draft"), "gmail_remove_attachment")
+
+    def test_detach_attachment(self):
+        self.assertEqual(_classify("detach the attachment"), "gmail_remove_attachment")
+
+    def test_drop_invoice_from_email(self):
+        self.assertEqual(_classify("drop the invoice from the email"), "gmail_remove_attachment")
+
+    def test_remove_attachment_ordinal(self):
+        self.assertEqual(_classify("remove attachment 1"), "gmail_remove_attachment")
+
+    def test_detach_pdf(self):
+        self.assertEqual(_classify("detach the PDF"), "gmail_remove_attachment")
+
+    def test_remove_not_attach(self):
+        # "remove" verb beats "attach" intent
+        result = _classify("remove the PDF from the draft")
+        self.assertEqual(result, "gmail_remove_attachment")
+        self.assertNotEqual(result, "gmail_attach_file")
+
+    # ── gmail_send_draft extended patterns ────────────────────────────────────
+
+    def test_send_the_email(self):
+        self.assertEqual(_classify("send the email"), "gmail_send_draft")
+
+    def test_send_the_message(self):
+        self.assertEqual(_classify("send the message"), "gmail_send_draft")
+
+    def test_looks_good_send_it(self):
+        self.assertEqual(_classify("looks good, send it"), "gmail_send_draft")
+
+    def test_lgtm_send(self):
+        self.assertEqual(_classify("lgtm send it"), "gmail_send_draft")
+
+    def test_good_to_go_send(self):
+        self.assertEqual(_classify("good to go, send the email"), "gmail_send_draft")
+
+    def test_approved_send(self):
+        self.assertEqual(_classify("approved, send it"), "gmail_send_draft")
+
+    # ── Ordering guards ───────────────────────────────────────────────────────
+
+    def test_remove_attachment_before_attach_file(self):
+        # "remove the document" should NOT match gmail_attach_file
+        result = _classify("remove the document from the draft")
+        self.assertEqual(result, "gmail_remove_attachment")
+        self.assertNotEqual(result, "gmail_attach_file")
+
+    def test_undo_archive_before_archive_pattern(self):
+        # "undo the archive" must go to gmail_undo, not gmail_archive
+        result = _classify("undo the archive")
+        self.assertEqual(result, "gmail_undo")
+        self.assertNotEqual(result, "gmail_archive")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

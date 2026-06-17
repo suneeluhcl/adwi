@@ -38,7 +38,7 @@ ALL_INTENTS = [
     "gmail_draft_reply","gmail_compose","gmail_show_draft","gmail_send_draft","gmail_cancel_draft","gmail_rewrite_draft",
     "gmail_add_cc","gmail_add_bcc",
     "gmail_list_attachments","gmail_save_attachment","gmail_summarize_attachment",
-    "gmail_attach_file",
+    "gmail_attach_file", "gmail_remove_attachment", "gmail_undo",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -354,6 +354,11 @@ REGEX_INTENTS = [
     (re.compile(r"\b(inference|llm|model|ollama).{0,20}\b(throughput|latency\s+benchmark|speed\s+test)\b", re.I), "benchmark"),
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
+    # gmail Phase 8: remove-attachment intent — MUST precede gmail_attach_file
+    (re.compile(r"\b(?:remove|detach|drop)\b.{0,30}\battachment\b", re.I), "gmail_remove_attachment"),
+    (re.compile(r"\bdetach\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b", re.I), "gmail_remove_attachment"),
+    (re.compile(r"\b(?:remove|drop|delete)\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b.{0,20}\bfrom\s+(?:the\s+)?(?:draft|email|message)\b", re.I), "gmail_remove_attachment"),
+    (re.compile(r"\bdraft\b.{0,20}\b(?:without|no\s+attachment|remove\s+the)\b", re.I), "gmail_remove_attachment"),
     # gmail Phase 7: attach-file intent — MUST precede gmail_rewrite_draft
     (re.compile(r"\battach\b.{0,50}\b(?:pdf|document|file|spreadsheet|invoice|report|deck|image|photo|attachment)\b", re.I), "gmail_attach_file"),
     (re.compile(r"\b(?:add|include)\b.{0,20}\b(?:the\s+)?(?:pdf|spreadsheet|invoice|report|deck|image|attachment)\b.{0,30}\b(?:(?:to|in)\s+(?:(?:this|the)\s+)?(?:draft|email|message|reply))\b", re.I), "gmail_attach_file"),
@@ -380,6 +385,8 @@ REGEX_INTENTS = [
     (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)\s*$", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,15}\b(?:the\s+)?(?:reply|response)\b", re.I), "gmail_send_draft"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?(?:email|mail|message)\b", re.I), "gmail_send_draft"),
+    (re.compile(r"\b(?:looks?\s+good|lgtm|approved?|good\s+to\s+go)\b.{0,25}\bsend\b", re.I), "gmail_send_draft"),
     (re.compile(r"\b(?:cancel|discard|delete|clear|abort)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:forget|throw\s+away)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:show|display|view|preview|read)\b.{0,20}\b(?:the\s+|my\s+)?draft\b", re.I), "gmail_show_draft"),
@@ -392,6 +399,11 @@ REGEX_INTENTS = [
     # gmail Phase 2: mutation intents — MUST precede gmail_open / gmail_list_category
     (re.compile(r"^confirm\s*$", re.I), "gmail_confirm"),
     (re.compile(r"^yes,?\s+do\s+it\s*$", re.I), "gmail_confirm"),
+    # gmail undo — MUST precede gmail_cancel
+    (re.compile(r"^undo\s*$", re.I), "gmail_undo"),
+    (re.compile(r"^undo\s+that\s*$", re.I), "gmail_undo"),
+    (re.compile(r"\bundo\b.{0,30}\b(?:archive|trash|that\s+archive|that\s+trash|mark|last\s+action|that\s+action)\b", re.I), "gmail_undo"),
+    (re.compile(r"\b(?:bring\s+back|restore)\b.{0,25}\b(?:those|them|those\s+emails?|that\s+email)\b", re.I), "gmail_undo"),
     (re.compile(r"^cancel(?:\s+that)?\s*$", re.I), "gmail_cancel"),
     (re.compile(r"^(?:never\s+mind|abort|stop\s+that)\s*$", re.I), "gmail_cancel"),
     (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?read\b", re.I), "gmail_mark_read"),
@@ -1107,6 +1119,36 @@ def build_corpus() -> list[dict]:
         "include the invoice in this email","attach the document","attach the image",
     ]:
         add(p, "comms", "gmail_attach_file", "medium", fam="gmail_attach_file")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # GMAIL PHASE 8 — undo / remove_attachment / send_email patterns  (22 scenarios)
+    # ─────────────────────────────────────────────────────────────────────────
+    for p in [
+        "undo","undo that","undo the archive","undo that archive",
+        "undo the trash","undo that trash action","undo that mark as read",
+        "bring back those emails","restore those emails",
+    ]:
+        add(p, "comms", "gmail_undo", "easy", fam="gmail_undo")
+
+    for p in [
+        "remove the PDF from the draft","detach the attachment",
+        "drop the invoice from the email","remove attachment 1",
+        "detach the PDF","remove that attachment from the draft",
+    ]:
+        add(p, "comms", "gmail_remove_attachment", "medium", fam="gmail_remove_attachment")
+
+    for p in [
+        "send the email","send the message","looks good send it",
+        "lgtm send it","good to go, send it","approved, send the email",
+    ]:
+        add(p, "comms", "gmail_send_draft", "medium", fam="gmail_send_draft")
+
+    # Compose with "to" extraction pattern
+    for p in [
+        "compose an email to Rahul saying hi","write an email to Priya about the meeting",
+        "send an email to my boss saying I finished",
+    ]:
+        add(p, "comms", "gmail_compose", "medium", fam="gmail_compose")
 
     # ─────────────────────────────────────────────────────────────────────────
     # WEB SEARCH  (45 scenarios)

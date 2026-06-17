@@ -261,6 +261,23 @@ def mark_unread(msg_ids: list) -> int:
     return _batch_modify(msg_ids, add_labels=["UNREAD"])
 
 
+def unarchive_messages(msg_ids: list) -> int:
+    """Restore archived messages to INBOX. Returns count modified."""
+    return _batch_modify(msg_ids, add_labels=["INBOX"])
+
+
+def untrash_messages(msg_ids: list) -> int:
+    """Restore trashed messages back to INBOX. Returns count modified."""
+    if not msg_ids:
+        return 0
+    service = get_service()
+    count = 0
+    for mid in msg_ids:
+        service.users().messages().untrash(userId="me", id=mid).execute()
+        count += 1
+    return count
+
+
 # ── Phase 3: draft / send helpers (gmail.modify scope covers all of these) ───
 
 _ATTACH_MAX_BYTES = 20 * 1024 * 1024  # 20 MB per-file safety cap

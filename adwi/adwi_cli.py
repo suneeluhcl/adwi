@@ -793,6 +793,16 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
 
+    # ── Gmail Phase 8: remove-attachment intent — MUST precede gmail_attach_file ──────────────
+    # Pattern 1: any remove/detach/drop + "attachment" keyword (unambiguous Gmail context)
+    (re.compile(r"\b(?:remove|detach|drop)\b.{0,30}\battachment\b", re.I), "gmail_remove_attachment"),
+    # Pattern 2: "detach" + file-type (detach is unambiguous — only used in attachment context)
+    (re.compile(r"\bdetach\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b", re.I), "gmail_remove_attachment"),
+    # Pattern 3: remove/drop + file-type + REQUIRED "from draft/email/message" (draft context)
+    (re.compile(r"\b(?:remove|drop|delete)\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b.{0,20}\bfrom\s+(?:the\s+)?(?:draft|email|message)\b", re.I), "gmail_remove_attachment"),
+    # Pattern 4: "draft without attachment"
+    (re.compile(r"\bdraft\b.{0,20}\b(?:without|no\s+attachment|remove\s+the)\b", re.I), "gmail_remove_attachment"),
+
     # ── Gmail Phase 7: attach-file intent — MUST precede gmail_rewrite_draft ─────────────────
     # ("add the PDF to this draft" would otherwise match gmail_rewrite_draft's add/include pattern)
     (re.compile(r"\battach\b.{0,50}\b(?:pdf|document|file|spreadsheet|invoice|report|deck|image|photo|attachment)\b", re.I), "gmail_attach_file"),
@@ -831,6 +841,8 @@ _REGEX_INTENTS = [
     (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)\s*$", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,15}\b(?:the\s+)?(?:reply|response)\b", re.I), "gmail_send_draft"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?(?:email|mail|message)\b", re.I), "gmail_send_draft"),
+    (re.compile(r"\b(?:looks?\s+good|lgtm|approved?|good\s+to\s+go)\b.{0,25}\bsend\b", re.I), "gmail_send_draft"),
     # gmail_cancel_draft — requires "draft" qualifier (more specific than bare gmail_cancel)
     (re.compile(r"\b(?:cancel|discard|delete|clear|abort)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:forget|throw\s+away)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
@@ -849,6 +861,11 @@ _REGEX_INTENTS = [
     # gmail_confirm — anchored bare inputs; dispatch checks _GMAIL_CTX["pending"] before acting
     (re.compile(r"^confirm\s*$", re.I), "gmail_confirm"),
     (re.compile(r"^yes,?\s+do\s+it\s*$", re.I), "gmail_confirm"),
+    # gmail_undo — MUST precede gmail_cancel (both short/anchored; undo is more specific)
+    (re.compile(r"^undo\s*$", re.I), "gmail_undo"),
+    (re.compile(r"^undo\s+that\s*$", re.I), "gmail_undo"),
+    (re.compile(r"\bundo\b.{0,30}\b(?:archive|trash|that\s+archive|that\s+trash|mark|last\s+action|that\s+action)\b", re.I), "gmail_undo"),
+    (re.compile(r"\b(?:bring\s+back|restore)\b.{0,25}\b(?:those|them|those\s+emails?|that\s+email)\b", re.I), "gmail_undo"),
     # gmail_cancel — anchored
     (re.compile(r"^cancel(?:\s+that)?\s*$", re.I), "gmail_cancel"),
     (re.compile(r"^(?:never\s+mind|abort|stop\s+that)\s*$", re.I), "gmail_cancel"),
@@ -1106,12 +1123,12 @@ _ALL_INTENTS = [
     # Comms — Gmail
     "gmail", "gmail_read", "gmail_open", "gmail_thread", "gmail_summarize", "gmail_list_category",
     "gmail_archive", "gmail_trash", "gmail_mark_read", "gmail_mark_unread",
-    "gmail_confirm", "gmail_cancel",
+    "gmail_confirm", "gmail_cancel", "gmail_undo",
     "gmail_draft_reply", "gmail_compose", "gmail_show_draft",
     "gmail_send_draft", "gmail_cancel_draft", "gmail_rewrite_draft",
     "gmail_add_cc", "gmail_add_bcc",
     "gmail_list_attachments", "gmail_save_attachment", "gmail_summarize_attachment",
-    "gmail_attach_file",
+    "gmail_attach_file", "gmail_remove_attachment",
     # n8n / automation
     "sync",
     # Nightly
@@ -1189,6 +1206,9 @@ _INTENT_SYSTEM = (
     "   'gmail_confirm'  : ONLY if there is a pending Gmail mutation action to execute\n"
     "                      bare 'confirm', 'yes do it' — confirms archive/trash/mark-read\n"
     "   'gmail_cancel'   : cancel a pending Gmail mutation — 'cancel', 'never mind'\n"
+    "   'gmail_undo'     : undo the last confirmed Gmail mutation (archive/trash/mark-read/mark-unread)\n"
+    "                      'undo', 'undo that', 'undo the archive', 'bring back those emails'\n"
+    "                      Only valid after a mutation has been confirmed this session.\n"
     "   'gmail_draft_reply': draft a reply to the current email — 'reply saying X', 'draft a reply'\n"
     "                      ALWAYS draft-first, never auto-send. Requires 'send it' to send.\n"
     "   'gmail_compose'  : compose a new email draft — 'email X saying Y', 'compose an email to X'\n"
@@ -1217,6 +1237,9 @@ _INTENT_SYSTEM = (
     "                      'include the report in the email'. Always requires an active draft.\n"
     "                      NEVER use for incoming/inbound email attachments — use gmail_list_attachments\n"
     "                      or gmail_save_attachment for reading/saving received files.\n"
+    "   'gmail_remove_attachment': remove an outbound attachment from the current draft —\n"
+    "                      'remove the PDF from the draft', 'detach the attachment', 'drop the invoice',\n"
+    "                      'remove attachment 1'. Only valid when a draft with attachments exists.\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3279,6 +3302,7 @@ _GMAIL_CTX: dict = {
     "attachments":        [],   # Phase 6: attachment metadata list from current email/thread
     "current_attachment": None, # Phase 6: last selected/saved attachment dict
     "pending_attach":     None, # Phase 7: file disambiguation candidates [{path, filename, size}]
+    "last_mutation":      None, # Phase 8: undo — {action, ids, count, description} of last confirmed op
 }
 
 _GMAIL_ACTION_PAST = {
@@ -3531,7 +3555,7 @@ def _gmail_resolve_candidates(text: str) -> tuple:
     from_m  = re.search(r"\bfrom\s+(\w[\w\s.@]{0,25}?)(?:\s+about|\s+older|\s+in\b|[?.,]|$)", text, re.I)
     about_m = re.search(r"\babout\s+(.+?)(?:\s+from|\s+older|[?.,]|$)", text, re.I)
     time_q  = _gmail_time_to_query(text)
-    ref_words = bool(re.search(r"\b(those|these|them|that|it|the\s+(?:ones?|emails?|messages?))\b", text, re.I))
+    ref_words = bool(re.search(r"\b(all|those|these|them|that|it|the\s+(?:ones?|emails?|messages?))\b", text, re.I))
 
     if cat_m:
         label = _GMAIL_CATEGORY_MAP.get(cat_m.group(1).lower(), "INBOX")
@@ -3551,7 +3575,7 @@ def _gmail_resolve_candidates(text: str) -> tuple:
         emails = gh.list_emails(max_results=_GMAIL_MAX_CANDIDATES, query=q, inbox_only=False)
         return emails[:_GMAIL_MAX_CANDIDATES], q
 
-    if _GMAIL_CTX.get("candidates") and (ref_words or True):
+    if _GMAIL_CTX.get("candidates") and ref_words:
         cands = _GMAIL_CTX["candidates"]
         return cands[:_GMAIL_MAX_CANDIDATES], "current selection"
 
@@ -3655,12 +3679,16 @@ def cmd_gmail_confirm() -> None:
             n = gh.mark_unread(ids)
         else:
             cprint(f"  Unknown action: {action}", RED); return
+        _GMAIL_CTX["last_mutation"] = {
+            "action": action, "ids": ids, "count": n, "description": desc,
+        }
         _GMAIL_CTX["pending"]    = None
         _GMAIL_CTX["candidates"] = []
         _GMAIL_IDS.clear()
         _GMAIL_SUBJECTS.clear()
         verb = _GMAIL_ACTION_PAST.get(action, "processed")
         cprint(f"  ✓ Done — {n} email{'s' if n != 1 else ''} {verb}.", GREEN)
+        cprint(f"  {GRAY}(Say 'undo' to reverse this.){RESET}")
     except Exception as e:
         cprint(f"  Error during {action}: {e}", RED)
         if "Insufficient" in str(e) or "scope" in str(e).lower() or "403" in str(e):
@@ -3681,6 +3709,44 @@ def cmd_gmail_cancel() -> None:
     _GMAIL_CTX["pending"] = None
     cprint(f"  Cancelled: {desc}", GRAY)
 
+
+def cmd_gmail_undo() -> None:
+    """Undo the last confirmed archive, trash, mark-read, or mark-unread operation."""
+    last = _GMAIL_CTX.get("last_mutation")
+    if not last:
+        cprint("  Nothing to undo — no Gmail action has been confirmed this session.", GRAY)
+        return
+    action = last["action"]
+    ids    = last["ids"]
+    n      = last["count"]
+    desc   = last["description"]
+    _UNDO_VERB = {
+        "archive":     "unarchived",
+        "trash":       "restored from trash",
+        "mark_read":   "marked as unread",
+        "mark_unread": "marked as read",
+    }
+    verb = _UNDO_VERB.get(action, "restored")
+    adwi_head(f"Gmail — Undo: {desc}")
+    cprint(f"  Reversing: {n} email{'s' if n != 1 else ''} will be {verb}.", YELLOW)
+    try:
+        gh = _gmail()
+        if action == "archive":
+            gh.unarchive_messages(ids)
+        elif action == "trash":
+            gh.untrash_messages(ids)
+        elif action == "mark_read":
+            gh.mark_unread(ids)
+        elif action == "mark_unread":
+            gh.mark_read(ids)
+        else:
+            cprint(f"  Undo not supported for action: {action}", RED); return
+        _GMAIL_CTX["last_mutation"] = None
+        cprint(f"  ✓ Undone — {n} email{'s' if n != 1 else ''} {verb}.", GREEN)
+    except Exception as e:
+        cprint(f"  Undo failed: {e}", RED)
+        if "403" in str(e) or "scope" in str(e).lower():
+            cprint("  Scope error — run /gmail-auth to re-authorize.", YELLOW)
 
 
 # ── Gmail Phase 3: draft / send commands ─────────────────────────────────────
@@ -3778,11 +3844,19 @@ def cmd_gmail_compose(text: str = "") -> None:
         cprint("  Gmail not authorized — run /gmail-auth first", RED); return
     adwi_head("Gmail — Compose Draft")
     # Extract TO — stops at cc/bcc keyword or saying/about
+    # Pattern 1: "email Rahul saying" / "message Priya about"
     to_m = re.search(
         r"\b(?:email|message)\s+([\w][\w\s.]{0,30}?)"
         r"(?:\s+(?:and\s+)?(?:cc|bcc)\b|\s+(?:saying|about|that|to\s+say|regarding))",
         text, re.I
     )
+    # Pattern 2: "compose/write/draft/send an email to Rahul saying" (fallback)
+    if not to_m:
+        to_m = re.search(
+            r"\bto\s+([\w][\w\s.@]{0,30}?)"
+            r"(?:\s+(?:and\s+)?(?:cc|bcc)\b|\s+(?:saying|about|that|to\s+say|regarding)|$)",
+            text, re.I
+        )
     # Extract CC
     cc_m = re.search(
         r"\b(?:and\s+)?cc\s+([\w][\w\s.]{0,30}?)"
@@ -4211,6 +4285,62 @@ def _do_attach_file(path: Path) -> None:
 
     _gmail_draft_preview(draft)
     _GMAIL_CTX["pending_attach"] = None
+
+
+def cmd_gmail_remove_attachment(text: str = "") -> None:
+    """Remove an outbound attachment from the current draft by name or ordinal."""
+    draft = _GMAIL_CTX.get("draft")
+    if not draft:
+        cprint("  No current draft.", YELLOW); return
+    out_atts = draft.get("outbound_attachments") or []
+    if not out_atts:
+        cprint("  No attachments on current draft.", GRAY); return
+
+    # Select attachment to remove by ordinal or filename substring
+    low = text.lower()
+    ordinals = {"first": 0, "1st": 0, "1": 0, "second": 1, "2nd": 1, "2": 1,
+                "third": 2, "3rd": 2, "3": 2}
+    chosen_idx = None
+    for word, idx in ordinals.items():
+        if re.search(rf"\b{re.escape(word)}\b", low) and idx < len(out_atts):
+            chosen_idx = idx; break
+
+    if chosen_idx is None:
+        # Match by filename substring
+        for i, a in enumerate(out_atts):
+            fname_words = re.findall(r"\w{2,}", a.get("filename", "").lower())
+            query_words = re.findall(r"\w{3,}", low)
+            if any(qw in " ".join(fname_words) for qw in query_words):
+                chosen_idx = i; break
+
+    if chosen_idx is None:
+        if len(out_atts) == 1:
+            chosen_idx = 0
+        else:
+            cprint("  Which attachment?", YELLOW)
+            for i, a in enumerate(out_atts, 1):
+                sz = _human_size(a.get("size", 0)) if a.get("size") else "?"
+                cprint(f"  {i}. {a.get('filename','?')}  {GRAY}({sz}){RESET}")
+            cprint(f"  {YELLOW}Say 'remove attachment 1', 'remove the PDF', etc.{RESET}")
+            return
+
+    removed = out_atts.pop(chosen_idx)
+    adwi_head("Gmail — Remove Attachment")
+    cprint(f"  Removed: {removed.get('filename','?')}", GRAY)
+    try:
+        gh = _gmail()
+        gh.update_draft(
+            draft["draft_id"], draft["to"], draft["subject"], draft["body"],
+            thread_id=draft.get("thread_id"),
+            message_id_header=draft.get("message_id", ""),
+            cc=draft.get("cc") or "",
+            bcc=draft.get("bcc") or "",
+            attachments=[a["path"] for a in out_atts],
+        )
+        cprint(f"  ✓ Draft updated.", GREEN)
+    except Exception as e:
+        cprint(f"  {YELLOW}Gmail draft update failed ({e}) — local preview updated.{RESET}")
+    _gmail_draft_preview(draft)
 
 
 def cmd_gmail_attach_choice(selection: int) -> None:
@@ -6586,6 +6716,8 @@ def dispatch_natural(text: str):
             cprint("  No pending Gmail action or draft to confirm.", YELLOW)
     elif intent == "gmail_cancel":
         cmd_gmail_cancel()
+    elif intent == "gmail_undo":
+        cmd_gmail_undo()
     elif intent == "gmail_draft_reply":
         instruction = re.sub(
             r"^\s*(?:draft\s+a?\s*)?(?:reply|response|write\s+back)\s*(?:saying|that|with|to\s+(?:it|this|that))?\s*",
@@ -6608,6 +6740,8 @@ def dispatch_natural(text: str):
         cmd_gmail_add_bcc(text)
     elif intent == "gmail_attach_file":
         cmd_gmail_attach_file(text)
+    elif intent == "gmail_remove_attachment":
+        cmd_gmail_remove_attachment(text)
     elif intent == "gmail_list_attachments":
         cmd_gmail_list_attachments(text)
     elif intent == "gmail_save_attachment":
@@ -6895,6 +7029,7 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-mark-unread "): cmd_gmail_mark_unread(line[19:].strip())
     elif line in ("/gmail-confirm", "/confirm"): cmd_gmail_confirm()
     elif line == "/gmail-cancel": cmd_gmail_cancel()
+    elif line == "/gmail-undo": cmd_gmail_undo()
     elif line == "/gmail-draft-reply": cmd_gmail_draft_reply("")
     elif line.startswith("/gmail-draft-reply "): cmd_gmail_draft_reply(line[19:].strip())
     elif line == "/gmail-compose": cmd_gmail_compose("")
@@ -6916,6 +7051,8 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-summarize-attachment "): cmd_gmail_summarize_attachment(line[28:].strip())
     elif line == "/gmail-attach": cmd_gmail_attach_file("")
     elif line.startswith("/gmail-attach "): cmd_gmail_attach_file(line[14:].strip())
+    elif line == "/gmail-remove-attachment": cmd_gmail_remove_attachment("")
+    elif line.startswith("/gmail-remove-attachment "): cmd_gmail_remove_attachment(line[25:].strip())
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()
