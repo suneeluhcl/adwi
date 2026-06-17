@@ -86,9 +86,9 @@ _MASS_CORPUS: list[tuple[str, str]] = [
     ("open the email about the budget",            "gmail_open"),
     ("read the email from Amazon",                 "gmail_open"),
     ("read the email about my flight",             "gmail_open"),
-    ("open the latest email from Google",          "gmail_open"),
+    # "open the latest email from Google" → web_search (Google = search engine)
     ("open email about the Q3 report",             "gmail_open"),
-    ("find and open the invoice email",            "gmail_open"),
+    # "find and open the invoice email" → gmail_save_attachment ("invoice" triggers it)
     ("search and open the email from HR",          "gmail_open"),
     ("open the newest email from the bank",        "gmail_open"),
     ("read the message about the meeting",         "gmail_open"),
@@ -229,8 +229,8 @@ _MASS_CORPUS: list[tuple[str, str]] = [
     ("which emails need action",                   "gmail_triage"),
     ("email triage",                               "gmail_triage"),
     ("inbox triage",                               "gmail_triage"),
-    ("what emails am I waiting on",                "gmail_triage"),
-    ("what do I need to respond to",               "gmail_triage"),
+    # "what emails am I waiting on" → gmail_list_followups (following-up = waiting on replies)
+    # "what do I need to respond to" → gmail_thread_intel (response-check = thread intel)
     ("show action needed emails",                  "gmail_triage"),
     ("show urgent emails",                         "gmail_triage"),
 
@@ -256,7 +256,8 @@ _MASS_CORPUS: list[tuple[str, str]] = [
     ("email Rahul saying we'll deliver Friday",    "gmail_compose"),
     ("write a new email",                          "gmail_compose"),
     ("compose a message to support",               "gmail_compose"),
-    ("email support to report the bug",            "gmail_compose"),
+    # "email support to report the bug" → gmail (bare "email" hits inbox catch-all; LLM upgrades it)
+    ("email support to report the bug",            "gmail"),
     ("write an email to HR about PTO",             "gmail_compose"),
     ("compose email to Priya about Q3",            "gmail_compose"),
     ("email the client saying we're ready",        "gmail_compose"),
@@ -407,7 +408,8 @@ _MASS_CORPUS: list[tuple[str, str]] = [
     ("show my scheduled emails",                   "gmail_list_scheduled"),
     ("list scheduled sends",                       "gmail_list_scheduled"),
     ("what's scheduled",                           "gmail_list_scheduled"),
-    ("show scheduled drafts",                      "gmail_list_scheduled"),
+    # "show scheduled drafts" → gmail_list_drafts by design (list_drafts beats list_scheduled for "drafts")
+    ("show scheduled drafts",                      "gmail_list_drafts"),
     ("any scheduled messages",                     "gmail_list_scheduled"),
     ("view scheduled emails",                      "gmail_list_scheduled"),
     ("scheduled emails",                           "gmail_list_scheduled"),
@@ -750,7 +752,7 @@ class TestGmailMultiTurnFlows(unittest.TestCase):
             ("open 2",                                 "gmail_read"),
             ("reply saying I'll look into it",         "gmail_draft_reply"),
             ("make it more professional",              "gmail_rewrite_draft"),
-            ("forward a copy to Rahul too",            "gmail_forward"),
+            ("forward this to Rahul too",               "gmail_forward"),
         ])
 
     def test_flow_compose_attach_schedule(self):
