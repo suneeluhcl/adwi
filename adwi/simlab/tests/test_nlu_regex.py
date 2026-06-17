@@ -1438,5 +1438,127 @@ class TestGmailRoutingPhase16(unittest.TestCase):
         self.assertEqual(_classify("view my rules"), "gmail_filter_list")
 
 
+class TestGmailRoutingPhase17(unittest.TestCase):
+    """Phase 17: gmail_extract_tasks / gmail_tasks_save / gmail_tasks_remind NLU routing."""
+
+    # ── gmail_extract_tasks ──────────────────────────────────────────────────
+
+    def test_turn_email_into_task_list(self):
+        self.assertEqual(_classify("turn this email into a task list"), "gmail_extract_tasks")
+
+    def test_turn_thread_into_tasks(self):
+        self.assertEqual(_classify("turn this thread into tasks"), "gmail_extract_tasks")
+
+    def test_extract_action_items(self):
+        self.assertEqual(_classify("extract action items from this email"), "gmail_extract_tasks")
+
+    def test_extract_deadlines(self):
+        self.assertEqual(_classify("extract deadlines from this thread"), "gmail_extract_tasks")
+
+    def test_extract_decisions(self):
+        self.assertEqual(_classify("extract decisions from this email"), "gmail_extract_tasks")
+
+    def test_what_deadlines_mentioned(self):
+        self.assertEqual(_classify("what deadlines are mentioned here"), "gmail_extract_tasks")
+
+    def test_what_due_dates_in_email(self):
+        self.assertEqual(_classify("what due dates are in this email"), "gmail_extract_tasks")
+
+    def test_make_followup_checklist(self):
+        self.assertEqual(_classify("make a follow-up checklist"), "gmail_extract_tasks")
+
+    def test_make_task_list_from_thread(self):
+        self.assertEqual(_classify("make a task list from this thread"), "gmail_extract_tasks")
+
+    def test_summarize_thread_as_tasks(self):
+        self.assertEqual(_classify("summarize this thread as tasks"), "gmail_extract_tasks")
+
+    def test_summarize_email_as_checklist(self):
+        self.assertEqual(_classify("summarize this email as a checklist"), "gmail_extract_tasks")
+
+    def test_what_followups_should_i_do(self):
+        self.assertEqual(_classify("what follow-ups should I do"), "gmail_extract_tasks")
+
+    def test_extract_asks(self):
+        self.assertEqual(_classify("extract the asks from this email"), "gmail_extract_tasks")
+
+    def test_build_task_list(self):
+        self.assertEqual(_classify("build a task list from this email"), "gmail_extract_tasks")
+
+    def test_extract_tasks_beats_thread_intel(self):
+        # "extract action items" must go to extract_tasks (not thread_intel)
+        result = _classify("extract action items from this email")
+        self.assertEqual(result, "gmail_extract_tasks")
+        self.assertNotEqual(result, "gmail_thread_intel")
+
+    def test_extract_deadlines_beats_thread_intel(self):
+        result = _classify("extract deadlines from this thread")
+        self.assertEqual(result, "gmail_extract_tasks")
+        self.assertNotEqual(result, "gmail_thread_intel")
+
+    # ── gmail_tasks_save ─────────────────────────────────────────────────────
+
+    def test_save_tasks_to_obsidian(self):
+        self.assertEqual(_classify("save those tasks to Obsidian"), "gmail_tasks_save")
+
+    def test_add_checklist_to_daily_note(self):
+        self.assertEqual(_classify("add the checklist to my daily note"), "gmail_tasks_save")
+
+    def test_save_action_items_to_notes(self):
+        self.assertEqual(_classify("save these action items to my notes"), "gmail_tasks_save")
+
+    def test_export_extracted_tasks(self):
+        self.assertEqual(_classify("export the extracted tasks"), "gmail_tasks_save")
+
+    def test_put_items_in_my_list(self):
+        self.assertEqual(_classify("put those items in my list"), "gmail_tasks_save")
+
+    def test_add_tasks_to_daily_note(self):
+        # "add those tasks to my daily note" must go to gmail_tasks_save, not obsidian_daily
+        result = _classify("add those tasks to my daily note")
+        self.assertEqual(result, "gmail_tasks_save")
+        self.assertNotEqual(result, "obsidian_daily")
+
+    def test_save_checklist_beats_obsidian(self):
+        # "write those tasks to Obsidian" must go to gmail_tasks_save
+        result = _classify("write those tasks to Obsidian")
+        self.assertEqual(result, "gmail_tasks_save")
+
+    # ── gmail_tasks_remind ───────────────────────────────────────────────────
+
+    def test_create_reminders_for_action_items(self):
+        self.assertEqual(_classify("create reminders for those action items"), "gmail_tasks_remind")
+
+    def test_create_reminders_for_deadlines(self):
+        self.assertEqual(_classify("create reminders for the deadlines"), "gmail_tasks_remind")
+
+    def test_set_reminders_for_tasks(self):
+        self.assertEqual(_classify("set reminders for those tasks"), "gmail_tasks_remind")
+
+    def test_remind_me_about_those_action_items(self):
+        self.assertEqual(_classify("remind me about those action items"), "gmail_tasks_remind")
+
+    def test_set_reminders_for_each(self):
+        self.assertEqual(_classify("set reminders for each of those"), "gmail_tasks_remind")
+
+    def test_tasks_remind_beats_followup_reminder(self):
+        # "create reminders for those action items" must NOT go to gmail_followup_reminder
+        result = _classify("create reminders for those action items")
+        self.assertEqual(result, "gmail_tasks_remind")
+        self.assertNotEqual(result, "gmail_followup_reminder")
+
+    def test_bare_remind_me_stays_followup(self):
+        # "remind me about this thread in 3 days" must still go to gmail_followup_reminder
+        result = _classify("remind me about this thread in 3 days")
+        self.assertNotEqual(result, "gmail_tasks_remind")
+        self.assertEqual(result, "gmail_followup_reminder")
+
+    def test_set_followup_stays_followup(self):
+        # "set a follow-up reminder for this" must stay gmail_followup_reminder
+        result = _classify("set a follow-up reminder for this")
+        self.assertNotEqual(result, "gmail_tasks_remind")
+        self.assertEqual(result, "gmail_followup_reminder")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

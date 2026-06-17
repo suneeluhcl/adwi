@@ -276,6 +276,38 @@ Applied after session-2 eval results confirmed 86.0% baseline. Includes completi
 
 ---
 
+## Gmail Phase 13 — Applied 2026-06-17
+
+**Feature:** Reschedule / open scheduled sends
+
+### Changes applied
+
+| Item | Description |
+|------|-------------|
+| `_GMAIL_CTX["selected_scheduled"]` | New session field for user-selected scheduled send |
+| `_resolve_scheduled_ref(text, pending_only)` | Shared selection helper (ordinal, digit, keyword + time-phrase stripping) |
+| `cmd_gmail_reschedule_send(text)` | Resolves target via `_resolve_scheduled_ref`, new time via `_resolve_schedule_time`, preview old→new, confirm, atomic update |
+| `cmd_gmail_open_scheduled_draft(text)` | Loads underlying draft from pending scheduled send into `_GMAIL_CTX["draft"]` |
+| `cmd_gmail_cancel_scheduled_send` | Updated to use `_resolve_scheduled_ref` (adds keyword matching on top of prior digit-only ordinal) |
+| `cmd_gmail_list_scheduled` | Updated hints: reschedule / open / cancel tips shown when pending entries exist |
+| NLU `gmail_reschedule_send` patterns | `\breschedule\b`; move/push/delay/postpone + scheduled; change + scheduled + time/date |
+| NLU `gmail_open_scheduled_draft` patterns | open/reopen/switch-to/load + scheduled + draft/email/send/message |
+| **Ordering fix** | Phase 13 placed BEFORE Phase 6 (attachment intents) — `gmail_save_attachment` would otherwise steal "open the scheduled invoice draft" via the "invoice" keyword |
+| `_ALL_INTENTS` | Added `gmail_reschedule_send`, `gmail_open_scheduled_draft` |
+| `_INTENT_SYSTEM` | Added descriptions for both new intents with positive/negative examples |
+| Dispatch | Added `elif` branches for both new intents |
+| Slash commands | `/gmail-reschedule [text]`, `/gmail-open-scheduled [text]` |
+| Eval sync | Patterns + 14 P1 + 12 P2 scenarios added to both eval harnesses |
+| Tests | `TestGmailRoutingPhase13` — 18 tests, all pass |
+
+### Key ordering: Phase 13 → Phase 6 → Phase 12 → Phase 11 → Phase 10 → Phase 3
+
+The `gmail_open_scheduled_draft` pattern must precede `gmail_save_attachment` because:
+- `gmail_save_attachment` has `\b(?:save|download|open)\b.{0,30}\b...(invoice)...\b`
+- "open the scheduled invoice draft" would match via "invoice" if Phase 13 came after Phase 6
+
+---
+
 ## Remaining High-Value Families (next targets)
 
 | Family | Failures | Notes |
@@ -286,6 +318,172 @@ Applied after session-2 eval results confirmed 86.0% baseline. Includes completi
 | `web_search` | 7 | "search for something" too ambiguous without topic context |
 | `organize` | 4 | "what's the best way to structure" → advisory (genuinely ambiguous) |
 | `benchmark` | 3 | Remaining "how fast is X" ambiguous with status |
+
+---
+
+---
+
+## Gmail Phase 14 — Applied 2026-06-17
+
+**Feature:** Smart compose polish — subject extraction + tone/length guidance + safer compose UX
+
+### Changes applied
+
+| Item | Description |
+|------|-------------|
+| `_derive_subject(text, instruction)` | Deterministic topic extractor: about X saying Y → title-case X; re X → X; regarding X → X; fallback to instruction[:55] |
+| `_clean_subject_phrase(phrase)` | Shared helper: strip articles, trim, title-case if ≤ 4 words |
+| `cmd_gmail_compose` (3 call sites) | Replace `instruction[:60]` subject with `_derive_subject(text, instruction)` |
+| `cmd_gmail_update_subject(text)` | New command: LLM-generate better subject; show old→new diff; confirm; `update_draft()`; preview |
+| `cmd_gmail_rewrite_draft` LLM prompt | Added factual-preservation guard ("Preserve all specific dates, names, commitments") + improved system prompt |
+| NLU `gmail_update_subject` patterns | 5 patterns: rewrite/update/change subject; make subject clearer; write better subject; subject sounds weak; give me a better subject |
+| NLU `gmail_rewrite_draft` extension | Extended style-word list: `natural`, `informal`, `polite`, `robotic`, `engaging`; 2 new patterns: "turn this into X" and "write a shorter version" |
+| `_ALL_INTENTS` | Added `gmail_update_subject` |
+| `_INTENT_SYSTEM` | Extended `gmail_rewrite_draft` description + new `gmail_update_subject` description |
+| Dispatch | Added `elif intent == "gmail_update_subject"` handler |
+| Slash commands | `/gmail-update-subject [text]` |
+| Eval sync | Patterns + 15 P1 + 14 P2 scenarios (rewrite + update_subject) |
+| Tests | `TestGmailRoutingPhase14` — 17 tests, all pass |
+
+### NLU ordering: Phase 14 → Phase 7 → Phase 4 → Phase 5 → Phase 13 → Phase 6 → Phase 12 → …
+
+`gmail_update_subject` must precede `gmail_rewrite_draft` (Phase 4) to prevent "update the subject" routing to rewrite.
+
+### Key behavior: subject extraction examples
+- "email Rahul about the Q3 plan saying I reviewed the deck" → subject **"Q3 Plan"**
+- "draft an email to Priya re onboarding timeline" → subject **"Onboarding Timeline"**
+- "send a note to Arjun about the invoice discrepancy" → subject **"Invoice Discrepancy"**
+- "compose an email to Rahul saying I'll be late" → subject **"I'll be late"** (fallback)
+
+---
+
+## Gmail Phase 17 — Applied 2026-06-17
+
+**Feature:** Email → task/calendar extraction + action-item workflows
+
+### Changes applied
+
+| Item | Description |
+|------|-------------|
+| `_GMAIL_CTX["pending_tasks"]` | New slot: extracted tasks dict or None |
+| `_extract_email_tasks(body, subject, mode)` | LLM-based extraction; 5 modes: full / action_items / deadlines / decisions / asks |
+| `_parse_task_extraction(raw, mode, subject)` | Parses LLM bullet output into structured dict {action_items, deadlines [{item,date_str},...], decisions, asks} |
+| `_task_list_preview(result)` | Preview box: sections per category + next-step hints |
+| `cmd_gmail_extract_tasks(text)` | Main command: detects mode, loads thread/email context, runs extraction, shows preview, stores `pending_tasks` |
+| `cmd_gmail_tasks_save(text)` | Confirm → write markdown checklist to Obsidian daily note via `/daily-note` API |
+| `cmd_gmail_tasks_remind(text)` | Confirm → create follow-up reminder entries in `followup_reminders.json` with best-effort date parsing |
+| NLU Phase 17 main block (before Phase 11) | 3 `gmail_tasks_remind` + 3 `gmail_tasks_save` + 6 `gmail_extract_tasks` patterns |
+| NLU early guard (before obsidian_daily) | 1 `gmail_tasks_save` guard for "save tasks to daily note" |
+| `_ALL_INTENTS` | Added 3 new intents |
+| `_INTENT_SYSTEM` | Added descriptions for all 3 new intents with boundary conditions |
+| Dispatch | 3 new `elif intent ==` branches before `gmail_followup_reminder` |
+| Slash commands | `/gmail-extract-tasks [mode]`, `/gmail-tasks-save`, `/gmail-tasks-remind` |
+| Eval sync | Early guard + Phase 17 block in both eval files; +29 P1 + 20 P2 scenarios |
+| Tests | `TestGmailRoutingPhase17` — 27 tests, all pass |
+
+### Architecture decisions
+
+**Output targets** (both safe, both existing): Obsidian daily note (via bridge `/daily-note`) + `followup_reminders.json` (existing store from Phase 11). No new file or external dependency.
+
+**Extraction modes**: "full" is default (extracts everything). Targeted modes (action_items / deadlines / decisions / asks) fire when text is unambiguously mode-specific (no other category words present).
+
+**`gmail_tasks_remind` vs `gmail_followup_reminder` boundary**: Phase 17 patterns require "those/these/each/all" OR explicit "action items/deadlines/tasks" anchor. Bare "remind me about this thread in 3 days" correctly passes through to `gmail_followup_reminder`.
+
+**`gmail_tasks_save` vs `obsidian_daily` boundary**: Early guard at position before obsidian patterns fires only when "tasks/items/checklist/action items/todos" is present in the utterance alongside "daily note". Bare "open today's daily note" still routes to `obsidian_daily`.
+
+### NLU ordering: Phase 17 early guard → obsidian_daily → ... → Phase 17 main block → Phase 11 → Phase 10 → Phase 16 → Phase 15 → Phase 3 → Phase 2
+
+---
+
+## Gmail Phase 16 — Applied 2026-06-17
+
+**Feature:** Filter / rule builder with preview → apply
+
+### Changes applied
+
+| Item | Description |
+|------|-------------|
+| `gmail_helper.list_labels_all()` | List all Gmail labels (id, name, type) |
+| `gmail_helper.get_or_create_label(name)` | Find by name (case-insensitive) or create; returns label_id. Uses `gmail.modify` scope |
+| `gmail_helper.apply_rule_to_existing(query, label_id, archive, mark_read, star, max_results)` | Backfill: search Gmail for matching messages, batch-apply actions. Uses `gmail.modify` scope |
+| `gmail_helper.create_filter_native(...)` | Attempt persistent Gmail filter via Settings API (needs `gmail.settings.basic`); returns None gracefully on 403 |
+| `GMAIL_RULES_FILE` | `adwi/gmail_rules.json` — local rule store, gitignored |
+| `_GMAIL_CTX["pending_rule"]` | New slot: candidate rule dict or None |
+| `_extract_sender_email(from_str)` | Extract bare email from "Name <email>" |
+| `_load_gmail_rules / _save_gmail_rules` | Atomic JSON read/write (`.tmp` replace) |
+| `_parse_filter_rule(text)` | Deterministic NLP → structured rule: sender / subject / category criteria + label / archive / mark_read / star actions + sensible defaults |
+| `_filter_criteria_to_query(criteria)` | Criteria dict → Gmail search query string |
+| `_filter_preview(rule)` | Preview box: criteria table + actions table + confirm/discard hint |
+| `cmd_gmail_filter_build(text)` | Parse + preview; stores to `pending_rule` |
+| `cmd_gmail_filter_apply(text)` | 4-step apply: create/find label → backfill existing emails → attempt native filter → save locally |
+| `cmd_gmail_filter_cancel(text)` | Clear `pending_rule` |
+| `cmd_gmail_filter_list(text)` | Render all locally saved rules |
+| NLU Phase 16 block (before Phase 15) | 3 `gmail_filter_cancel` + 3 `gmail_filter_apply` + 2 `gmail_filter_list` + 5 `gmail_filter_build` patterns |
+| `_ALL_INTENTS` | Added 4 new intents |
+| `_INTENT_SYSTEM` | Added descriptions for all 4 new intents |
+| Dispatch | 4 new `elif intent ==` branches |
+| Slash commands | `/gmail-rule [text]`, `/gmail-rule-apply`, `/gmail-rule-cancel`, `/gmail-rules` |
+| `.gitignore` | Added `adwi/gmail_rules.json` |
+| Eval sync | Patterns + 28 P1 + 15 P2 scenarios across all 4 intents |
+| Tests | `TestGmailRoutingPhase16` — 26 tests, all pass |
+
+### Architecture decisions
+
+**Live apply** works in two layers:
+1. **Backfill** (always): applies rule to existing matching emails immediately (gmail.modify scope, already authorized)
+2. **Persistent native filter** (attempted): calls Gmail Settings API; gracefully returns None on 403; shows re-auth instructions if needed
+
+**Scope upgrade path** for persistent filters: add `'https://www.googleapis.com/auth/gmail.settings.basic'` to `SCOPES` in `gmail_helper.py`, then run `/gmail-auth`. This does NOT break existing auth — existing token stays valid until the user re-auths with the new scope. Not added by default to avoid disrupting existing flows.
+
+**Rule parsing defaults**: "invoices" or "receipts" → label "Finance"; "newsletters/promotions" → archive. User can override.
+
+**Bare "mark X as read"** → `gmail_mark_read` mutation (not a rule). Prefix with "always/auto" to create a rule.
+
+### NLU ordering: Phase 16 → Phase 15 → Phase 3 → Phase 2 (mutations)
+
+`gmail_filter_cancel` precedes Phase 2 so "cancel the filter" beats bare `gmail_cancel`.
+`gmail_filter_apply` precedes `gmail_filter_build` so "create that rule" beats "create a rule for X".
+
+---
+
+## Gmail Phase 15 — Applied 2026-06-17
+
+**Feature:** Thread intelligence + context-aware reply / forwarding
+
+### Changes applied
+
+| Item | Description |
+|------|-------------|
+| `_thread_latest_message(thread)` | Returns last message dict from thread, or None |
+| `_thread_build_context(thread, max_chars)` | Assembles condensed thread string (most-recent-first, budget-limited) for LLM prompts |
+| `cmd_gmail_thread_intel(text)` | Thread intelligence handler: 6 modes — action_items, decisions, questions, reply_needed, latest_delta, summary. LLM prompt per mode. Stores result in `_GMAIL_CTX["thread_intel"]` |
+| `cmd_gmail_forward(text)` | Forward current email: resolve recipient via `_gmail_resolve_recipient`; optional intro (summary or instruction); calls `create_draft_forward`; preview; draft-first |
+| `cmd_gmail_draft_reply` — context-aware mode | New path when "latest ask / follow-up / based on thread" detected: uses `_thread_build_context` to find latest unresolved ask; generates reply without explicit instruction |
+| `gmail_helper.create_draft_forward(...)` | New function: builds Fwd: draft with forwarded-message block and optional intro; returns draft context dict |
+| `_GMAIL_CTX["thread_intel"]` | New slot: Phase 15 last intel result |
+| NLU early guards (before web_search/git_status) | 3 patterns for `gmail_thread_intel`: "what changed in thread/reply", "latest reply/message/delta", "latest update in thread" — must precede git_status and web_search |
+| NLU Phase 15 block (before Phase 3) | 7 `gmail_thread_intel` patterns + 2 `gmail_forward` patterns |
+| `_ALL_INTENTS` | Added `gmail_thread_intel`, `gmail_forward` |
+| `_INTENT_SYSTEM` | Added descriptions for both new intents |
+| Dispatch | `elif intent == "gmail_thread_intel"` + `elif intent == "gmail_forward"` |
+| Slash commands | `/gmail-thread-intel [text]`, `/gmail-forward [text]` |
+| Eval sync | Early guards + Phase 15 block in both eval harnesses; 22 P1 + 15 P2 scenarios |
+| Tests | `TestGmailRoutingPhase15` — 24 tests (17 thread_intel + 7 forward), all pass |
+
+### NLU ordering: early guards → … → Phase 15 → Phase 3 → …
+
+Early guards for `gmail_thread_intel` must precede web_search (~line 653) and git_status (~line 772) because:
+- "what changed" conflicts with `git_status` pattern `what (changed|committed)`
+- "latest update" conflicts with `web_search` pattern `what's the latest ... update`
+The early guards add email/thread context (`reply|thread|email|message`) to distinguish.
+
+### Key behavior
+- "what action items are in this thread?" → mode `action_items` → bullet list of to-dos
+- "do I owe a reply here?" → mode `reply_needed` → YES/NO + explanation
+- "what changed in the last reply?" → mode `latest_delta` → last-message summary
+- "forward to Rahul" → resolve Rahul's email, create Fwd: draft, preview
+- "forward this with a summary" → LLM-generated 1-2 sentence intro + forward block
+- "reply to the latest ask" → context-aware reply using thread, no explicit instruction needed
 
 ---
 

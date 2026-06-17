@@ -55,6 +55,7 @@
     "/gmail-delete-draft",
     "/gmail-draft-reply",
     "/gmail-drafts",
+    "/gmail-extract-tasks",
     "/gmail-followup",
     "/gmail-followups",
     "/gmail-forward",
@@ -80,6 +81,8 @@
     "/gmail-summarize",
     "/gmail-summarize-attachment",
     "/gmail-summary",
+    "/gmail-tasks-remind",
+    "/gmail-tasks-save",
     "/gmail-thread",
     "/gmail-thread-intel",
     "/gmail-trash",
@@ -174,7 +177,7 @@
     [
       "open-webui",
       "1",
-      "Up 22 hours (healthy)"
+      "Up 23 hours (healthy)"
     ],
     [
       "n8n",
@@ -199,7 +202,7 @@
     [
       "grafana",
       "1",
-      "Up 22 hours"
+      "Up 23 hours"
     ],
     [
       "node-exporter",
@@ -254,5 +257,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-17",
-  "_hash": "c29d6253afefc7a5"
+  "_hash": "f2834f8035137023"
 }

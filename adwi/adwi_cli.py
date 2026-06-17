@@ -651,6 +651,9 @@ _REGEX_INTENTS = [
     # "latest update in this thread/email" must beat web_search "latest ... update"
     (re.compile(r"\blatest\s+update\b.{0,30}\b(?:thread|email|conversation|message)\b", re.I), "gmail_thread_intel"),
 
+    # ── Gmail Phase 17 early guard — "save tasks to daily note" must precede obsidian_daily ──
+    (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,50}\bdaily\s+note\b", re.I), "gmail_tasks_save"),
+
     # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
     (re.compile(r"\b(visit|browse\s+to|navigate\s+to)\b.{0,50}(https?://|\.(com|io|org|dev|net|ai|co|app))\b", re.I), "browse"),
     (re.compile(r"\bfetch\b.{0,40}(https?://|content\s+of\s+https?://)", re.I), "browse"),
@@ -882,6 +885,23 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_delete_draft"),
     (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}the\s+(?!draft\b)(?!that\b)(?!current\b)\w+\s+draft\b", re.I), "gmail_delete_draft"),
     (re.compile(r"\b(?:cancel|delete|remove)\b.{0,15}\bold\b.{0,10}\bdraft\b", re.I), "gmail_delete_draft"),
+
+    # ── Gmail Phase 17: extract tasks / save / remind — MUST precede Phase 11 ──────────────
+    # gmail_tasks_remind — "create/set reminders for those action items" — BEFORE followup_reminder
+    (re.compile(r"\bcreate\b.{0,15}\breminders?\b.{0,40}\b(?:for\s+(?:those|these|the|them|each|all)\b|for\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    (re.compile(r"\bset\b.{0,15}\breminders?\b.{0,40}\b(?:for\s+(?:those|these|the|them|each|all)\b|for\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    (re.compile(r"\bremind\s+me\b.{0,40}\b(?:about\s+(?:those|these|each)\b|about\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    # gmail_tasks_save — "save those tasks to Obsidian", "export checklist", "add tasks to my notes"
+    (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,40}\b(?:to|in(?:to)?)\b.{0,20}\b(?:obsidian|daily\s+note|my\s+notes?|my\s+list)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:save|add|put|export)\b.{0,20}\b(?:those?|these?|them)\b.{0,20}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:save|export)\b.{0,20}\b(?:the\s+)?(?:extracted\s+)?(?:tasks?|checklist|action\s+items?)\b", re.I), "gmail_tasks_save"),
+    # gmail_extract_tasks — "turn this email into tasks", "extract deadlines", "what deadlines are here"
+    (re.compile(r"\bturn\b.{0,30}\b(?:this|the|it)\b.{0,20}\b(?:email|thread|message)\b.{0,20}\binto?\b.{0,20}\b(?:tasks?|todo|checklist|action\s+items?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bextract\b.{0,30}\b(?:action\s+items?|tasks?|deadlines?|decisions?|asks?|due\s+dates?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bwhat\s+(?:deadlines?|due\s+dates?|dates?)\b.{0,30}\b(?:are\s+(?:in|mentioned)|(?:mentioned|are)\s+(?:here|in\s+(?:this|the)))\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\b(?:make|create|build)\b.{0,25}\b(?:a\s+)?(?:follow.?up\s+checklist|task\s+list)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bsummarize\b.{0,30}\b(?:this|the)\b.{0,20}\b(?:email|thread)\b.{0,30}\bas\b.{0,20}\b(?:tasks?|todos?|action\s+items?|a?\s*checklist)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bwhat\s+follow.?ups?\s+(?:should|do)\s+I\b", re.I), "gmail_extract_tasks"),
 
     # ── Gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns ─────────────
     # gmail_cancel_followup FIRST (cancel+reminder must win over cancel+scheduled)
@@ -1259,6 +1279,7 @@ _ALL_INTENTS = [
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "gmail_thread_intel", "gmail_forward",
     "gmail_filter_build", "gmail_filter_apply", "gmail_filter_cancel", "gmail_filter_list",
+    "gmail_extract_tasks", "gmail_tasks_save", "gmail_tasks_remind",
     # n8n / automation
     "sync",
     # Nightly
@@ -1441,6 +1462,20 @@ _INTENT_SYSTEM = (
     "                      ONLY use when a pending rule exists (user built one first).\n"
     "   'gmail_filter_cancel': cancel the pending rule — 'cancel rule creation', 'discard the filter'.\n"
     "   'gmail_filter_list': list saved Gmail rules — 'show my rules', 'list my Gmail filters'.\n"
+    "   'gmail_extract_tasks': extract action items, deadlines, decisions, or asks from current email/thread —\n"
+    "                      'turn this email into a task list', 'extract action items',\n"
+    "                      'what deadlines are mentioned here?', 'make a follow-up checklist',\n"
+    "                      'summarize this thread as tasks', 'extract decisions'.\n"
+    "                      Requires email/thread in context. Stores result for follow-up save/remind.\n"
+    "   'gmail_tasks_save' : save extracted tasks/checklist to Obsidian daily note —\n"
+    "                      'save those tasks to Obsidian', 'add to my daily note',\n"
+    "                      'export the checklist', 'save those action items'.\n"
+    "                      ONLY use after gmail_extract_tasks (requires pending_tasks in context).\n"
+    "   'gmail_tasks_remind': create follow-up reminders from extracted task deadlines —\n"
+    "                      'create reminders for those action items', 'set reminders for the deadlines',\n"
+    "                      'remind me about those tasks'.\n"
+    "                      Key signal: requires 'those/these/the action items/deadlines' anchor.\n"
+    "                      NEVER use for 'remind me about this thread in 3 days' (→ gmail_followup_reminder).\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3538,6 +3573,7 @@ _GMAIL_CTX: dict = {
     "draft_list":         [],   # Phase 12: cached [{draft_id,to,subject,mode,has_attachment,…}] from list_drafts
     "thread_intel":       None, # Phase 15: last thread intelligence result {mode, subject}
     "pending_rule":       None, # Phase 16: candidate filter rule dict or None
+    "pending_tasks":      None, # Phase 17: extracted tasks/deadlines/decisions dict or None
 }
 
 _GMAIL_ACTION_PAST = {
@@ -4913,6 +4949,329 @@ def cmd_gmail_thread(query: str = "") -> None:
         _display_thread(thread)
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
+
+
+# ── Gmail Phase 17: extract tasks ────────────────────────────────────────────
+
+def _extract_email_tasks(body: str, subject: str = "", mode: str = "full") -> dict:
+    """
+    LLM-based structured extraction from email/thread content.
+    mode: "full" | "action_items" | "deadlines" | "decisions" | "asks"
+    Returns {action_items, deadlines [{item,date_str},...], decisions, asks, source_subject, mode}
+    """
+    prompt_parts = {
+        "full": (
+            "Extract ONLY items clearly present. Be conservative and never invent:\n"
+            "1. ACTION ITEMS: specific tasks for Suneel (start each with a verb)\n"
+            "2. DEADLINES: items with explicit due dates or timeframes\n"
+            "3. DECISIONS: decisions made or agreed upon\n"
+            "4. ASKS: direct requests or questions directed at Suneel\n\n"
+            "Use EXACTLY this format (omit empty sections, write 'None found.' for absent):\n"
+            "ACTION ITEMS:\n- item\n\nDEADLINES:\n- item | due: date\n\n"
+            "DECISIONS:\n- item\n\nASKS:\n- item"
+        ),
+        "action_items": (
+            "List ONLY specific action items or tasks for Suneel. Start each with a verb.\n"
+            "Respond with a bullet list (- item) or 'None found.'"
+        ),
+        "deadlines": (
+            "List ONLY deadlines, due dates, or timeframes mentioned.\n"
+            "Format each as: - task description | due: date/time\n"
+            "Respond with a bullet list or 'None found.'"
+        ),
+        "decisions": (
+            "List ONLY decisions that were made or agreed upon.\n"
+            "Respond with a bullet list (- item) or 'None found.'"
+        ),
+        "asks": (
+            "List ONLY direct requests, questions, or asks directed at Suneel.\n"
+            "Respond with a bullet list (- item) or 'None found.'"
+        ),
+    }
+    prompt_text = prompt_parts.get(mode, prompt_parts["full"])
+    full_prompt = f"Subject: {subject}\n\nContent:\n{body[:3000]}\n\n{prompt_text}"
+    raw = _ollama(
+        full_prompt,
+        system=(
+            "You are a precise email analyst. Extract only what is explicitly present "
+            "in the text. Never invent items that are not clearly stated."
+        ),
+        timeout=35,
+    )
+    return _parse_task_extraction(raw, mode, subject)
+
+
+def _parse_task_extraction(raw: str, mode: str, subject: str) -> dict:
+    """Parse LLM extraction output into structured dict."""
+    def _section_items(text: str, header: str) -> list:
+        m = re.search(rf"{header}:\s*\n((?:[ \t]*[-*]\s*.+\n?)*)", text, re.IGNORECASE)
+        if not m:
+            return []
+        items = []
+        for line in m.group(1).splitlines():
+            item = line.strip().lstrip("-* ").strip()
+            if item and item.lower() not in ("none", "none found.", "none found", "n/a"):
+                items.append(item)
+        return items
+
+    def _parse_deadlines(raw_list: list) -> list:
+        result = []
+        for dl in raw_list:
+            if " | due:" in dl.lower():
+                parts = dl.split("|", 1)
+                result.append({
+                    "item":     parts[0].strip(),
+                    "date_str": parts[1].replace("due:", "").replace("Due:", "").strip(),
+                })
+            else:
+                result.append({"item": dl, "date_str": ""})
+        return result
+
+    if mode == "full":
+        action_items = _section_items(raw, "ACTION ITEMS")
+        decisions    = _section_items(raw, "DECISIONS")
+        asks         = _section_items(raw, "ASKS")
+        deadlines    = _parse_deadlines(_section_items(raw, "DEADLINES"))
+    elif mode == "action_items":
+        action_items = [l.strip().lstrip("-* ").strip() for l in raw.splitlines() if l.strip().startswith(("-", "*"))]
+        deadlines = decisions = asks = []
+    elif mode == "deadlines":
+        deadlines    = _parse_deadlines([l.strip().lstrip("-* ").strip() for l in raw.splitlines() if l.strip().startswith(("-", "*"))])
+        action_items = decisions = asks = []
+    elif mode == "decisions":
+        decisions    = [l.strip().lstrip("-* ").strip() for l in raw.splitlines() if l.strip().startswith(("-", "*"))]
+        action_items = deadlines = asks = []
+    elif mode == "asks":
+        asks         = [l.strip().lstrip("-* ").strip() for l in raw.splitlines() if l.strip().startswith(("-", "*"))]
+        action_items = decisions = deadlines = []
+    else:
+        action_items = decisions = asks = []
+        deadlines = []
+
+    _noise = {"none", "none found", "none found.", "n/a", "-"}
+    action_items = [i for i in action_items if len(i) > 3 and i.lower() not in _noise]
+    decisions    = [i for i in decisions    if len(i) > 3 and i.lower() not in _noise]
+    asks         = [i for i in asks         if len(i) > 3 and i.lower() not in _noise]
+    deadlines    = [d for d in deadlines    if len(d.get("item", "")) > 3 and d["item"].lower() not in _noise]
+
+    return {
+        "action_items":   action_items,
+        "deadlines":      deadlines,
+        "decisions":      decisions,
+        "asks":           asks,
+        "source_subject": subject,
+        "mode":           mode,
+    }
+
+
+def _task_list_preview(result: dict) -> None:
+    """Render extracted tasks/deadlines/decisions preview box."""
+    W       = 60
+    subject = (result.get("source_subject") or "")[:50]
+    ai      = result.get("action_items", [])
+    dl      = result.get("deadlines",    [])
+    dec     = result.get("decisions",    [])
+    asks    = result.get("asks",         [])
+    total   = len(ai) + len(dl) + len(dec) + len(asks)
+
+    cprint(f"  {'─' * W}", GRAY)
+    cprint(f"  FROM: {subject or '(current email/thread)'}", BOLD)
+    if ai:
+        cprint(f"\n  ACTION ITEMS ({len(ai)})", CYAN)
+        for i, item in enumerate(ai, 1):
+            cprint(f"    {i}. {item[:W - 6]}", "")
+    if dl:
+        cprint(f"\n  DEADLINES ({len(dl)})", YELLOW)
+        for i, d in enumerate(dl, 1):
+            date_part = f" — {d['date_str']}" if d.get("date_str") else ""
+            cprint(f"    {i}. {d['item'][:W - 20]}{date_part}", "")
+    if dec:
+        cprint(f"\n  DECISIONS ({len(dec)})", GREEN)
+        for i, item in enumerate(dec, 1):
+            cprint(f"    {i}. {item[:W - 6]}", "")
+    if asks:
+        cprint(f"\n  ASKS ({len(asks)})", "")
+        for i, item in enumerate(asks, 1):
+            cprint(f"    {i}. {item[:W - 6]}", "")
+    if total == 0:
+        cprint("  (No items found — try 'show the thread' first, then ask again.)", GRAY)
+    cprint(f"\n  {'─' * W}", GRAY)
+    hints = []
+    if ai or asks:
+        hints.append("'save to Obsidian' / 'add to my list'")
+    if dl:
+        hints.append("'create reminders for those'")
+    if hints:
+        cprint(f"  {GRAY}Next: {' or '.join(hints)}{RESET}", "")
+
+
+def cmd_gmail_extract_tasks(text: str = "") -> None:
+    """Phase 17: Extract action items, deadlines, decisions, asks from current email/thread."""
+    tl   = text.lower()
+    mode = "full"
+    if   re.search(r"\bdeadlines?\b|\bdue\s+dates?\b", tl) and not re.search(r"\baction\s+items?\b|\bdecisions?\b|\basks?\b", tl):
+        mode = "deadlines"
+    elif re.search(r"\bdecisions?\b", tl) and not re.search(r"\baction\s+items?\b|\bdeadlines?\b|\basks?\b", tl):
+        mode = "decisions"
+    elif re.search(r"\basks?\b|\bwhat\s+am\s+I\s+being\s+asked\b", tl) and not re.search(r"\baction\s+items?\b|\bdeadlines?\b|\bdecisions?\b", tl):
+        mode = "asks"
+    elif re.search(r"\baction\s+items?\b|\btasks?\b|\bchecklist\b|\btodo\b", tl) and not re.search(r"\bdeadlines?\b|\bdecisions?\b", tl):
+        mode = "action_items"
+
+    thread = _GMAIL_CTX.get("current_thread")
+    email  = _GMAIL_CTX.get("current_email")
+
+    if thread and thread.get("messages"):
+        subject = thread.get("subject", "")
+        body    = _thread_build_context(thread, max_chars=3000)
+        source  = f"thread ({thread.get('count', 1)} msg)"
+    elif email:
+        subject = email.get("subject", "")
+        body    = email.get("body", "")[:3000]
+        source  = "email"
+    else:
+        cprint("  No email or thread in context. Open an email or thread first.", YELLOW)
+        return
+
+    adwi_head(f"Gmail — Extract Tasks ({mode})")
+    cprint(f"  {GRAY}Analyzing {source}: {subject[:55]}…{RESET}")
+    result = _extract_email_tasks(body, subject=subject, mode=mode)
+    _GMAIL_CTX["pending_tasks"] = result
+    _task_list_preview(result)
+
+
+def cmd_gmail_tasks_save(text: str = "") -> None:
+    """Phase 17: Save extracted tasks/checklist to Obsidian daily note."""
+    result = _GMAIL_CTX.get("pending_tasks")
+    if not result:
+        cprint("  No extracted tasks in context. Say 'extract action items' or 'turn this email into tasks' first.", YELLOW)
+        return
+
+    subject = result.get("source_subject") or "email"
+    ai      = result.get("action_items", [])
+    dl      = result.get("deadlines",    [])
+    dec     = result.get("decisions",    [])
+    asks    = result.get("asks",         [])
+    total   = len(ai) + len(dl) + len(dec) + len(asks)
+
+    if total == 0:
+        cprint("  Extracted list is empty — nothing to save.", YELLOW); return
+
+    lines = [f"### Tasks from: {subject}"]
+    if ai:
+        lines.append("\n**Action Items**")
+        for item in ai:
+            lines.append(f"- [ ] {item}")
+    if dl:
+        lines.append("\n**Deadlines**")
+        for d in dl:
+            date_part = f" (due: {d['date_str']})" if d.get("date_str") else ""
+            lines.append(f"- [ ] {d['item']}{date_part}")
+    if dec:
+        lines.append("\n**Decisions**")
+        for item in dec:
+            lines.append(f"- {item}")
+    if asks:
+        lines.append("\n**Asks**")
+        for item in asks:
+            lines.append(f"- [ ] {item}")
+
+    adwi_head("Gmail — Save Tasks to Obsidian Daily Note")
+    cprint(f"  {total} item(s) to append:\n", "")
+    for ln in lines:
+        cprint(f"  {GRAY}{ln}{RESET}", "")
+    ans = input(f"\n  {YELLOW}Append to today's Obsidian daily note? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled.", GRAY); return
+
+    content    = "\n".join(lines)
+    obs_result = _obsidian_api("POST", "/daily-note", {"content": f"\n{content}\n"})
+    if "error" in obs_result:
+        cprint(f"  ✗ {obs_result['error']}", RED)
+        cprint("  (Is the Obsidian Bridge running? Try: bin/start-obsidian-bridge)", GRAY)
+    else:
+        cprint(f"  {GREEN}✓ {total} item(s) saved → {obs_result.get('daily_note', 'daily note')}{RESET}", "")
+        _GMAIL_CTX["pending_tasks"] = None
+
+
+def cmd_gmail_tasks_remind(text: str = "") -> None:
+    """Phase 17: Create follow-up reminders from extracted task deadlines / action items."""
+    import hashlib as _hl17
+    result = _GMAIL_CTX.get("pending_tasks")
+    if not result:
+        cprint("  No extracted tasks in context. Say 'extract deadlines' or 'extract action items' first.", YELLOW)
+        return
+
+    dl = result.get("deadlines",    [])
+    ai = result.get("action_items", [])
+
+    if not dl and not ai:
+        cprint("  No action items or deadlines found to create reminders from.", YELLOW); return
+
+    items_to_remind = dl if dl else [{"item": a, "date_str": ""} for a in ai[:5]]
+
+    thread    = _GMAIL_CTX.get("current_thread")
+    email     = _GMAIL_CTX.get("current_email")
+    thread_id = (thread or {}).get("thread_id") or (email or {}).get("thread_id") or ""
+    subject   = result.get("source_subject", "")
+
+    adwi_head("Gmail — Create Reminders from Tasks")
+    cprint(f"  {len(items_to_remind)} reminder(s) to create:\n", "")
+    for i, d in enumerate(items_to_remind, 1):
+        date_part = f" — due: {d['date_str']}" if d.get("date_str") else " — default: 3 days"
+        cprint(f"  {i}. {d['item'][:55]}{date_part}", GRAY)
+
+    ans = input(f"\n  {YELLOW}Create these reminders? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled.", GRAY); return
+
+    reminders = _load_followup_reminders()
+    now       = datetime.now()
+    created   = 0
+
+    for idx, d in enumerate(items_to_remind):
+        due_dt = None
+        ds     = (d.get("date_str") or "").lower()
+        if ds:
+            try:
+                if "tomorrow"    in ds: due_dt = now + timedelta(days=1)
+                elif "today"     in ds or "eod" in ds:
+                    due_dt = now.replace(hour=17, minute=0, second=0, microsecond=0)
+                elif "next week" in ds: due_dt = now + timedelta(days=7)
+                elif "friday"    in ds:
+                    ahead = (4 - now.weekday()) % 7 or 7
+                    due_dt = now + timedelta(days=ahead)
+                elif "monday"    in ds:
+                    ahead = (0 - now.weekday()) % 7 or 7
+                    due_dt = now + timedelta(days=ahead)
+                elif re.search(r"\d{1,2}/\d{1,2}", ds):
+                    m_ = re.search(r"(\d{1,2})/(\d{1,2})", ds)
+                    mo, da = int(m_.group(1)), int(m_.group(2))
+                    due_dt = now.replace(month=mo, day=da, hour=9, minute=0, second=0, microsecond=0)
+                    if due_dt < now:
+                        due_dt = due_dt.replace(year=now.year + 1)
+            except Exception:
+                pass
+        if due_dt is None:
+            due_dt = now + timedelta(days=3)
+
+        uid = f"fu_{now.strftime('%Y%m%d_%H%M%S')}_{_hl17.md5(d['item'].encode()).hexdigest()[:4]}_{idx}"
+        reminders.append({
+            "id":               uid,
+            "thread_id":        thread_id,
+            "to":               "",
+            "subject":          f"[Task] {d['item'][:80]}",
+            "tracked_since_ms": int(now.timestamp() * 1000),
+            "due_at_iso":       due_dt.isoformat(timespec="seconds"),
+            "status":           "pending",
+            "created_at_iso":   now.isoformat(timespec="seconds"),
+            "note":             f"From email: {subject[:60]}",
+        })
+        created += 1
+
+    _save_followup_reminders(reminders)
+    cprint(f"  {GREEN}✓ {created} reminder(s) created. Say 'show follow-ups' to review.{RESET}", "")
+    _GMAIL_CTX["pending_tasks"] = None
 
 
 # ── Gmail Phase 16: filter / rule builder ────────────────────────────────────
@@ -8920,6 +9279,12 @@ def dispatch_natural(text: str):
         cmd_gmail_reschedule_send(text)
     elif intent == "gmail_open_scheduled_draft":
         cmd_gmail_open_scheduled_draft(text)
+    elif intent == "gmail_extract_tasks":
+        cmd_gmail_extract_tasks(text)
+    elif intent == "gmail_tasks_save":
+        cmd_gmail_tasks_save(text)
+    elif intent == "gmail_tasks_remind":
+        cmd_gmail_tasks_remind(text)
     elif intent == "gmail_followup_reminder":
         cmd_gmail_followup_reminder(text)
     elif intent == "gmail_list_followups":
@@ -9307,6 +9672,10 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-reschedule "): cmd_gmail_reschedule_send(line[18:].strip())
     elif line == "/gmail-open-scheduled": cmd_gmail_open_scheduled_draft("")
     elif line.startswith("/gmail-open-scheduled "): cmd_gmail_open_scheduled_draft(line[22:].strip())
+    elif line == "/gmail-extract-tasks": cmd_gmail_extract_tasks("")
+    elif line.startswith("/gmail-extract-tasks "): cmd_gmail_extract_tasks(line[21:].strip())
+    elif line == "/gmail-tasks-save": cmd_gmail_tasks_save("")
+    elif line == "/gmail-tasks-remind": cmd_gmail_tasks_remind("")
     elif line.startswith("/gmail-followup "): cmd_gmail_followup_reminder(line[16:].strip())
     elif line == "/gmail-followup": cmd_gmail_followup_reminder("")
     elif line == "/gmail-followups": cmd_gmail_list_followups()

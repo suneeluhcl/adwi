@@ -46,6 +46,7 @@ ALL_INTENTS = [
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "gmail_thread_intel", "gmail_forward",
     "gmail_filter_build", "gmail_filter_apply", "gmail_filter_cancel", "gmail_filter_list",
+    "gmail_extract_tasks", "gmail_tasks_save", "gmail_tasks_remind",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -219,6 +220,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bwhat\s+changed\b.{0,30}\b(?:reply|thread|email|message|conversation)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\blatest\s+(?:reply|message|delta)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\blatest\s+update\b.{0,30}\b(?:thread|email|conversation|message)\b", re.I), "gmail_thread_intel"),
+    # gmail Phase 17 early guard — "save tasks to daily note" must precede obsidian_daily
+    (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,50}\bdaily\s+note\b", re.I), "gmail_tasks_save"),
     # FIX-BROWSE-001: URL/domain visit patterns BEFORE web_search
     (re.compile(r"\b(visit|browse\s+to|navigate\s+to)\b.{0,50}(https?://|\.(com|io|org|dev|net|ai|co|app))\b", re.I), "browse"),
     (re.compile(r"\bfetch\b.{0,40}(https?://|content\s+of\s+https?://)", re.I), "browse"),
@@ -386,6 +389,19 @@ REGEX_INTENTS = [
     (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_delete_draft"),
     (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}the\s+(?!draft\b)(?!that\b)(?!current\b)\w+\s+draft\b", re.I), "gmail_delete_draft"),
     (re.compile(r"\b(?:cancel|delete|remove)\b.{0,15}\bold\b.{0,10}\bdraft\b", re.I), "gmail_delete_draft"),
+    # gmail Phase 17: extract tasks / save / remind — MUST precede Phase 11
+    (re.compile(r"\bcreate\b.{0,15}\breminders?\b.{0,40}\b(?:for\s+(?:those|these|the|them|each|all)\b|for\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    (re.compile(r"\bset\b.{0,15}\breminders?\b.{0,40}\b(?:for\s+(?:those|these|the|them|each|all)\b|for\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    (re.compile(r"\bremind\s+me\b.{0,40}\b(?:about\s+(?:those|these|each)\b|about\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
+    (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,40}\b(?:to|in(?:to)?)\b.{0,20}\b(?:obsidian|daily\s+note|my\s+notes?|my\s+list)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:save|add|put|export)\b.{0,20}\b(?:those?|these?|them)\b.{0,20}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:save|export)\b.{0,20}\b(?:the\s+)?(?:extracted\s+)?(?:tasks?|checklist|action\s+items?)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\bturn\b.{0,30}\b(?:this|the|it)\b.{0,20}\b(?:email|thread|message)\b.{0,20}\binto?\b.{0,20}\b(?:tasks?|todo|checklist|action\s+items?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bextract\b.{0,30}\b(?:action\s+items?|tasks?|deadlines?|decisions?|asks?|due\s+dates?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bwhat\s+(?:deadlines?|due\s+dates?|dates?)\b.{0,30}\b(?:are\s+(?:in|mentioned)|(?:mentioned|are)\s+(?:here|in\s+(?:this|the)))\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\b(?:make|create|build)\b.{0,25}\b(?:a\s+)?(?:follow.?up\s+checklist|task\s+list)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bsummarize\b.{0,30}\b(?:this|the)\b.{0,20}\b(?:email|thread)\b.{0,30}\bas\b.{0,20}\b(?:tasks?|todos?|action\s+items?|a?\s*checklist)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bwhat\s+follow.?ups?\s+(?:should|do)\s+I\b", re.I), "gmail_extract_tasks"),
     # gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns
     (re.compile(r"\bcancel\b.{0,25}\b(?:follow.?up|reminder|that\s+reminder)\b", re.I), "gmail_cancel_followup"),
     (re.compile(r"\b(?:remove|delete|stop)\b.{0,20}\breminder\b", re.I), "gmail_cancel_followup"),
@@ -1281,6 +1297,39 @@ def build_p2_corpus() -> list[dict]:
             else "gmail_filter_list"
         )
         add(p, "comms", t, "easy", fam=t)
+
+    # Phase 17 — extract tasks / save / remind
+    for p in [
+        "turn this email into a task list",
+        "extract action items from this thread",
+        "what deadlines are mentioned here",
+        "make a follow-up checklist",
+        "summarize this thread as tasks",
+        "extract decisions from this email",
+        "what follow-ups should I do",
+        "extract the asks from this email",
+        "build a task list from this email",
+        "what due dates are in this email",
+    ]:
+        add(p, "comms", "gmail_extract_tasks", "easy", fam="gmail_extract_tasks")
+
+    for p in [
+        "save those tasks to Obsidian",
+        "add the checklist to my daily note",
+        "export the extracted tasks",
+        "save those action items",
+        "put those items in my list",
+    ]:
+        add(p, "comms", "gmail_tasks_save", "easy", fam="gmail_tasks_save")
+
+    for p in [
+        "create reminders for those action items",
+        "set reminders for the deadlines",
+        "remind me about those action items",
+        "create reminders for all of those",
+        "set reminders for those tasks",
+    ]:
+        add(p, "comms", "gmail_tasks_remind", "easy", fam="gmail_tasks_remind")
 
     return sc
 
