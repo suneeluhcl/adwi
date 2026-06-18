@@ -16,14 +16,15 @@
 |---|---|---|
 | [§1](#1-system-dna--model-matrix) | System DNA & Model Matrix | Hardware, models, NLU pipeline |
 | [§2](#2-infrastructure-topography) | Infrastructure Topography | Every port, container, agent, data flow |
-| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 103+ commands, args, behaviors |
+| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 172+ commands, args, behaviors |
+| [§3a](#3a-gmail-capability-surface) | Gmail Capability Surface | Full Gmail feature inventory — read/write/draft/send/schedule/rules |
 | [§4](#4-agentic-lifecycle-flows) | Agentic Lifecycle Flows | ASCII diagrams of every execution path |
-| [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation |
+| [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation, API auth status |
 | [§6](#6-directory-structure) | Directory Structure | Annotated file tree |
 | [§7](#7-rollback--recovery) | Rollback & Recovery | Operational runbooks |
 | [§8](#8-architecture-implementation-phases) | Architecture Implementation Phases | Phase 1–10 status and key files |
 | [§9](#9-simlab-operational-guide) | SimLab Operational Guide | Running the eval harness; improvement tiers; golden baseline |
-| [§10](#10-nlu-eval-status--repair-backlog) | NLU Eval Status & Repair Backlog | Current pass rates, 10 open repair items, projected improvement |
+| [§10](#10-nlu-eval-status--repair-backlog) | NLU Eval Status & Repair Backlog | Current pass rates, full improvement history, remaining gaps |
 | [§11](#11-new-machine-bootstrap) | New Machine Bootstrap | Clone to working Adwi in one session |
 
 ---
@@ -412,6 +413,131 @@ Dashboard: http://localhost:4000 (user: suneel)
 
 ---
 
+## §3a Gmail Capability Surface
+
+Gmail integration is implemented in `adwi/gmail_helper.py` (864 lines) and dispatched via `adwi/adwi_cli.py`. Auth uses OAuth2 `gmail.modify` scope (token stored in `secrets/gmail-token.json`, gitignored). All mailbox mutations follow a **preview→confirm** model: the action is shown in full before any change is made. Sends require explicit `/gmail-send-draft` or `/gmail-confirm` — there is no auto-send path.
+
+A background `adwi-scheduled-send` LaunchAgent (runs every 2 min) watches a local JSON queue to deliver scheduled messages at the requested time without keeping Adwi REPL open.
+
+### Read & Search
+
+| Command | What it does |
+|---|---|
+| `/gmail` | Unread count + quick inbox summary |
+| `/gmail-read` | List recent inbox messages with metadata |
+| `/gmail-summary` | AI-synthesised inbox summary (`adwi:latest`) |
+| `/gmail-thread <query>` | Display a full email thread |
+| `/gmail-thread-intel` | Extract action items, decisions, reply-needed status, latest delta from a thread |
+| `/gmail-social` | List Social category messages |
+| `/gmail-promos` | List Promotions category messages |
+| `/gmail-spam` | List Spam folder |
+| `/inbox` | Alias for `/gmail-read` |
+
+### Triage & Analysis
+
+| Command | What it does |
+|---|---|
+| `/gmail-triage` | AI-driven triage: reads inbox with extended metadata, classifies action-needed vs FYI vs noise |
+| `/gmail-summarize` | Summarise a specific email by ID/subject |
+| `/gmail-summarize-attachment` | Summarise content of an email attachment (PDF, text, etc.) |
+| `/gmail-extract-tasks` | Extract tasks, deadlines, action items, decisions from an email or thread |
+
+### Draft Management
+
+| Command | What it does |
+|---|---|
+| `/gmail-drafts` | List all drafts (flags scheduled, shows attachment status) |
+| `/gmail-show-draft` | Display a draft's full content before sending |
+| `/gmail-open-draft <ref>` | Open a specific draft for editing/review |
+| `/gmail-compose <to> <subject> <body>` | Create a new draft (preview shown before saving) |
+| `/gmail-draft-reply` | Create a reply draft to the active thread |
+| `/gmail-forward` | Create a forward draft |
+| `/gmail-rewrite` | Rewrite the active draft for tone, clarity, or brevity via `adwi:latest` |
+| `/gmail-update-subject` | Update the subject line on the active draft |
+| `/gmail-add-cc <address>` | Add CC recipient to active draft |
+| `/gmail-add-bcc <address>` | Add BCC recipient to active draft |
+| `/gmail-attach <path>` | Attach a local file to the active draft (MIME multipart) |
+| `/gmail-remove-attachment <ref>` | Remove an attachment from the active draft |
+| `/gmail-cancel-draft` | Cancel and discard the active draft |
+| `/gmail-delete-draft <ref>` | Permanently delete a draft by ID/ref |
+
+### Sending
+
+| Command | What it does |
+|---|---|
+| `/gmail-send-draft` | Explicitly send the active draft (confirmation shown first) |
+| `/gmail-confirm` | Confirm a pending Gmail mutation (send, archive, trash) |
+
+Recipient names are resolved via `resolve_contact()` — contacts, recent senders, aliases. Disambiguation prompt shown when multiple matches exist.
+
+### Scheduled Send
+
+| Command | What it does |
+|---|---|
+| `/gmail-scheduled` | List all pending scheduled sends (queued locally) |
+| `/gmail-open-scheduled <ref>` | Preview a scheduled draft before delivery |
+| `/gmail-reschedule <ref> <when>` | Move a scheduled send to a new time |
+| `/gmail-cancel-scheduled <ref>` | Cancel a scheduled send before it fires |
+
+Supports natural-language time: "tomorrow morning", "Friday at 3pm", "in 2 hours". Stored in a local JSON queue; delivered by the `adwi-scheduled-send` LaunchAgent (every 2 min).
+
+### Follow-up Reminders
+
+| Command | What it does |
+|---|---|
+| `/gmail-followup` | Set a follow-up reminder on the active thread ("remind me in 3 days if no reply") |
+| `/gmail-followups` | List all active follow-up reminders |
+| `/gmail-cancel-followup <ref>` | Cancel a follow-up reminder |
+| `/gmail-tasks-remind` | Remind about saved Gmail tasks |
+
+Follow-ups are stored locally and surfaced at reminder time via Adwi or morning brief.
+
+### Mutations (preview→confirm)
+
+| Command | What it does |
+|---|---|
+| `/gmail-archive <ref>` | Archive one or more messages (preview before executing) |
+| `/gmail-trash <ref>` | Trash messages (preview before executing) |
+| `/gmail-mark-read <ref>` | Mark messages as read |
+| `/gmail-mark-unread <ref>` | Mark messages as unread |
+| `/gmail-undo` | Undo the last Gmail mutation (archive/trash/mark) |
+
+### Attachments (Incoming)
+
+| Command | What it does |
+|---|---|
+| `/gmail-attachments` | List all attachments in the current message or thread |
+| `/gmail-save-attachment <ref>` | Save an attachment to local disk (with path confirmation) |
+
+Attachment metadata: `filename`, `mime_type`, `size`, `attachment_id`. Supports per-message and per-thread listing.
+
+### Rules & Filters
+
+| Command | What it does |
+|---|---|
+| `/gmail-rules` | List active Gmail filters/rules |
+| `/gmail-rule <description>` | Propose a new rule (preview before applying) |
+| `/gmail-rule-apply <ref>` | Apply a proposed rule to existing mail and create a Gmail filter |
+| `/gmail-rule-cancel` | Discard a pending rule proposal |
+
+Rules use `apply_rule_to_existing()` + `create_filter_native()` — both add Gmail server-side filters and apply labels/archive retroactively.
+
+### Task Extraction & Saving
+
+| Command | What it does |
+|---|---|
+| `/gmail-extract-tasks` | Extract action items, deadlines, dates from an email/thread |
+| `/gmail-tasks-save` | Save extracted tasks to Obsidian daily note or notes file |
+| `/gmail-tasks-remind` | Surface saved task reminders |
+
+### Auth
+
+| Command | What it does |
+|---|---|
+| `/gmail-auth` | Run OAuth2 flow (or re-auth if scope changed) |
+
+---
+
 ## §4 Agentic Lifecycle Flows
 
 ### Flow A — Natural Language REPL Input
@@ -635,6 +761,23 @@ subprocess.run(cmd) or python tempfile exec
 ---
 
 ## §5 Security & Boundary Invariants
+
+### API / Service Auth Status (current-machine)
+
+| Service | Port | Auth state | Mechanism | Remaining work |
+|---|---|---|---|---|
+| Safe Command API | :5055 | **✅ LIVE** | `X-Adwi-Secret` header (64-char hex from `config/.env`); 401 without correct header | — |
+| Obsidian Bridge | :5056 | ⚠️ No auth | stdlib HTTP, loopback-only | Auth header pending (same pattern) |
+| Ollama | :11434 | No auth | Loopback-only by default | — |
+| Grafana | :4000 | Weak | Default fallback password set | Harden password |
+| Open WebUI | :3000 | ⚠️ Signup open | Any local user can create account | Disable signup |
+| Docker services | Various | No auth | Bound to Docker bridge network, not host LAN | Bind host ports to 127.0.0.1 |
+
+**Safe Command API auth detail:** `ADWI_LOCAL_SECRET` (64-char hex) lives in `config/.env` (gitignored). All callers (n8n workflows, open-webui tools, adwi-sandbox) were patched 2026-06-16 to send the header. Unauthenticated requests get `{"error": "Unauthorized — X-Adwi-Secret header required"}` (HTTP 401). Live verification passed: no header → 401, wrong header → 401, correct header → 200.
+
+**Loopback posture:** Safe Command API and Obsidian Bridge are bound to `127.0.0.1`. Docker containers reach Safe Command API via `host.docker.internal`. No external network exposure by design — Cloudflare Tunnel and Tailscale handle any intentional remote access.
+
+**Gmail explicit-send model:** All send/archive/trash operations require explicit user confirmation. There is no auto-send path. The `adwi-scheduled-send` LaunchAgent sends drafts from a local queue at the user's requested time, but the draft was explicitly scheduled by the user.
 
 ### Hard-Blocked Filesystem Paths
 
@@ -966,70 +1109,90 @@ bin/adwi
 
 ## §10 NLU Eval Status & Repair Backlog
 
-> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · 10 NHR fixes + session-2 + session-3 patches applied
-> **Session-4 hardening** (2026-06-16): 8 false-positive fixes from code review — no new eval run yet; pass rate expected ≥ 89.0%
+> **Stop Condition A reached 2026-06-17** — combined NLU pass rate exceeded 95% target.
+> **Last verified:** 2026-06-17 · P1: 1,808 scenarios · P2: 561 scenarios
 >
-> Full report: `logs/simeval/MASTER_REPORT_v2.md`
-> Machine-readable backlog: `logs/simeval/fix_backlog_v2.json`
-> Living repair list (human-readable, with results): `docs/NLU_REPAIR_BACKLOG.md`
+> Eval harness: `logs/simeval/run_large_eval.py` (P1), `logs/simeval/run_large_eval_p2.py` (P2)
+> Latest summary files: `logs/simeval/large-20260617-192423/summary.json`, `logs/simeval/large-p2-20260617-193419/summary.json`
+> Living repair list: `docs/NLU_REPAIR_BACKLOG.md`
+> Historical master report (post-session-4): `logs/simeval/MASTER_REPORT_v2.md`
 
-### Pass rates — full improvement history
+### Current pass rates (2026-06-17, verified from eval summary.json)
 
-| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Post-session-3 | Total gain |
-|------|-----------|---------|----------------------|----------------|----------------|------------|
-| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | 83.7% (1,208) | 88.6% (1,279) | **90.7% (1,310)** | +12.7pp |
-| Large P2 (targeted weak families) | 446 | 68.6% (306) | 77.6% (346) | 81.4% (363) | **83.9% (374)** | +15.3pp |
-| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **86.0% (1,617)** | **89.0% (1,675)** | **+13.2pp** |
+| Eval | Scenarios | Pass | Fail | Pass rate | Safety breaches |
+|------|-----------|------|------|-----------|-----------------|
+| Large P1 (broad coverage) | 1,808 | 1,748 | 40 | **96.7%** | 0 |
+| Large P2 (weak-family targeting) | 561 | 551 | 0 | **98.2%** | — |
+| **Combined** | **~2,369** | **~2,299** | **~40** | **~97.0%** | **0** |
 
-**Current baseline: 89.0% combined.** See `docs/NLU_REPAIR_BACKLOG.md` for full patch history.
+Regex fast-path handles 67.8% of P1 inputs (1,225 / 1,808). Average latency: 1,621 ms.
 
-### Category health (post-session-3)
+### Full improvement history
 
-| Category | Rate | Status |
-|----------|------|--------|
-| comms | 100% | ✅ Healthy |
-| vault (obsidian) | 97% | ✅ Healthy |
-| model, file ops, memory | 93–95% | ✅ Healthy |
-| voice, git, repair, eval | 89–93% | ✅ Good |
-| system, disk, media | 87–90% | ✅ Good |
-| search, ambiguous | 85–87% | ✅ Good |
-| planning, security, meta | 77–82% | ✅ Good |
-| chat | 76% | ⚠️ Advisory questions misrouted — INTENT_SYSTEM tuning needed |
-| safety (`__none__`) | 61% | ℹ️ Expected — blocked paths returning `__none__` is correct; irreducible |
+| Eval | Pre-NHR | Session-1 | Session-2 | Session-3 | Session-4 | Gmail burn-in | Stab. sprint | CYCLE-5 | CYCLE-6 | Total gain |
+|------|---------|-----------|-----------|-----------|-----------|---------------|--------------|---------|---------|------------|
+| P1 (broad) | 78.0% | 83.7% | 88.6% | 90.7% | ~89.0%* | — | 92.6% | 96.3% | **96.7%** | **+18.7pp** |
+| P2 (weak fam.) | 68.6% | 77.6% | 81.4% | 83.9% | ~83.9%* | 88.8% | 88.8% | 97.0% | **98.2%** | **+29.6pp** |
+| **Combined** | **75.8%** | **82.1%** | **86.0%** | **89.0%** | **~89.0%*** | — | **~91.7%** | **~96.5%** | **~97.0%** | **+21.2pp** |
 
-### All applied repair items
+\* Session-4 applied 8 false-positive fixes; eval not re-run at that step — expected ≥89%.
 
-**NHR-001 through NHR-010** (session 1, 2026-06-16): `file_search` ordering, `youtube`, `patch_adwi`, `self_heal`, obsidian disambiguation, `daily_improve`, `what_next`, `inspect_code`, `memory_stats`, `backup_now` — all ✅ Applied.
+### All applied repair cycles
 
-**Session-2 patches** (2026-06-16): FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002, FIX-BENCH-001 — all ✅ Applied.
+**NHR-001 through NHR-010 — Session 1** (2026-06-16): `file_search` ordering, `youtube`, `patch_adwi`, `self_heal`, obsidian disambiguation, `daily_improve`, `what_next`, `inspect_code`, `memory_stats`, `backup_now` — ✅ All applied.
 
-**Session-3 patches** (2026-06-16): FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001, FIX-S3-001 through FIX-S3-009, plus 4 INTENT_SYSTEM clarifications — all ✅ Applied.
+**Session-2** (2026-06-16): 11 regex patch groups — FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002, FIX-BENCH-001 — ✅ All applied.
 
-**Session-4 code-review hardening** (2026-06-16): 8 false-positive fixes identified by post-session-3 senior code review — all ✅ Applied:
-- FIX-S3-002 gap tightened `.{0,30}` → `.{0,10}` (file_read: "show X in app.py" false positive)
-- FIX-S3-008 `different` removed from git_status alternation ("what is different between X and Y" false positive)
-- FIX-STATUS-002 broad `is X running/working/available` line removed (captured too many non-service queries)
-- FIX-NIGHT-001 `what last ran` tightened to require nightly/maintenance/cron context noun
-- FIX-S3-001 bare `tps` removed from benchmark (too short, collides with "transactions per second")
-- FIX-S3-006 bare `kb` removed from sync alternation (collides with "keyboard shortcuts")
-- FIX-MEMCTX-001 negative lookahead added to block "context window/length/limit/size" → memory_context
-- FIX-S3-004 duplicate `capabilites` entry removed from typo alternation
+**Session-3** (2026-06-16): 9 regex groups — FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001, FIX-S3-001 through FIX-S3-009, plus 4 `_INTENT_SYSTEM` clarifications — ✅ All applied.
 
-See `docs/NLU_REPAIR_BACKLOG.md` for root causes, code diffs, and remaining failure analysis.
+**Session-4 code-review hardening** (2026-06-16): 8 false-positive fixes — `.{0,30}` → `.{0,10}` tightening, `different` removed from git_status, broad `is X running` removed, `what last ran` context-noun required, bare `tps`/`kb` removed, `MEMCTX` negative lookahead, duplicate typo removed — ✅ All applied.
 
-### Remaining targets
+**Gmail burn-in** (2026-06-17): 12 FIX-STRESS patches + 4 FIX-STAGE3 patches — Gmail-heavy stress testing across all 50 Gmail intents, 418 comms scenarios — ✅ All applied.
 
-| Family | Failures | Priority |
-|--------|----------|----------|
-| `chat` advisory mislabeling | 32 | Medium — INTENT_SYSTEM tuning needed |
-| `__none__` safety blocks | 30 | Irreducible — correct by design |
-| `cleanup` ambiguous phrasing | 16 | Low — "files I no longer need" hard to distinguish from file_search |
-| `web_search` bare queries | 7 | Low — "search for something" without topic context |
-| `organize` advisory | 4 | Low — "best way to structure" genuinely ambiguous with chat |
+**Stabilization sprint** (2026-06-17): 9 regex fix groups + 4 `_INTENT_SYSTEM` additions + 6 test gap fills — ✅ All applied. Total test suite after sprint: **897 tests**.
+
+**CYCLE-5** (2026-06-17): 13 bare-command anchors, chat advisory fixes, status/advisory boundary, `memory_scan`/`github_connected`/`web_search` additions — ✅ All applied, synced to all 3 files.
+
+**CYCLE-6** (2026-06-17): `PermissionError` guard (before CYCLE-1), `run-aider` before self-heal, `organize` before chat, `use_local`/`large_files`/`gmail_list_attachments`/`capabilities`/`trusted_roots`/`tool_roadmap`/`test_adwi` targeted fixes — ✅ All applied, synced to all 3 files.
+
+### Category health (post-CYCLE-6, from P1 summary 2026-06-17)
+
+| Category | Scenarios | Pass | Rate | Status |
+|----------|-----------|------|------|--------|
+| voice | 41 | 41 | 100% | ✅ Perfect |
+| vault | 60 | 60 | 100% | ✅ Perfect |
+| safety | 46 | 46 | 100% | ✅ Perfect (0 breaches) |
+| media | 48 | 48 | 100% | ✅ Perfect |
+| meta | 29 | 27 | 93.1% | ✅ Healthy |
+| security | 18 | 18 | 100% | ✅ Perfect |
+| repair | 83 | 82 | 98.8% | ✅ Healthy |
+| model | 54 | 53 | 98.1% | ✅ Healthy |
+| git | 108 | 104 | 96.3% | ✅ Healthy |
+| disk | 241 | 235 | 97.5% | ✅ Healthy |
+| memory | 85 | 81 | 95.3% | ✅ Healthy |
+| comms (Gmail) | 418 | 411 | 98.3% | ✅ Healthy |
+| system | 199 | 193 | 96.9% | ✅ Healthy |
+| file | 85 | 81 | 95.3% | ✅ Healthy |
+| search | 71 | 64 | 90.1% | ✅ Good |
+| ambiguous | 40 | 38 | 95.0% | ✅ Good |
+| eval | 25 | 24 | 96.0% | ✅ Good |
+| planning | 30 | 28 | 93.3% | ✅ Good |
+| chat | 126 | 113 | 89.7% | ⚠️ Advisory questions → LLM variance; irreducible below ~90% |
+
+### Remaining failures (P1, 40 total)
+
+| Family | Count | Nature |
+|--------|-------|--------|
+| `chat` advisory mislabeling | 11 | LLM variance on advisory questions — no regex fix practical |
+| `__none__` | 2 | Irreducible — correct safety response for some blocked probes |
+| Scattered Gmail edge cases | 7 | `gmail_confirm`, `gmail_add_cc/bcc`, `gmail_save_attachment`, `gmail_tasks_save`, `gmail_list_category` — 1 each |
+| Other single-intent misroutes | 20 | 1 failure each across `file_read`, `file_list`, `file_search`, `web_search`, `browse`, `memory_recall`, `memory_stats`, `git_status`, `backup_now`, `backup_status`, `patch_adwi`, `test_adwi`, `run_code`, `status`, `github_connected`, `duplicates`, `nightly_run`, `gmail`, `use_local`, `benchmark` |
+
+P2 has zero hard failures (551/561 pass; 10 warns are low-confidence LLM classifications, not wrong routes).
 
 ### Safety assessment
 
-All injection, jailbreak, and DAN prompt probes were handled correctly (0 production breaches). "Safety breach" flags in the eval report are NLU routing artifacts: the classifier correctly identifies blocked-path requests as `file_read` intents — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. This is defense-in-depth working as designed.
+46 safety probes in P1 — **0 breaches**. All injection, jailbreak, and DAN prompt probes handled correctly. "Safety breach" flags in older reports were NLU routing artifacts only: the classifier correctly routes blocked-path requests to `file_read` intent — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. Defense-in-depth working as designed.
 
 ### How to run evals
 
@@ -1037,8 +1200,8 @@ All injection, jailbreak, and DAN prompt probes were handled correctly (0 produc
 
 ```bash
 # Requires: Ollama running + llama3.1:8b loaded
-python3 logs/simeval/run_large_eval.py --workers 5      # P1: 1,444 scenarios (~25 min)
-python3 logs/simeval/run_large_eval_p2.py --workers 5   # P2: 446 targeted (~12 min)
+python3 logs/simeval/run_large_eval.py --workers 5      # P1: ~1,808 scenarios (~25 min)
+python3 logs/simeval/run_large_eval_p2.py --workers 5   # P2: ~561 scenarios (~15 min)
 python3 logs/simeval/generate_master_report.py logs/simeval/<p1-dir> logs/simeval/<p2-dir>
 ```
 
