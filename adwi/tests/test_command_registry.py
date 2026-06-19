@@ -571,5 +571,131 @@ class TestPhase4AssistantCommands(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 68)
 
 
+# ── Phase 5 wiring verification ───────────────────────────────────────────────
+
+
+class TestPhase5GmailReadOnlyCommands(unittest.TestCase):
+    """
+    Verify Phase 5A Gmail listing/display commands are registered via discover()
+    and dispatch correctly.
+
+    Phase 5A = read-only Gmail commands only (no send/compose/archive/trash/mark).
+    Mutating Gmail commands are deferred to Phase 6.
+
+    Note on _GMAIL_CTX writes: list_drafts and list_attachments write in-memory
+    cache entries (_GMAIL_CTX["draft_list"] / ["attachments"]) — that is their
+    expected behavior, identical to the elif chain. They do NOT mutate Gmail state.
+    """
+
+    PHASE5A = [
+        "/gmail-show-draft",
+        "/gmail-followups",
+        "/gmail-scheduled",
+        "/gmail-drafts",
+        "/gmail-rules",
+        "/gmail-promos",
+        "/gmail-spam",
+        "/gmail-social",
+        "/gmail-attachments",
+    ]
+
+    # Commands explicitly deferred to Phase 6 (mutating)
+    PHASE6_DEFERRED = [
+        "/gmail-compose",
+        "/gmail-send-draft",
+        "/gmail-archive",
+        "/gmail-trash",
+        "/gmail-mark-read",
+        "/gmail-mark-unread",
+        "/gmail-cancel-draft",
+        "/gmail-forward",
+        "/gmail-rule-apply",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase5a_commands_registered(self):
+        for cmd in self.PHASE5A:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase5a_commands_dispatch_true(self):
+        for cmd in self.PHASE5A:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase5a_commands_have_descriptions(self):
+        for cmd in self.PHASE5A:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase5a_commands_in_gmail_category(self):
+        for cmd in self.PHASE5A:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertEqual(spec.category, "gmail")
+
+    def test_gmail_intents_wired(self):
+        expected = {
+            "gmail_show_draft": "/gmail-show-draft",
+            "gmail_list_followups": "/gmail-followups",
+            "gmail_list_scheduled": "/gmail-scheduled",
+            "gmail_list_drafts": "/gmail-drafts",
+            "gmail_filter_list": "/gmail-rules",
+            "gmail_list_category": "/gmail-promos",
+            "gmail_list_attachments": "/gmail-attachments",
+        }
+        for intent, cmd in expected.items():
+            with self.subTest(intent=intent):
+                self.assertIn(intent, self.reg.intent_map())
+                self.assertEqual(self.reg.intent_map()[intent], cmd)
+
+    def test_drafts_passes_args(self):
+        """/gmail-drafts <filter> must reach handler (dispatch returns True)."""
+        result = self.reg.dispatch("/gmail-drafts invoice", {})
+        self.assertTrue(result)
+
+    def test_attachments_passes_args(self):
+        result = self.reg.dispatch("/gmail-attachments thread", {})
+        self.assertTrue(result)
+
+    def test_rules_passes_args(self):
+        result = self.reg.dispatch("/gmail-rules finance", {})
+        self.assertTrue(result)
+
+    def test_phase6_mutating_commands_not_in_registry(self):
+        """Mutating Gmail commands must NOT be in the registry yet (deferred to Phase 6)."""
+        for cmd in self.PHASE6_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain in elif chain only until Phase 6",
+                )
+
+    def test_mutating_commands_still_return_false(self):
+        """Unregistered mutating commands return False so elif chain fires."""
+        for cmd in self.PHASE6_DEFERRED:
+            with self.subTest(cmd=cmd):
+                result = self.reg.dispatch(cmd, {})
+                self.assertFalse(result, f"{cmd} must fall through to elif chain")
+
+    def test_gmail_module_loaded_via_discover(self):
+        fresh = CommandRegistry()
+        count = fresh.discover("adwi.commands")
+        self.assertGreaterEqual(count, 7, "7 modules including gmail")
+        self.assertIsNotNone(fresh.get("/gmail-show-draft"))
+
+    def test_total_unique_commands_at_phase5(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 77)
+
+
 if __name__ == "__main__":
     unittest.main()
