@@ -376,11 +376,15 @@ REGEX_INTENTS = [
     (re.compile(r"\b(repeated|appear.{0,10}more\s+than\s+once)\b.{0,30}(files?|photos?|images?)?\b", re.I), "duplicates"),
     (re.compile(r"\bdedupe\b.{0,30}(workspace|folder|files?|photos?)?\b", re.I), "duplicates"),
     (re.compile(r"\bdup(l?i?k|l?ic|l?ik)at", re.I), "duplicates"),
+    (re.compile(r"\bdupkicat", re.I), "duplicates"),
 
     # FIX-CLEAN-004: "clean up downloads/cache/trash" → cleanup BEFORE organize steals "clean up…folder"
     (re.compile(r"\bclean\s*up\b.{0,40}(my\s+)?(downloads?|desktop|cache|temp|trash|junk)\b", re.I), "cleanup"),
     (re.compile(r"\bremove\b.{0,20}\b(unneeded|unnecessary|useless|unwanted|redundant)\b", re.I), "cleanup"),
     (re.compile(r"\b(suggest|find|show)\b.{0,20}\bthings?\b.{0,25}\b(i\s+(can|could|should)\s+)?(remove|delete|trash|get\s+rid\s+of)\b", re.I), "cleanup"),
+    # rag_search beats obsidian_search for notes+summarize and "my notes" (with typo tolerance)
+    (re.compile(r"\bsea?r?a?ch\s+(?:my\s+)?notes?\b.{0,40}(?:then|and)\s+summariz", re.I), "rag_search"),
+    (re.compile(r"\bsea?r?a?ch\s+my\s+notes?\b", re.I), "rag_search"),
     # FIX-NOTES-001: "find/search notes about X" → obsidian_search BEFORE rag_search swallows it
     (re.compile(r"\b(find|search)\s+(for\s+)?notes?\b.{0,20}\b(about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\bsearch\s+(for\s+)?notes?\s+for\b", re.I), "obsidian_search"),
@@ -535,6 +539,9 @@ REGEX_INTENTS = [
     (re.compile(r"\b(browser.?delegate|delegate.{0,15}browser|safe.?browse|browser.?agent|browser.?task)\b", re.I), "browser_delegate"),
     (re.compile(r"\b(use\s+browser\s+to|use\s+playwright\s+to|automate.{0,20}browser)\b", re.I), "browser_delegate"),
     # ── Research operator (deep cited research, BEFORE web_search) ───────────────
+    # research beats web_search for "research latest/recent X"
+    (re.compile(r"\bresearch\b.{0,20}\b(latest|recent|current|new)\b.{0,30}\b(changes?|updates?|protocol|spec|release|version)", re.I), "research"),
+    (re.compile(r"\bresearch\b.{0,10}\b(MCP|LLM|AI|ML|API|protocol|framework)\b", re.I), "research"),
     (re.compile(r"\b(deep.?dive|deep.?research|research.?brief|cited\s+report|research\s+report)\b", re.I), "research"),
     (re.compile(r"\b(research|investigate|look\s+into).{0,15}\bfor\s+me\b", re.I), "research"),
     (re.compile(r"\b(write|produce|generate)\b.{0,20}\b(research|cited|sourced)\s+(brief|report|summary)\b", re.I), "research"),
@@ -590,6 +597,7 @@ REGEX_INTENTS = [
     (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(logs?|nightly|daily|adwi)\b", re.I), "nightly_status"),
     (re.compile(r"\bgenerate\b.{0,15}\bmy\s+daily\s+report\b", re.I), "nightly_status"),
     (re.compile(r"^nightly\s*$", re.I), "nightly_status"),
+    (re.compile(r"\bwhat\b.{0,20}\blast\s+(?:thing|item|task|job)\b.{0,10}\bran\b", re.I), "nightly_status"),
     (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered).{0,20}\b(nightly|maintenance|cron)\b", re.I), "nightly_status"),
     (re.compile(r"\b(nightly|night.?run)\b.{0,20}(status|log|report|last run|results?)\b", re.I), "nightly_status"),
     (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
@@ -697,6 +705,7 @@ REGEX_INTENTS = [
     (re.compile(r"(connected to|link(ed)? to|set up).{0,20}(github|git hub)", re.I), "github_connected"),
     # CYCLE-5: "adwi check github"
     (re.compile(r"\badwi\b.{0,15}\bcheck\b.{0,20}\bgithub\b", re.I), "github_connected"),
+    (re.compile(r"\bgi[th]?h?ub\b.{0,15}\b(?:connected?|link(ed)?|status|ok|working)\b", re.I), "github_connected"),
 
     # CYCLE-6: trusted_roots and tool_roadmap — regex-anchored
     (re.compile(r"\badwi\s+trusted\s+roots?\b", re.I), "trusted_roots"),
@@ -735,6 +744,8 @@ REGEX_INTENTS = [
     # ── Code execution ───────────────────────────────────────────────────────────
     # FIX-PATCH-002: "run code improvement" / "self-improve adwi" → patch_adwi BEFORE run_code steals them
     (re.compile(r"\b(self.?improv|auto.?improv).{0,15}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(update|upgrade|refresh)\b.{0,15}\badwi\b.{0,20}\b(codebase|source|code|scripts?)\b", re.I), "patch_adwi"),
+    (re.compile(r"\badwi\b.{0,10}\b(codebase|source\s+code|scripts?)\b.{0,20}\b(update|upgrade|refresh|improve)\b", re.I), "patch_adwi"),
     (re.compile(r"\b(run|execute)\b.{0,15}(self.?improv|autonomous\s*(code\s*)?improv)", re.I), "patch_adwi"),
     (re.compile(r"\b(run|execute)\b.{0,15}\bcode\s+improv", re.I), "patch_adwi"),
     # run_code: added \b around "test" to prevent "latest" ⊇ "test" false positive (FIX-RC-001)
