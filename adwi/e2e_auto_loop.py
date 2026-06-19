@@ -228,6 +228,327 @@ KNOWN_REGEX_FIXES: list[dict] = [
         ),
         "minimum_examples": 2,
     },
+    # ── FIX-E2E-005a: add run_code to P1 eval INTENT_SYSTEM (insert before research) ──
+    {
+        "id":             "FIX-E2E-005a",
+        "description":    "Add run_code description to run_large_eval.py — insert before research",
+        "target_intents": ["run_code"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"how to make AI faster.*\n.*'research'",
+        "old_str": (
+            '    "                      \'what affects inference speed\', \'how to make AI faster\' → \'chat\'.\\n"\n'
+            '    "   \'research\'       : deep multi-source research with citations. \'research X for me\',\\n"\n'
+            '    "                      \'do deep research on X\', \'deep dive into X\', \'write a research brief on X\',\\n"\n'
+            '    "                      \'cited report on X\', \'save research about X\'. NOT \'web_search\' (quick lookup).\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'what affects inference speed\', \'how to make AI faster\' → \'chat\'.\\n"\n'
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+            '    "   \'research\'       : deep multi-source research with citations. \'research X for me\',\\n"\n'
+            '    "                      \'do deep research on X\', \'deep dive into X\', \'write a research brief on X\',\\n"\n'
+            '    "                      \'cited report on X\', \'save research about X\'. NOT \'web_search\' (quick lookup).\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-005b: add run_code to P2 eval INTENT_SYSTEM ──────────────────────
+    {
+        "id":             "FIX-E2E-005b",
+        "description":    "Add run_code description to run_large_eval_p2.py — insert before research",
+        "target_intents": ["run_code"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"show me the context.*\n.*'research'",
+        "old_str": (
+            '    "                      \'current session context\', \'context summary\', \'show me the context\'.\\n"\n'
+            '    "   \'research\'       : deep multi-source research with citations. \'research X for me\',\\n"\n'
+            '    "                      \'do deep research on X\', \'deep dive into X\', \'write a research brief on X\',\\n"\n'
+            '    "                      \'cited report on X\', \'save research about X\'. NOT \'web_search\' (quick lookup).\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'current session context\', \'context summary\', \'show me the context\'.\\n"\n'
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+            '    "   \'research\'       : deep multi-source research with citations. \'research X for me\',\\n"\n'
+            '    "                      \'do deep research on X\', \'deep dive into X\', \'write a research brief on X\',\\n"\n'
+            '    "                      \'cited report on X\', \'save research about X\'. NOT \'web_search\' (quick lookup).\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-006a: expand file_search P1 — add locate examples ────────────────
+    {
+        "id":             "FIX-E2E-006a",
+        "description":    "Expand file_search in run_large_eval.py — add locate examples, NOT file_list",
+        "target_intents": ["file_search"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'file_search'.*pattern.*\n.*'git_status'",
+        "old_str": (
+            '    "   \'file_search\'    : search the filesystem for files by name, extension, or pattern.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'file_search\'    : search the filesystem for files by name, extension, or pattern.\\n"\n'
+            '    "                      \'locate requirements.txt\', \'locate docker-compose.yml\',\\n"\n'
+            '    "                      \'find all dockerfile variants\', \'locate the eval runner\'.\\n"\n'
+            '    "                      \'locate X\' → file_search NOT file_list. \'find files\' → file_search.\\n"\n'
+        ),
+        "minimum_examples": 3,
+    },
+    # ── FIX-E2E-006b: expand git_status P1 — add "any changes" examples ──────────
+    {
+        "id":             "FIX-E2E-006b",
+        "description":    "Expand git_status in run_large_eval.py — add changes/history examples",
+        "target_intents": ["git_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'git_status'.*staged/unstaged.*\n.*'nightly_status'",
+        "old_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+            '    "                      \'are there any changes\', \'recent change history\',\\n"\n'
+            '    "                      \'show recent commits\', \'are there uncommitted changes\'.\\n"\n'
+            '    "                      ANYTHING about git state → git_status, NOT \'status\' (service health).\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-006c: expand nightly_status P1 — add log/last-ran examples ────────
+    {
+        "id":             "FIX-E2E-006c",
+        "description":    "Expand nightly_status in run_large_eval.py — add show-logs/last-ran examples",
+        "target_intents": ["nightly_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'nightly_status'.*last ran\.",
+        "old_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran and what it produced.\\n"\n'
+            '    "                      \'show me the logs\', \'what was the last thing that ran\',\\n"\n'
+            '    "                      \'nightly status\', \'when did nightly last run\'.\\n"\n'
+            '    "                      NOT \'status\' (service health). NOT \'memory_curate\'.\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-007a: expand self_heal P1 — add repair/errored examples ──────────
+    {
+        "id":             "FIX-E2E-007a",
+        "description":    "Expand self_heal in run_large_eval.py — add repair/errored examples",
+        "target_intents": ["self_heal"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'self_heal'.*WITHOUT pasting",
+        "old_str": (
+            '    "   \'self_heal\'      : user says service is broken WITHOUT pasting an actual error message.\\n"\n'
+            '    "                      \'fix my setup\', \'adwi is broken\', \'something is broken\', \'self-heal\'.\\n"\n'
+            '    "                      \'doctor\' is ONLY for EXPLICIT deep health-check requests (\'run doctor\', \'full health check\').\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'self_heal\'      : user says service is broken WITHOUT pasting an actual error message.\\n"\n'
+            '    "                      \'fix my setup\', \'adwi is broken\', \'something is broken\', \'self-heal\',\\n"\n'
+            '    "                      \'adwi please repair\', \'something errored out help\'.\\n"\n'
+            '    "                      \'doctor\' is ONLY for EXPLICIT deep health-check requests (\'run doctor\', \'full health check\').\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-007b: expand self_heal P2 ────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-007b",
+        "description":    "Expand self_heal in run_large_eval_p2.py — add repair/errored examples",
+        "target_intents": ["self_heal"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'self_heal'.*WITHOUT pasting.*\n.*'fix my setup'.*'self-heal'\.",
+        "old_str": (
+            '    "   \'self_heal\'      : user says service is broken WITHOUT pasting an actual error message.\\n"\n'
+            '    "                      \'fix my setup\', \'something is broken\', \'self-heal\'.\\n"\n'
+            '    "                      \'doctor\' is ONLY for EXPLICIT deep health-check requests.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'self_heal\'      : user says service is broken WITHOUT pasting an actual error message.\\n"\n'
+            '    "                      \'fix my setup\', \'something is broken\', \'self-heal\',\\n"\n'
+            '    "                      \'adwi please repair\', \'something errored out help\'.\\n"\n'
+            '    "                      \'doctor\' is ONLY for EXPLICIT deep health-check requests (\'run doctor\').\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-008a: expand benchmark P1 — add GPU tokens/sec example ───────────
+    {
+        "id":             "FIX-E2E-008a",
+        "description":    "Expand benchmark in run_large_eval.py — add GPU tokens/sec example",
+        "target_intents": ["benchmark"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'how many tokens per second', 'time the model'",
+        "old_str": (
+            '    "                      \'run a speed test\', \'how many tokens per second\', \'time the model\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'run a speed test\', \'how many tokens per second\',\\n"\n'
+            '    "                      \'how many tokens can my GPU do per second\', \'time the model\'.\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-008b: expand benchmark P2 — same GPU example ─────────────────────
+    {
+        "id":             "FIX-E2E-008b",
+        "description":    "Expand benchmark in run_large_eval_p2.py — add GPU tokens/sec example",
+        "target_intents": ["benchmark"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'how many tokens per second', 'time the model'",
+        "old_str": (
+            '    "                      \'run a speed test\', \'how many tokens per second\', \'time the model\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'run a speed test\', \'how many tokens per second\',\\n"\n'
+            '    "                      \'how many tokens can my GPU do per second\', \'time the model\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-009a: expand sync P1 — add NOT-list for chat disambiguation ──────
+    {
+        "id":             "FIX-E2E-009a",
+        "description":    "Expand sync in run_large_eval.py — add NOT-list for update-adwi/smarter cases",
+        "target_intents": ["sync", "chat"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'sync'.*ONLY when user says 'sync' or 'update knowledge base'\.",
+        "old_str": (
+            '    "   \'sync\'           : sync adwi knowledge base to Open WebUI — ONLY when user says \'sync\' or \'update knowledge base\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'sync\'           : sync adwi knowledge base to Open WebUI — ONLY when user explicitly says \'sync\'\\n"\n'
+            '    "                      or \'update knowledge base\'. NOT for vague update/manage requests:\\n"\n'
+            '    "                      NOT \'update adwi\', \'make adwi smarter\', \'sync everything\',\\n"\n'
+            '    "                      \'update my knowledge\', \'manage my data\' → those are \'chat\' or \'what_next\'.\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-010a: expand what_next P1 — add "missing from adwi" example ──────
+    {
+        "id":             "FIX-E2E-010a",
+        "description":    "Expand what_next in run_large_eval.py — add what's missing from adwi",
+        "target_intents": ["what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'generate a todo list for adwi' → what_next\.",
+        "old_str": (
+            '    "                      \'what should I refactor in adwi\', \'generate a todo list for adwi\' → what_next.\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'what should I refactor in adwi\', \'generate a todo list for adwi\',\\n"\n'
+            '    "                      \'what\'s missing from adwi\' → what_next.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-010b: expand what_next P2 — same ─────────────────────────────────
+    {
+        "id":             "FIX-E2E-010b",
+        "description":    "Expand what_next in run_large_eval_p2.py — add what's missing from adwi",
+        "target_intents": ["what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'generate a todo list for adwi' → what_next\.",
+        "old_str": (
+            '    "                      \'what should I refactor in adwi\', \'generate a todo list for adwi\' → what_next.\\n"\n'
+        ),
+        "new_str": (
+            '    "                      \'what should I refactor in adwi\', \'generate a todo list for adwi\',\\n"\n'
+            '    "                      \'what\'s missing from adwi\' → what_next.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-011a: expand file_read P1 — add display example ──────────────────
+    {
+        "id":             "FIX-E2E-011a",
+        "description":    "Expand file_read in run_large_eval.py — add display example, NOT inspect_code",
+        "target_intents": ["file_read"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'file_read'.*read and display.*\n.*'file_list'",
+        "old_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+            '    "                      \'show me X.py\', \'display adwi main file\', \'print the contents of X\'.\\n"\n'
+            '    "                      NOT inspect_code (which analyzes). \'display X file\' → file_read.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-012a: add cleanup to P1 eval — insert after old_files ────────────
+    {
+        "id":             "FIX-E2E-012a",
+        "description":    "Add cleanup description to run_large_eval.py — insert after old_files",
+        "target_intents": ["cleanup"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'old_files'.*\n.*'gmail'",
+        "old_str": (
+            '    "   \'old_files\'      : find files older than a time period\\n"\n'
+            '    "   \'gmail\'          : questions about email, inbox, messages\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'old_files\'      : find files older than a time period\\n"\n'
+            '    "   \'cleanup\'        : delete/remove/purge unwanted files/data. \'can you help me delete stuff\',\\n"\n'
+            '    "                      \'purge old downloads\', \'remove leftover installers\', \'clean up junk\'.\\n"\n'
+            '    "                      Key: delete/remove/purge + files/data → cleanup. NOT organize. NOT old_files.\\n"\n'
+            '    "   \'gmail\'          : questions about email, inbox, messages\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-012b: add cleanup to P2 eval — insert after old_files ────────────
+    {
+        "id":             "FIX-E2E-012b",
+        "description":    "Add cleanup description to run_large_eval_p2.py — insert after old_files",
+        "target_intents": ["cleanup"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'old_files'.*\n.*'gmail'",
+        "old_str": (
+            '    "   \'old_files\'      : find files older than a time period\\n"\n'
+            '    "   \'gmail\'          : questions about email, inbox, messages\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'old_files\'      : find files older than a time period\\n"\n'
+            '    "   \'cleanup\'        : delete/remove/purge unwanted files/data. \'can you help me delete stuff\',\\n"\n'
+            '    "                      \'purge old downloads\', \'remove leftover installers\', \'clean up junk\'.\\n"\n'
+            '    "                      Key: delete/remove/purge + files/data → cleanup. NOT organize. NOT old_files.\\n"\n'
+            '    "   \'gmail\'          : questions about email, inbox, messages\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-013a: expand git_status P2 ───────────────────────────────────────
+    {
+        "id":             "FIX-E2E-013a",
+        "description":    "Expand git_status in run_large_eval_p2.py — add changes/history examples",
+        "target_intents": ["git_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'git_status'.*staged/unstaged.*\n.*'memory_context'",
+        "old_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+            '    "                      \'are there any changes\', \'recent change history\',\\n"\n'
+            '    "                      \'show recent commits\', \'are there uncommitted changes\'.\\n"\n'
+            '    "                      ANYTHING about git state → git_status, NOT \'status\' (service health).\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-014a: add run_code to adwi_cli.py INTENT_SYSTEM ──────────────────
+    {
+        "id":             "FIX-E2E-014a",
+        "description":    "Add run_code description to adwi_cli.py INTENT_SYSTEM (insert before web_search)",
+        "target_intents": ["run_code"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"those are.*run_code.*\n.*ONLY use when.*image",
+        "old_str": (
+            '    "                      → those are \'nightly_status\', \'what_next\', \'run_code\', or \'chat\'.\\n"\n'
+            '    "                      ONLY use when prompt explicitly asks for an image/picture/photo/drawing.\\n"\n'
+            '    "   \'web_search\'     : explicit request for internet/web search\\n"\n'
+        ),
+        "new_str": (
+            '    "                      → those are \'nightly_status\', \'what_next\', \'run_code\', or \'chat\'.\\n"\n'
+            '    "                      ONLY use when prompt explicitly asks for an image/picture/photo/drawing.\\n"\n'
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+            '    "   \'web_search\'     : explicit request for internet/web search\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
 ]
 
 
