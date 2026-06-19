@@ -53,7 +53,7 @@
 | `MODEL_MAIN` | `adwi:latest` |
 | `MODEL_NLU_FALLBACK` | `qwen3:0.6b` |
 | `MODEL_VISION` | `minicpm-v:latest` |
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:MODELS -->
 
 ### Model Role Matrix
@@ -98,7 +98,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 - `arguments` — typed key-value slots fed straight into command handlers
 
 **Qdrant few-shot collection:** `nlu_fixtures` · 96 seed fixtures · scored at `score_threshold=0.5` · provisioned via `python3 adwi/memory.py provision-nlu`
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:NLU -->
 
 ---
@@ -111,7 +111,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | Port | Service | Layer | Purpose |
 |---|---|---|---|
 | — | config/infra_ports.json not found | — | run bin/generate-manifest |
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:INFRA_PORTS -->
 
 ### Docker Container Inventory
@@ -119,7 +119,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 <!-- AUTO:SERVICES -->
 | Service | Port | Status |
 |---|---|---|
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:SERVICES -->
 
 ### macOS LaunchAgents
@@ -137,7 +137,7 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 | `openwebui-knowledge-watcher` | KeepAlive |
 | `phoenix` | KeepAlive |
 | `qdrant` | on demand |
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:AGENTS -->
 
 ### Data Flow Topology
@@ -181,7 +181,7 @@ External World
 
 Start: `cd local-ai-stack && docker compose up -d prometheus loki promtail grafana node-exporter cadvisor`
 Dashboard: http://localhost:4000 (user: suneel)
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:MONITORING -->
 
 ---
@@ -282,7 +282,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **web**: `/web-search`
 **what**: `/what-next`
 **youtube**: `/youtube`
-*Auto-updated: 2026-06-18*
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:COMMANDS -->
 
 ### Full Command Reference
@@ -1005,8 +1005,8 @@ python3 -m py_compile adwi/adwi_cli.py && echo "still compiles"
 | 9 | Security Core: PathValidator, OTel Telemetry, Fast NLU Bypass | deny-first path containment; OTLP→Phoenix traces with credential redaction; Qdrant ≥0.88 score skip of 8B LLM (43 ms → <5 ms fast path) | `adwi/path_validator.py · adwi/telemetry.py · adwi/nlu_fast_path.py` |
 | 10 | SimLab: Bounded Continuous Eval & Self-Improvement Harness | hardware/thermal gates; ephemeral sandbox; SHA-256 failure fingerprinting; Tier A/B/C improvement proposals; immutable golden baseline (100% required); auto git-rollback on regression; 41 unit tests, 0 warnings | `adwi/simlab/ (11 modules)` |
 
-All 10 phases verified on 2026-06-18. Each phase committed atomically as an independent transactional unit.
-*Auto-updated: 2026-06-18*
+All 10 phases verified on 2026-06-19. Each phase committed atomically as an independent transactional unit.
+*Auto-updated: 2026-06-19*
 <!-- /AUTO:PHASES -->
 
 ---
