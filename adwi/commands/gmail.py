@@ -1,13 +1,24 @@
 """
-commands/gmail.py — Gmail listing and display commands (Phase 5A, read-only).
+commands/gmail.py — Gmail listing, display, and bounded mutating commands (Phases 5A + 6).
 
-These commands fetch and display Gmail state without sending, modifying, or
-deleting messages, drafts, or rules. Some cache results to _GMAIL_CTX (e.g.
-draft_list, attachments) as in-memory state for subsequent commands — that is
-their expected behavior, identical to the elif chain they replace.
+Phase 5A (read-only): show-draft, followups, scheduled, drafts, rules, promos,
+spam, social, attachments.
 
-Mutating Gmail commands (compose, send, archive, trash, mark, confirm, cancel,
-forward, schedule, filter-apply, etc.) are deferred to Phase 6.
+Phase 6A (preview→confirm/cancel/undo cluster): archive, trash, mark-read,
+mark-unread, confirm (with /confirm alias), cancel, undo. All mutations require
+an explicit /gmail-confirm step — the preview commands only stage the action in
+_GMAIL_CTX["pending"]; no live Gmail API call until confirm is issued.
+
+Phase 6B (filter rule cluster): rule-build, rule-apply, rule-cancel. Rule
+creation goes through a pending_rule preview step before apply.
+
+Phase 7 (draft lifecycle cluster): compose, send-draft, cancel-draft, forward.
+Compose and forward accept NL text args; send-draft and cancel-draft take no
+args and use inline input() confirmations for safety.
+
+Deferred to Phase 8+: draft-reply, rewrite, update-subject, add-cc/bcc,
+open-draft, delete-draft, schedule-send, cancel-scheduled, reschedule,
+followup-reminder, extract-tasks, triage, attachment mutations.
 """
 
 from __future__ import annotations
@@ -33,7 +44,7 @@ def _cli():
     return sys.modules["adwi_cli"]
 
 
-# ── Handlers ──────────────────────────────────────────────────────────────────
+# ── Phase 5A handlers (read-only) ─────────────────────────────────────────────
 
 
 def _show_draft(args: str, ctx: dict) -> None:
@@ -72,10 +83,77 @@ def _attachments(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_list_attachments(args)
 
 
+# ── Phase 6A handlers (preview→confirm/cancel/undo cluster) ───────────────────
+
+
+def _archive(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_archive(args)
+
+
+def _trash(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_trash_emails(args)
+
+
+def _mark_read(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_mark_read(args)
+
+
+def _mark_unread(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_mark_unread(args)
+
+
+def _confirm(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_confirm()
+
+
+def _cancel_action(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_cancel()
+
+
+def _undo(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_undo()
+
+
+# ── Phase 7 handlers (draft lifecycle cluster) ────────────────────────────────
+
+
+def _compose(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_compose(args)
+
+
+def _send_draft(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_send_draft()
+
+
+def _cancel_draft(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_cancel_draft()
+
+
+def _forward(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_forward(args)
+
+
+# ── Phase 6B handlers (filter rule build→apply/cancel cluster) ────────────────
+
+
+def _rule_build(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_filter_build(args)
+
+
+def _rule_apply(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_filter_apply(args)
+
+
+def _rule_cancel(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_filter_cancel(args)
+
+
 # ── Registration ──────────────────────────────────────────────────────────────
 
 
 def register(registry: "CommandRegistry") -> None:
+    # Phase 5A — read-only listing/display
+
     registry.register(
         "/gmail-show-draft",
         description="Show the current pending Gmail draft",
@@ -139,3 +217,115 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_list_attachments"],
         args_schema={"filter": "str?"},
     )(_attachments)
+
+    # Phase 6A — preview→confirm/cancel/undo cluster
+
+    registry.register(
+        "/gmail-archive",
+        description="Archive the current email or matching emails (preview before apply)",
+        category="gmail",
+        intents=["gmail_archive"],
+        args_schema={"query": "str?"},
+    )(_archive)
+
+    registry.register(
+        "/gmail-trash",
+        description="Trash the current email or matching emails (preview before apply)",
+        category="gmail",
+        intents=["gmail_trash"],
+        args_schema={"query": "str?"},
+    )(_trash)
+
+    registry.register(
+        "/gmail-mark-read",
+        description="Mark the current email or matching emails as read (preview before apply)",
+        category="gmail",
+        intents=["gmail_mark_read"],
+        args_schema={"query": "str?"},
+    )(_mark_read)
+
+    registry.register(
+        "/gmail-mark-unread",
+        description="Mark the current email or matching emails as unread (preview before apply)",
+        category="gmail",
+        intents=["gmail_mark_unread"],
+        args_schema={"query": "str?"},
+    )(_mark_unread)
+
+    registry.register(
+        "/gmail-confirm",
+        description="Confirm a pending Gmail action (archive / trash / mark)",
+        category="gmail",
+        aliases=["/confirm"],
+        intents=["gmail_confirm"],
+    )(_confirm)
+
+    registry.register(
+        "/gmail-cancel",
+        description="Cancel the current pending Gmail action",
+        category="gmail",
+        intents=["gmail_cancel"],
+    )(_cancel_action)
+
+    registry.register(
+        "/gmail-undo",
+        description="Undo the last Gmail mutation (archive / trash / mark)",
+        category="gmail",
+        intents=["gmail_undo"],
+    )(_undo)
+
+    # Phase 6B — filter rule build→apply/cancel cluster
+
+    registry.register(
+        "/gmail-rule",
+        description="Build a Gmail filter rule from natural language (preview before apply)",
+        category="gmail",
+        intents=["gmail_filter_build"],
+        args_schema={"description": "str?"},
+    )(_rule_build)
+
+    registry.register(
+        "/gmail-rule-apply",
+        description="Apply the pending Gmail filter rule",
+        category="gmail",
+        intents=["gmail_filter_apply"],
+    )(_rule_apply)
+
+    registry.register(
+        "/gmail-rule-cancel",
+        description="Cancel the pending Gmail filter rule without applying",
+        category="gmail",
+        intents=["gmail_filter_cancel"],
+    )(_rule_cancel)
+
+    # Phase 7 — draft lifecycle cluster
+
+    registry.register(
+        "/gmail-compose",
+        description="Compose a new email draft with contact resolution and CC/BCC support",
+        category="gmail",
+        intents=["gmail_compose"],
+        args_schema={"instruction": "str?"},
+    )(_compose)
+
+    registry.register(
+        "/gmail-send-draft",
+        description="Send the current pending Gmail draft (shows preview, requires confirmation)",
+        category="gmail",
+        intents=["gmail_send_draft"],
+    )(_send_draft)
+
+    registry.register(
+        "/gmail-cancel-draft",
+        description="Cancel and delete the current pending Gmail draft",
+        category="gmail",
+        intents=["gmail_cancel_draft"],
+    )(_cancel_draft)
+
+    registry.register(
+        "/gmail-forward",
+        description="Forward the current email to a new recipient (creates a forward draft for review)",
+        category="gmail",
+        intents=["gmail_forward"],
+        args_schema={"target": "str?"},
+    )(_forward)

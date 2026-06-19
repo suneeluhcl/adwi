@@ -238,15 +238,8 @@ class CommandRegistry:
         return True
 
     def _lookup(self, name: str) -> Optional[CommandSpec]:
-        """Exact match first, then try stripping trailing args from longer names."""
-        spec = self._commands.get(name)
-        if spec:
-            return spec
-        # Allow prefix: "/fix-error some text" when command is "/fix-error"
-        for cmd_name in self._commands:
-            if name.startswith(cmd_name + "-") or name == cmd_name:
-                return self._commands[cmd_name]
-        return None
+        """Exact lookup by registered name or alias."""
+        return self._commands.get(name)
 
     @staticmethod
     def _call(spec: CommandSpec, args: str, ctx: dict) -> None:
