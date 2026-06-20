@@ -204,6 +204,42 @@ class TestIntentDispatch(unittest.TestCase):
         )
         self.assertEqual(self.received[-1][0], "/tmp/file.txt")
 
+    def test_dispatch_intent_size_mb_flattened_when_no_string_slot(self):
+        """size_mb slot must survive flattening when no string slot is present."""
+        @self.reg.register("/large-files", description="large files", intents=["large_files"])
+        def _h(args, ctx):
+            self.received.append((args, ctx))
+
+        self.reg.dispatch_intent("large_files", {"size_mb": 500}, {})
+        self.assertEqual(self.received[-1][0], "500")
+
+    def test_dispatch_intent_days_flattened_when_no_string_slot(self):
+        """days slot must survive flattening when no string slot is present."""
+        @self.reg.register("/old-files", description="old files", intents=["old_files"])
+        def _h(args, ctx):
+            self.received.append((args, ctx))
+
+        self.reg.dispatch_intent("old_files", {"days": 365}, {})
+        self.assertEqual(self.received[-1][0], "365")
+
+    def test_dispatch_intent_string_slot_wins_over_size_mb(self):
+        """path slot takes priority over size_mb in flattening order."""
+        @self.reg.register("/large-files-2", description="lf2", intents=["large_files_2"])
+        def _h(args, ctx):
+            self.received.append((args, ctx))
+
+        self.reg.dispatch_intent("large_files_2", {"path": "/tmp", "size_mb": 500}, {})
+        self.assertEqual(self.received[-1][0], "/tmp")
+
+    def test_dispatch_intent_empty_slots_return_empty_string(self):
+        """All slots absent → args_str is empty string, not None."""
+        @self.reg.register("/noarg-cmd", description="noarg", intents=["noarg_intent"])
+        def _h(args, ctx):
+            self.received.append((args, ctx))
+
+        self.reg.dispatch_intent("noarg_intent", {}, {})
+        self.assertEqual(self.received[-1][0], "")
+
 
 # ── Discovery ─────────────────────────────────────────────────────────────────
 
@@ -1335,9 +1371,9 @@ class TestPhase11GmailScheduleCluster(unittest.TestCase):
     def test_schedule_cluster_intents_wired(self):
         expected = {
             "gmail_schedule_send": "/gmail-schedule",
-            "gmail_cancel_scheduled": "/gmail-cancel-scheduled",
+            "gmail_cancel_scheduled_send": "/gmail-cancel-scheduled",
             "gmail_reschedule_send": "/gmail-reschedule",
-            "gmail_open_scheduled": "/gmail-open-scheduled",
+            "gmail_open_scheduled_draft": "/gmail-open-scheduled",
         }
         for intent, cmd in expected.items():
             with self.subTest(intent=intent):
@@ -1896,7 +1932,7 @@ class TestPhase16BGmailInboxNavigation(unittest.TestCase):
     def test_phase16b_intents_wired(self):
         expected = {
             "gmail_auth":          "/gmail-auth",
-            "gmail_inbox":         "/gmail",
+            "gmail":               "/gmail",
             "gmail_read":          "/gmail-read",
             "gmail_open":          "/gmail-open",
             "gmail_thread":        "/gmail-thread",

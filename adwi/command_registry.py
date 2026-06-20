@@ -228,11 +228,18 @@ class CommandRegistry:
         spec = self._commands.get(canonical)
         if not spec:
             return False
-        # Flatten typed slots to a positional args string
+        # Flatten typed slots to a positional args string.
+        # Numeric threshold slots (size_mb, days) are stringified as final
+        # fallbacks so they are not silently dropped when no string slot is set.
+        _size_mb = args.get("size_mb")
+        _days    = args.get("days")
         args_str = (
             args.get("path") or args.get("url") or
             args.get("query") or args.get("description") or
-            args.get("target") or ""
+            args.get("target") or
+            (str(int(_size_mb)) if _size_mb is not None else "") or
+            (str(int(_days))    if _days    is not None else "") or
+            ""
         )
         self._call(spec, args_str, ctx)
         return True

@@ -593,7 +593,7 @@ def register(registry: "CommandRegistry") -> None:
         "/gmail-cancel-scheduled",
         description="Cancel a pending scheduled send by index, ID, or most recent (confirm required)",
         category="gmail",
-        intents=["gmail_cancel_scheduled"],
+        intents=["gmail_cancel_scheduled_send"],
         args_schema={"ref": "str?"},
     )(_cancel_scheduled)
 
@@ -609,7 +609,7 @@ def register(registry: "CommandRegistry") -> None:
         "/gmail-open-scheduled",
         description="Load the draft from a pending scheduled send into session context for editing",
         category="gmail",
-        intents=["gmail_open_scheduled"],
+        intents=["gmail_open_scheduled_draft"],
         args_schema={"ref": "str?"},
     )(_open_scheduled)
 
@@ -713,7 +713,7 @@ def register(registry: "CommandRegistry") -> None:
         aliases=["/inbox"],
         description="Show Gmail inbox (optionally filtered by query)",
         category="gmail",
-        intents=["gmail_inbox"],
+        intents=["gmail"],
         args_schema={"query": "str?"},
     )(_gmail_inbox)
 
