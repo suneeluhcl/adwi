@@ -1709,5 +1709,180 @@ class TestTrustBaselineRouting(unittest.TestCase):
         self.assertEqual(_classify("tldr"), "gmail_summarize")
 
 
+class TestReliabilityCycle1Regressions(unittest.TestCase):
+    """
+    Regression suite for the 6 NLU patterns added in Reliability Cycle 1
+    (reliability-2026-06-20 branch, FIX-REL-001 through FIX-REL-006).
+
+    Each test pins a previously-failing scenario so any future regex edit that
+    breaks these routes is caught before eval.
+    """
+
+    # FIX-REL-001: "size hogs on my disk" → large_files
+    def test_size_hogs_singular(self):
+        self.assertEqual(_classify("what's a size hog on my disk"), "large_files")
+
+    def test_size_hogs_plural(self):
+        self.assertEqual(_classify("size hogs on my disk"), "large_files")
+
+    def test_disk_hog(self):
+        self.assertEqual(_classify("what are the disk hogs"), "large_files")
+
+    def test_space_hogs(self):
+        self.assertEqual(_classify("show me space hogs"), "large_files")
+
+    # FIX-REL-002: "files untouched for months" → old_files
+    def test_untouched_for_months(self):
+        self.assertEqual(_classify("files untouched for months"), "old_files")
+
+    def test_untouched_for_years(self):
+        self.assertEqual(_classify("show files untouched for years"), "old_files")
+
+    def test_files_untouched(self):
+        self.assertEqual(_classify("find files untouched"), "old_files")
+
+    def test_untouched_in_weeks(self):
+        self.assertEqual(_classify("what's been untouched in weeks"), "old_files")
+
+    # FIX-REL-003: "hasn't been used in 2 years" → old_files
+    def test_hasnt_been_used_in_2_years(self):
+        self.assertEqual(_classify("what hasn't been used in 2 years"), "old_files")
+
+    def test_hasnt_been_touched_in_6_months(self):
+        self.assertEqual(_classify("files that hasn't been touched in 6 months"), "old_files")
+
+    def test_havent_been_accessed_in_1_year(self):
+        self.assertEqual(_classify("find things I haven't accessed in 1 year"), "old_files")
+
+    def test_has_not_been_opened_in_3_months(self):
+        self.assertEqual(_classify("files that has not been opened in 3 months"), "old_files")
+
+    def test_have_not_been_used_in_2_years(self):
+        self.assertEqual(_classify("apps that have not been used in 2 years"), "old_files")
+
+    # FIX-REL-004: "find backup scripts" → file_search
+    def test_find_backup_scripts(self):
+        self.assertEqual(_classify("find backup scripts"), "file_search")
+
+    def test_find_all_scripts(self):
+        self.assertEqual(_classify("find all scripts in the project"), "file_search")
+
+    def test_find_python_scripts(self):
+        self.assertEqual(_classify("find python scripts"), "file_search")
+
+    # FIX-REL-005: "find all dockerfile variants" → file_search
+    def test_find_dockerfile(self):
+        self.assertEqual(_classify("find all dockerfile variants"), "file_search")
+
+    def test_find_makefile(self):
+        self.assertEqual(_classify("find makefile"), "file_search")
+
+    def test_find_requirements(self):
+        self.assertEqual(_classify("find requirements files"), "file_search")
+
+    def test_find_procfile(self):
+        self.assertEqual(_classify("find Procfile"), "file_search")
+
+    # FIX-REL-006: "what's in my home directory" → file_list
+    def test_whats_in_home(self):
+        self.assertEqual(_classify("what's in my home directory"), "file_list")
+
+    def test_whats_inside_root(self):
+        self.assertEqual(_classify("what's inside the root folder"), "file_list")
+
+    def test_whats_in_project_dir(self):
+        self.assertEqual(_classify("what's in the project dir"), "file_list")
+
+
+class TestReliabilityCycle2Regressions(unittest.TestCase):
+    """
+    Regression suite for the 6 NLU patterns added in Reliability Cycle 2
+    (FIX-REL-007 through FIX-REL-012).  These were LLM-path-only scenarios
+    in prior evals; now covered by regex to reduce Ollama dependency.
+    """
+
+    # FIX-REL-007: backup now / commit and push / save to github → backup_now
+    def test_backup_now(self):
+        self.assertEqual(_classify("backup now"), "backup_now")
+
+    def test_commit_and_push(self):
+        self.assertEqual(_classify("commit and push everything"), "backup_now")
+
+    def test_push_and_commit(self):
+        self.assertEqual(_classify("push and commit"), "backup_now")
+
+    def test_save_work_to_github(self):
+        self.assertEqual(_classify("save my work to github"), "backup_now")
+
+    def test_save_changes_to_github(self):
+        self.assertEqual(_classify("save changes to github"), "backup_now")
+
+    # Regression: backup_now must not capture backup_status / backup_log
+    def test_backup_status_not_backup_now(self):
+        self.assertEqual(_classify("backup status"), "backup_status")
+
+    def test_last_backup_not_backup_now(self):
+        self.assertEqual(_classify("when was the last backup"), "backup_status")
+
+    def test_backup_log_not_backup_now(self):
+        self.assertEqual(_classify("backup log"), "backup_log")
+
+    # FIX-REL-008: disk capacity / how packed → disk_usage
+    def test_disk_capacity_check(self):
+        self.assertEqual(_classify("disk capacity check"), "disk_usage")
+
+    def test_how_packed_is_my_disk(self):
+        self.assertEqual(_classify("how packed is my disk"), "disk_usage")
+
+    def test_disk_utilization(self):
+        self.assertEqual(_classify("disk utilization report"), "disk_usage")
+
+    def test_disk_full(self):
+        self.assertEqual(_classify("is the disk full"), "disk_usage")
+
+    # FIX-REL-009: list the contents of → file_list
+    def test_list_contents_of(self):
+        self.assertEqual(_classify("list the contents of logs/"), "file_list")
+
+    def test_list_contents_in(self):
+        self.assertEqual(_classify("list contents in adwi/"), "file_list")
+
+    def test_list_contents_no_prep(self):
+        self.assertEqual(_classify("list contents"), "file_list")
+
+    # FIX-REL-010: locate <filename> → file_search
+    def test_locate_requirements_txt(self):
+        self.assertEqual(_classify("locate requirements.txt"), "file_search")
+
+    def test_locate_yaml_config(self):
+        self.assertEqual(_classify("locate all yaml configs"), "file_search")
+
+    def test_locate_dockerfile(self):
+        self.assertEqual(_classify("locate Dockerfile"), "file_search")
+
+    # FIX-REL-011: search for scripts/configs → file_search
+    def test_search_for_shell_scripts(self):
+        self.assertEqual(_classify("search for shell scripts"), "file_search")
+
+    def test_search_for_configs(self):
+        self.assertEqual(_classify("search for configs"), "file_search")
+
+    # FIX-REL-012: local llm / run local model → use_local
+    def test_local_llm_please(self):
+        self.assertEqual(_classify("local llm please"), "use_local")
+
+    def test_local_model(self):
+        self.assertEqual(_classify("local model"), "use_local")
+
+    def test_run_local_model(self):
+        self.assertEqual(_classify("run local model"), "use_local")
+
+    def test_switch_model_to_local(self):
+        self.assertEqual(_classify("switch model to local"), "use_local")
+
+    def test_use_local_inference(self):
+        self.assertEqual(_classify("use local inference"), "use_local")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

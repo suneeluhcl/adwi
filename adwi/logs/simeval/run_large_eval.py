@@ -340,6 +340,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bfiles?\b.{0,30}(take\s+up|taking\s+up|using)\b.{0,20}(the\s+)?most\s+(room|space|storage)\b", re.I), "large_files"),
     (re.compile(r"\b(which|what)\b.{0,10}files?\b.{0,30}(use|take|using|taking).{0,10}(the\s+)?most\s+(space|room)\b", re.I), "large_files"),
     (re.compile(r"\bfiles?\b.{0,20}exceed(ing)?\b.{0,10}\d+\s*(gb|mb|gigabyte|megabyte)\b", re.I), "large_files"),
+    # FIX-REL-001: "size hogs on my disk"
+    (re.compile(r"\b(size|disk|space)\s*hogs?\b", re.I), "large_files"),
 
     # ── Disk / space (narrowed to disk/space/storage objects only) ───────────────
     # FIX-SPRINT-005: advisory "what generates/causes disk usage" → skip disk_usage (LLM handles as chat)
@@ -352,6 +354,9 @@ REGEX_INTENTS = [
     (re.compile(r"\bwhat.s\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),
     (re.compile(r"\bhow\s+much\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),
     (re.compile(r"\bcheck\b.{0,10}\b(my\s+)?(disk|storage|space)\b", re.I), "disk_usage"),
+    # FIX-REL-008: "disk capacity check", "how packed is my disk"
+    (re.compile(r"\bdisk\b.{0,20}\b(capacity|utiliz|occupi|packed)", re.I), "disk_usage"),
+    (re.compile(r"\b(how\s+)?(packed|full)\b.{0,20}\b(disk|drive|storage)\b", re.I), "disk_usage"),
     (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
 
     # FIX-SPRINT-004: "purge old X", "remove leftover X" → cleanup BEFORE old_files steals them
@@ -370,6 +375,11 @@ REGEX_INTENTS = [
     (re.compile(r"\bfiles?\b.{0,20}\b(?:neglect(?:ed)?|forgotten|never\s+open(?:ed)?)\b", re.I), "old_files"),
     (re.compile(r"\bfiles?\b.{0,30}\bnever\s+(?:open(?:ed)?|used|touched|accessed)\b", re.I), "old_files"),
     (re.compile(r"\bhaven.t.{0,10}(used|opened|accessed|touched)\b.{0,30}(this\s+year|in\s+(a|one|two|several)\s+year)\b", re.I), "old_files"),
+    # FIX-REL-002: "files untouched for months"
+    (re.compile(r"\buntouched\b.{0,30}(for|in)\b.{0,20}(months?|years?|weeks?)", re.I), "old_files"),
+    (re.compile(r"\bfiles?\b.{0,20}\buntouched\b", re.I), "old_files"),
+    # FIX-REL-003: "what hasn't been used in 2 years" — digit-year, handles hasn't/haven't/has not
+    (re.compile(r"\b(?:haven.t|hasn.t|has\s+not|have\s+not)\b.{0,25}\b(?:been\s+)?(used|touched|opened|accessed)\b.{0,30}\bin\s+\d+\s+(?:months?|years?)\b", re.I), "old_files"),
 
     # ── Duplicates ───────────────────────────────────────────────────────────────
     (re.compile(r"(duplicate|identical|same file|copy|copies|redundant)", re.I), "duplicates"),
@@ -439,9 +449,23 @@ REGEX_INTENTS = [
     (re.compile(r"\bhelp\b.{0,15}\bclean\s+up\b.{0,20}\b(my\s+)?(drive|disk|mac|machine|computer|system)\b", re.I), "cleanup"),
     (re.compile(r"\b(find|search for|locate|look for)\b.{0,20}\bfiles?\b", re.I), "file_search"),
     (re.compile(r"\bfind (all |every )?.{0,10}\.(py|js|ts|yaml|yml|json|txt|md|sh|toml)\b", re.I), "file_search"),
+    # FIX-REL-004: "find backup scripts", "find test scripts"
+    (re.compile(r"\bfind\b.{0,30}\bscripts?\b", re.I), "file_search"),
+    # FIX-REL-005: "find all dockerfile variants"
+    (re.compile(r"\bfind\b.{0,20}(all\s+|every\s+)?(dockerfile|makefile|vagrantfile|jenkinsfile|procfile|requirements)\b", re.I), "file_search"),
+    # FIX-REL-010: "locate requirements.txt", "locate yaml configs", "locate Dockerfile"
+    (re.compile(r"\blocate\b.{0,50}\.(py|js|ts|yml|yaml|json|txt|sh|md|go|rb|java|sql|toml|cfg|ini|xml|csv|env)\b", re.I), "file_search"),
+    (re.compile(r"\blocate\b.{0,30}\b(files?|scripts?|configs?|folders?|dirs?)\b", re.I), "file_search"),
+    (re.compile(r"\b(find|locate)\b.{0,20}(all\s+|every\s+)?(dockerfile|makefile|vagrantfile|jenkinsfile|procfile)\b", re.I), "file_search"),
+    # FIX-REL-011: "search for shell scripts" — search for + script/config/folder nouns
+    (re.compile(r"\bsearch\s+for\b.{0,30}\b(scripts?|configs?|folders?)\b", re.I), "file_search"),
     (re.compile(r"\bls\b", re.I), "file_list"),
-    (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|content)\b", re.I), "file_list"),
+    # FIX-REL-009: "list the contents of X" — extend content → contents?
+    (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|contents?)\b", re.I), "file_list"),
+    (re.compile(r"\blist\s+(the\s+)?contents?\s+(of|in)\b", re.I), "file_list"),
     (re.compile(r"\bwhat\s+files?\b.{0,20}(are in|in|inside)\b", re.I), "file_list"),
+    # FIX-REL-006: "what's in my home directory"
+    (re.compile(r"\bwhat.s\b.{0,25}\b(in|inside)\b.{0,20}\b(my\s+)?(home|workspace|root|project|folder|dir(?:ectory)?)\b", re.I), "file_list"),
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
@@ -624,6 +648,10 @@ REGEX_INTENTS = [
     # CYCLE-6: "switch to a local one" / "switch from cloud to local"
     (re.compile(r"\b(switch|change|move)\b.{0,20}\bto\b.{0,15}\b(?:a\s+)?local\b.{0,20}\b(?:one|model|llm|ai)\b", re.I), "use_local"),
     (re.compile(r"\buse\b.{0,10}\b(qwen|llama|mistral|phi|gemma)\b", re.I), "use_local"),
+    # FIX-REL-012: "local llm please", "run local model", "switch model to local"
+    (re.compile(r"\blocal\s+(llm|model)\b", re.I), "use_local"),
+    (re.compile(r"\b(run|use|launch)\b.{0,10}\blocal\b.{0,10}\b(model|llm|ai|inference)\b", re.I), "use_local"),
+    (re.compile(r"\b(switch|change)\b.{0,20}\bmodel\b.{0,15}\bto\b.{0,10}\blocal\b", re.I), "use_local"),
     (re.compile(r"\b(switch|change|use)\b.{0,15}(to\s+)?(cloud model|cloud api|cloud llm|gemini|openai)\b", re.I), "use_cloud"),
     (re.compile(r"\bswitch to cloud\b", re.I), "use_cloud"),
 
@@ -637,7 +665,12 @@ REGEX_INTENTS = [
     (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
     (re.compile(r"\b(text.to.speech|tts\b|speak.{0,15}this|say.{0,20}(aloud|out loud)|read.{0,10}aloud|read.{0,10}this.{0,10}out)\b", re.I), "voice_out"),
 
-    # ── Backup status / log ──────────────────────────────────────────────────────
+    # ── Backup now / status / log ─────────────────────────────────────────────────
+    # FIX-REL-007: "backup now", "commit and push", "save work to github"
+    (re.compile(r"\bbackup\s+now\b", re.I), "backup_now"),
+    (re.compile(r"\bcommit\s+and\s+push\b", re.I), "backup_now"),
+    (re.compile(r"\bpush\s+and\s+commit\b", re.I), "backup_now"),
+    (re.compile(r"\bsave\b.{0,20}\b(my\s+)?(work|changes|code)\b.{0,20}\b(to\s+)?github\b", re.I), "backup_now"),
     (re.compile(r"\b(backup.{0,10}(status|health|check|recent|current)|last.{0,10}backup|when.{0,15}(was.{0,5})?backup)\b", re.I), "backup_status"),
     (re.compile(r"\bbackup.{0,15}(log|history|logs)\b", re.I), "backup_log"),
 
