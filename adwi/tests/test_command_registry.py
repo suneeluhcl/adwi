@@ -601,8 +601,8 @@ class TestPhase5GmailReadOnlyCommands(unittest.TestCase):
 
     # Commands still deferred after Phase 7 (Phase 8+)
     PHASE8_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -727,8 +727,8 @@ class TestPhase6GmailMutatingCommands(unittest.TestCase):
 
     # Commands still deferred after Phase 7 (Phase 8+)
     PHASE8_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -865,8 +865,8 @@ class TestPhase7GmailDraftLifecycleCommands(unittest.TestCase):
     ]
 
     PHASE8_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -983,8 +983,8 @@ class TestPhase8GmailDraftEditingCommands(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -1102,8 +1102,8 @@ class TestPhase9GmailDraftManagementCommands(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -1209,8 +1209,8 @@ class TestPhase10GmailDraftReply(unittest.TestCase):
     """
 
     PHASE12_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -1298,8 +1298,8 @@ class TestPhase11GmailScheduleCluster(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -1429,8 +1429,8 @@ class TestPhase12GmailFollowupCluster(unittest.TestCase):
     ]
 
     PHASE13_DEFERRED = [
-        "/gmail-triage",
-        "/gmail-triage",
+        "/gmail-attachment-save",
+        "/gmail-attachment-save",
     ]
 
     @classmethod
@@ -1547,7 +1547,7 @@ class TestPhase13GmailExtractTasksCluster(unittest.TestCase):
     ]
 
     PHASE14_DEFERRED = [
-        "/gmail-triage",
+        "/gmail-attachment-save",
         "/gmail-attachment-save",
     ]
 
@@ -1631,6 +1631,87 @@ class TestPhase13GmailExtractTasksCluster(unittest.TestCase):
 
     def test_total_unique_commands_at_phase13(self):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 108)
+
+
+# ── Phase 14 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase14GmailTriage(unittest.TestCase):
+    """
+    Verify Phase 14 /gmail-triage is registered via discover() and dispatches
+    correctly.
+
+    /gmail-triage: read-only inbox classification — fetches inbox via
+    gh.list_inbox_for_triage() (live Gmail API, read-only), runs LLM batch
+    classification into reply_needed/action_needed/fyi/noise buckets, populates
+    _GMAIL_CTX["candidates"] and ["triage_results"] for follow-up commands.
+    No input(), no mailbox mutation. Auth-checked (gmail-token.json).
+
+    This is the entire triage cluster — no sibling triage commands exist.
+
+    Deferred to Phase 15+: attachment mutations.
+    """
+
+    PHASE15_DEFERRED = [
+        "/gmail-attachment-save",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_triage_registered(self):
+        self.assertIsNotNone(self.reg.get("/gmail-triage"))
+
+    def test_triage_dispatches_true(self):
+        result = self.reg.dispatch("/gmail-triage", {})
+        self.assertTrue(result)
+
+    def test_triage_has_description(self):
+        spec = self.reg.get("/gmail-triage")
+        self.assertIsNotNone(spec)
+        self.assertGreater(len(spec.description), 0)
+
+    def test_triage_in_gmail_category(self):
+        self.assertEqual(self.reg.get("/gmail-triage").category, "gmail")
+
+    def test_triage_intent_wired(self):
+        self.assertIn("gmail_triage", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["gmail_triage"], "/gmail-triage")
+
+    def test_triage_passes_mode_args(self):
+        """/gmail-triage with mode text dispatches correctly."""
+        result = self.reg.dispatch("/gmail-triage reply needed", {})
+        self.assertTrue(result)
+
+    def test_triage_passes_urgency_args(self):
+        result = self.reg.dispatch("/gmail-triage urgent", {})
+        self.assertTrue(result)
+
+    def test_triage_passes_today_args(self):
+        result = self.reg.dispatch("/gmail-triage today", {})
+        self.assertTrue(result)
+
+    def test_phase15_deferred_not_in_registry(self):
+        """Attachment commands remain in elif chain (deferred to Phase 15+)."""
+        for cmd in self.PHASE15_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred until Phase 15",
+                )
+
+    def test_phase15_deferred_still_return_false(self):
+        for cmd in self.PHASE15_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"{cmd} must fall through to elif chain",
+                )
+
+    def test_total_unique_commands_at_phase14(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 109)
 
 
 if __name__ == "__main__":

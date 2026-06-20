@@ -43,7 +43,12 @@ _GMAIL_CTX["pending_tasks"]. tasks-save appends to Obsidian daily note via
 local Bridge HTTP (confirm required). tasks-remind creates follow-up reminders
 from staged tasks (confirm required, local store only).
 
-Deferred to Phase 14+: triage, attachment mutations.
+Phase 14 (triage): triage. Read-only LLM inbox classification — fetches inbox
+via gh.list_inbox_for_triage(), classifies into reply_needed/action_needed/fyi/
+noise buckets, populates _GMAIL_CTX["candidates"] + ["triage_results"]. No
+input(), no mailbox mutation.
+
+Deferred to Phase 15+: attachment mutations.
 """
 
 from __future__ import annotations
@@ -208,6 +213,13 @@ def _tasks_save(args: str, ctx: dict) -> None:
 
 def _tasks_remind(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_tasks_remind(args)
+
+
+# ── Phase 14 handler (triage) ─────────────────────────────────────────────────
+
+
+def _triage(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_triage(args)
 
 
 # ── Phase 9 handlers (draft management cluster) ───────────────────────────────
@@ -574,3 +586,13 @@ def register(registry: "CommandRegistry") -> None:
         category="gmail",
         intents=["gmail_tasks_remind"],
     )(_tasks_remind)
+
+    # Phase 14 — triage
+
+    registry.register(
+        "/gmail-triage",
+        description="Classify inbox emails into reply-needed/action-needed/fyi/noise (read-only, no mutation)",
+        category="gmail",
+        intents=["gmail_triage"],
+        args_schema={"filter": "str?"},
+    )(_triage)
