@@ -2569,5 +2569,132 @@ class TestPhase23DiagnosticsViewerCluster(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 147)
 
 
+# ── Elif-chain fallback integrity ─────────────────────────────────────────────
+
+
+class TestElifFallbackIntegrity(unittest.TestCase):
+    """
+    Verify that commands intentionally left in the elif chain (not migrated to
+    the registry) still return False from registry dispatch — so the caller
+    falls through to the elif chain as designed.
+
+    These are commands that require either:
+      - Interactive user input (input() calls)
+      - Arbitrary code execution (security surface too wide for registry)
+      - External side effects (network, iPhone, subprocess patching)
+      - Model routing (handled before elif chain in handle())
+
+    None of these should ever silently be consumed by the registry.
+    """
+
+    ELIF_ONLY = [
+        # Code / shell execution
+        "/run-python",
+        "/run-python print('hi')",
+        "/run-bash ls",
+        # Production code patching
+        "/implement-idea",
+        "/implement-idea add logging",
+        # External push / notification
+        "/notify",
+        "/notify hello",
+        # E2E subprocess launcher
+        "/e2e-auto-loop",
+        "/e2e-auto-loop --cycles 1",
+        # Interactive image generation (uses input() on bare call)
+        "/generate-image",
+        # Model routing (handled before registry in handle())
+        "/use-cloud",
+        "/use-local",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_elif_only_commands_not_registered(self):
+        """All elif-only commands must have no registry entry."""
+        # Use the canonical name (strip args) to look up
+        canonical_names = {
+            "/run-python", "/run-bash", "/implement-idea",
+            "/notify", "/e2e-auto-loop", "/generate-image",
+            "/use-cloud", "/use-local",
+        }
+        for name in canonical_names:
+            with self.subTest(cmd=name):
+                self.assertIsNone(
+                    self.reg.get(name),
+                    f"{name} must NOT be in the registry — belongs to elif chain",
+                )
+
+    def test_elif_only_dispatch_returns_false(self):
+        """dispatch() must return False for every elif-only command line."""
+        for line in self.ELIF_ONLY:
+            with self.subTest(line=line):
+                self.assertFalse(
+                    self.reg.dispatch(line, {}),
+                    f"dispatch('{line}') must return False to allow elif fallback",
+                )
+
+
+# ── Safety boundary: dangerous commands must stay out of registry ─────────────
+
+
+class TestSafetyBoundaryRegistry(unittest.TestCase):
+    """
+    Hard safety boundary: commands with external side effects or arbitrary
+    execution surfaces must NEVER be registered in CommandRegistry.
+
+    If any of these appear in the registry it means a migration accidentally
+    exposed a dangerous command to registry-first dispatch, which could bypass
+    the elif-chain guards and interactive confirmation flows.
+    """
+
+    DANGEROUS = [
+        # iPhone push — external network side effect
+        "/notify",
+        # E2E subprocess — may spawn adwi_cli.py patcher
+        "/e2e-auto-loop",
+        # Arbitrary code execution
+        "/run-python",
+        "/run-bash",
+        # Production code patcher
+        "/implement-idea",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_dangerous_commands_not_registered(self):
+        for cmd in self.DANGEROUS:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"SAFETY VIOLATION: {cmd} must never be in the CommandRegistry",
+                )
+
+    def test_dangerous_commands_dispatch_false(self):
+        for cmd in self.DANGEROUS:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"SAFETY VIOLATION: dispatch('{cmd}') must return False",
+                )
+
+    def test_dangerous_commands_not_in_all_names(self):
+        """Registry all_names() must not include any dangerous command name."""
+        all_names = set(self.reg.all_names())
+        for cmd in self.DANGEROUS:
+            with self.subTest(cmd=cmd):
+                self.assertNotIn(
+                    cmd,
+                    all_names,
+                    f"SAFETY VIOLATION: {cmd} appears in registry all_names()",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()
