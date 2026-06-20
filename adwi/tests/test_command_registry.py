@@ -501,15 +501,15 @@ class TestPhase3DiagnosticsCommands(unittest.TestCase):
         """Registry must now cover at least 61 unique command names."""
         self.assertGreaterEqual(len(set(self.reg.all_names())), 61)
 
-    def test_mutating_commands_not_in_phase3(self):
-        """eval-adwi and capability-audit were intentionally excluded (they write capabilities.json)."""
-        # They may be registered by a future phase — this test just confirms Phase 3 didn't add them
-        # (they are absent from the diagnostics module)
+    def test_mutating_commands_migrated_by_phase23(self):
+        """Phase 3 excluded eval-adwi and capability-audit; Phase 23 added them."""
+        # capability-audit → diagnostics.py (Phase 23)
+        # eval-adwi       → eval.py         (Phase 23)
         import adwi.commands.diagnostics as diag_mod
+        import adwi.commands.eval as eval_mod
         import inspect
-        source = inspect.getsource(diag_mod)
-        self.assertNotIn("cmd_eval_adwi", source)
-        self.assertNotIn("cmd_capability_audit", source)
+        self.assertIn("cmd_capability_audit", inspect.getsource(diag_mod))
+        self.assertIn("cmd_eval_adwi", inspect.getsource(eval_mod))
 
 
 # ── Phase 4 wiring verification ───────────────────────────────────────────────
