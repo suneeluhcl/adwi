@@ -35,6 +35,7 @@ import http.client
 import json
 import logging
 import os
+import re
 import time
 import urllib.request
 from pathlib import Path
@@ -55,6 +56,13 @@ ADWI_API_HOST = "127.0.0.1"
 ADWI_API_PORT = 5055
 TG_API_BASE   = "https://api.telegram.org"
 
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07]*\x07")
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI escape sequences from subprocess output before sending to Telegram."""
+    return _ANSI_RE.sub("", text)
+
 # ── Command allowlist ─────────────────────────────────────────────────────────
 # Maps Telegram /command → Safe Command API route already in ALLOWED_COMMANDS.
 # To add a command: it must first exist in server.py ALLOWED_COMMANDS; then add
@@ -64,6 +72,7 @@ TG_API_BASE   = "https://api.telegram.org"
 
 TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/help":           None,                      # handled locally — lists commands
+    "/ping":           None,                      # handled locally — bridge health check
     "/status":         "/adwi-status",
     "/doctor":         "/adwi-doctor",
     "/brief":          "/adwi-brief",
@@ -71,14 +80,19 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/git-status":     "/git-status-workspace",
     "/models":         "/adwi-models",
     "/watcher-status": "/adwi-watcher-status",
+    "/e2e-status":     "/adwi-e2e-auto-loop-status",   # read-only: shows running/idle + last result
+}
+
+_LOCAL_RESPONSES: dict[str, str] = {
+    "/ping": "Pong! Adwi Telegram bridge is alive.",
 }
 
 _HELP_LINES = [
-    "Adwi Telegram Bridge  —  v1 read-only commands:",
-    *[f"  {cmd:<14} → {route or 'this message'}"
+    "Adwi Telegram Bridge  —  read-only commands:",
+    *[f"  {cmd:<14} → {route or 'local'}"
       for cmd, route in sorted(TELEGRAM_COMMANDS.items())],
     "",
-    "Commands not listed here are rejected.",
+    f"Total: {len(TELEGRAM_COMMANDS)} commands. Unknown commands are rejected.",
 ]
 HELP_TEXT = "\n".join(_HELP_LINES)
 
@@ -160,7 +174,7 @@ def _call_adwi(route: str, secret: str) -> str:
             parts.append(f"[exit {rc}] {stderr[:300]}")
         elif rc != 0:
             parts.append(f"[exit {rc}]")
-        return "\n".join(parts) if parts else "(no output)"
+        return _strip_ansi("\n".join(parts) if parts else "(no output)")
     except Exception as exc:
         return f"[error] {exc}"
     finally:
@@ -258,17 +272,19 @@ def _handle_update(update: dict, token: str, allowed_uid: int, secret: str) -> N
 
     # 2. Command allowlist
     if cmd_token not in TELEGRAM_COMMANDS:
+        n = len(TELEGRAM_COMMANDS)
         _send_reply(
             token, chat_id,
-            f"Unknown command: {cmd_token!r}\n\nSend /help to see available commands.",
+            f"Unknown command: {cmd_token!r}\n\n"
+            f"Adwi has {n} commands. Send /help to see them all.",
         )
         return
 
     route = TELEGRAM_COMMANDS[cmd_token]
 
-    # 3. Local /help — no API call
+    # 3. Local handlers — no API call
     if route is None:
-        _send_reply(token, chat_id, HELP_TEXT)
+        _send_reply(token, chat_id, _LOCAL_RESPONSES.get(cmd_token, HELP_TEXT))
         return
 
     # 4. Dispatch via Safe Command API

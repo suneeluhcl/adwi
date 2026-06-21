@@ -141,7 +141,7 @@ def chk_ollama() -> tuple[str, str]:
         models = [m["name"] for m in data.get("models", [])]
         if not models:
             return "warn", "Ollama running but no models loaded — run: ollama pull adwi:latest llama3.1:8b"
-        required = ["llama3.1:8b"]
+        required = ["llama3.1:8b", "adwi:latest"]
         missing = [m for m in required if not any(m in n for n in models)]
         if missing:
             return "warn", f"Missing models: {', '.join(missing)}. Loaded: {', '.join(models[:4])}"
@@ -269,6 +269,78 @@ def chk_gitignore_secrets() -> tuple[str, str]:
     return "pass", "All critical secret patterns in .gitignore"
 
 
+# ── Remote-ingress safety checks ──────────────────────────────────────────────
+
+def _read_env_keys() -> dict[str, str]:
+    """Return key→value dict from adwi/config/.env. Callers must not print values."""
+    env_path = ADWI / "config" / ".env"
+    if not env_path.exists():
+        return {}
+    keys: dict[str, str] = {}
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, _, v = line.partition("=")
+            keys[k.strip()] = v.strip().strip('"').strip("'")
+    return keys
+
+
+def chk_local_secret() -> tuple[str, str]:
+    val = _read_env_keys().get("ADWI_LOCAL_SECRET", "")
+    if not val or val == "REPLACE_ME":
+        return "warn", "ADWI_LOCAL_SECRET not set — Safe Command API and Obsidian Bridge accept unauthenticated requests"
+    return "pass", "ADWI_LOCAL_SECRET configured (value not shown)"
+
+
+def chk_safe_command_api() -> tuple[str, str]:
+    env = _read_env_keys()
+    secret_val = env.get("ADWI_LOCAL_SECRET", "")
+    secret_configured = bool(secret_val) and secret_val != "REPLACE_ME"
+
+    # Static: verify the server source still binds to loopback only.
+    # Catches both: host = "0.0.0.0" and ThreadingHTTPServer(("0.0.0.0", ...)) forms.
+    server_py = ADWI / "services" / "command-api" / "server.py"
+    if server_py.exists():
+        content = server_py.read_text()
+        if '"0.0.0.0"' in content or "'0.0.0.0'" in content:
+            return "fail", "server.py binds to 0.0.0.0 — must be 127.0.0.1 only"
+
+    # Runtime: probe without auth header to verify the gate is active
+    try:
+        req = urllib.request.Request("http://127.0.0.1:5055/", method="GET")
+        with urllib.request.urlopen(req, timeout=2):
+            if secret_configured:
+                return "fail", "Safe Command API :5055 accepted unauthenticated request — auth not enforced despite ADWI_LOCAL_SECRET being set"
+            return "warn", "Safe Command API :5055 up — auth disabled (ADWI_LOCAL_SECRET not configured)"
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            if secret_configured:
+                return "pass", "Safe Command API :5055 up, auth enforced (401 on unauthenticated request)"
+            return "warn", "Safe Command API :5055 returned 401 but ADWI_LOCAL_SECRET not configured in .env"
+        return "warn", f"Safe Command API :5055 HTTP {e.code}"
+    except Exception:
+        return "warn", "Safe Command API not reachable at 127.0.0.1:5055 — run: python3 adwi/services/command-api/server.py"
+
+
+def chk_telegram_config() -> tuple[str, str]:
+    env = _read_env_keys()
+    token  = env.get("TELEGRAM_BOT_TOKEN", "")
+    uid    = env.get("TELEGRAM_ALLOWED_USER_ID", "")
+    secret = env.get("ADWI_LOCAL_SECRET", "")
+
+    token_ok  = bool(token)  and token  != "REPLACE_ME"
+    uid_ok    = bool(uid)    and uid    != "REPLACE_ME"
+    secret_ok = bool(secret) and secret != "REPLACE_ME"
+
+    if not token_ok:
+        return "pass", "Telegram bridge not configured (TELEGRAM_BOT_TOKEN not set)"
+    if not uid_ok:
+        return "fail", "TELEGRAM_BOT_TOKEN set but TELEGRAM_ALLOWED_USER_ID missing — bridge will not start"
+    if not secret_ok:
+        return "warn", "TELEGRAM_BOT_TOKEN and UID set but ADWI_LOCAL_SECRET missing — command API auth disabled"
+    return "pass", "Telegram bridge: token configured, allowed UID set, secret set"
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 CHECKS = [
@@ -277,11 +349,14 @@ CHECKS = [
     ("Core file presence", chk_key_files),
     ("Python syntax", chk_syntax),
     ("config/.env", chk_env_file),
+    ("Local control-plane secret", chk_local_secret),
     ("Ollama", chk_ollama),
     ("Docker services", chk_docker_services),
     ("Obsidian bridge", chk_obsidian_bridge),
     ("SearXNG", chk_searxng),
     ("Qdrant", chk_qdrant),
+    ("Safe Command API", chk_safe_command_api),
+    ("Telegram bridge config", chk_telegram_config),
     ("bin/adwi in PATH", chk_bin_executable),
     ("LaunchAgents", chk_launchagents),
     (".gitignore safety", chk_gitignore_secrets),

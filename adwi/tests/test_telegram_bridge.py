@@ -158,11 +158,20 @@ class TestCommandAllowlist(unittest.TestCase):
         calls = _api_calls(_make_update(ALLOWED_UID, "/watcher-status"))
         self.assertIn("/adwi-watcher-status", calls)
 
+    def test_e2e_status_routes_to_adwi_e2e_status(self):
+        calls = _api_calls(_make_update(ALLOWED_UID, "/e2e-status"))
+        self.assertIn("/adwi-e2e-auto-loop-status", calls)
+
     def test_help_lists_models_and_watcher(self):
         replies = _replies(_make_update(ALLOWED_UID, "/help"))
         self.assertEqual(len(replies), 1)
         self.assertIn("/models", replies[0])
         self.assertIn("/watcher-status", replies[0])
+
+    def test_help_lists_e2e_status(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/help"))
+        self.assertEqual(len(replies), 1)
+        self.assertIn("/e2e-status", replies[0])
 
 
 # ── 3. Dangerous commands rejected ───────────────────────────────────────────
@@ -181,6 +190,8 @@ class TestDangerousCommandsRejected(unittest.TestCase):
         "/git-commit",
         "/git-push",
         "/e2e-auto-loop",
+        "/e2e-start",            # must never reach API — starts background loop
+        "/e2e-cancel",           # must never reach API — cancels running loop
         "/nightly-run",
         "/gmail-send",
         "/gmail-confirm",
@@ -449,6 +460,92 @@ class TestDailyBriefFormatter(unittest.TestCase):
                 TOKEN, ALLOWED_UID, SECRET,
             )
         self.assertEqual(called_with, [], "Formatter must NOT be called for /doctor")
+
+
+# ── 9. /ping local handler ────────────────────────────────────────────────────
+
+class TestPingCommand(unittest.TestCase):
+    """/ping must reply instantly without any API call."""
+
+    def test_ping_replies_with_pong(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/ping"))
+        self.assertEqual(len(replies), 1)
+        self.assertIn("Pong", replies[0])
+
+    def test_ping_does_not_call_api(self):
+        calls = _api_calls(_make_update(ALLOWED_UID, "/ping"))
+        self.assertEqual(calls, [], "/ping must not call the Safe Command API")
+
+    def test_ping_in_command_table(self):
+        self.assertIn("/ping", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/ping"])
+
+    def test_ping_at_suffix_stripped(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/ping@MyAdwiBot"))
+        self.assertGreater(len(replies), 0)
+        self.assertIn("Pong", replies[0])
+
+
+# ── 10. ANSI stripping ────────────────────────────────────────────────────────
+
+class TestAnsiStripping(unittest.TestCase):
+    """ANSI escape sequences in subprocess output must be stripped before Telegram send."""
+
+    def test_plain_text_unchanged(self):
+        self.assertEqual(bridge._strip_ansi("hello world"), "hello world")
+
+    def test_color_escape_stripped(self):
+        self.assertEqual(bridge._strip_ansi("\x1b[32mGreen\x1b[0m"), "Green")
+
+    def test_bold_escape_stripped(self):
+        self.assertEqual(bridge._strip_ansi("\x1b[1mBold\x1b[0m"), "Bold")
+
+    def test_cursor_movement_stripped(self):
+        self.assertEqual(bridge._strip_ansi("\x1b[2Kupdate\x1b[2K"), "update")
+
+    def test_mixed_ansi_and_text(self):
+        result = bridge._strip_ansi("\x1b[33mWARN\x1b[0m: something happened")
+        self.assertEqual(result, "WARN: something happened")
+
+    def test_ansi_stripped_from_call_adwi_output(self):
+        """ANSI stripping must happen before reply is sent through _call_adwi pipeline."""
+        colored_output = "\x1b[32mOllama: running\x1b[0m"
+        sent: list[str] = []
+        with patch.object(bridge, "_call_adwi", return_value=bridge._strip_ansi(colored_output)), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._handle_update(
+                _make_update(ALLOWED_UID, "/status"),
+                TOKEN, ALLOWED_UID, SECRET,
+            )
+        # Verify no ANSI codes reached the sent messages
+        for msg in sent:
+            self.assertNotIn("\x1b[", msg)
+
+
+# ── 11. Denied-command UX ─────────────────────────────────────────────────────
+
+class TestDeniedCommandUX(unittest.TestCase):
+    """Unknown commands must return a clear message referencing /help and command count."""
+
+    def test_unknown_command_mentions_help(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/nonexistent"))
+        self.assertTrue(any("/help" in r for r in replies))
+
+    def test_unknown_command_mentions_count(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/nonexistent"))
+        n = str(len(bridge.TELEGRAM_COMMANDS))
+        self.assertTrue(any(n in r for r in replies),
+                        f"Denied message must include command count ({n})")
+
+    def test_unknown_command_does_not_reach_api(self):
+        calls = _api_calls(_make_update(ALLOWED_UID, "/fakecommand"))
+        self.assertEqual(calls, [])
+
+    def test_help_listed_in_command_table(self):
+        # /help must still list all current commands including /ping
+        replies = _replies(_make_update(ALLOWED_UID, "/help"))
+        self.assertIn("/ping", replies[0])
+        self.assertIn("/status", replies[0])
 
 
 if __name__ == "__main__":
