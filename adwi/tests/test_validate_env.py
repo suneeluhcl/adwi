@@ -466,6 +466,41 @@ class TestSyntaxCheck(unittest.TestCase):
         # Multiple filenames should appear in the detail
         self.assertIn("adwi_cli.py", detail)
 
+    def test_oserror_reported_as_fail(self):
+        """If subprocess.run raises OSError (e.g. python3 not found), chk_syntax must fail."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            for name in ["adwi_cli.py", "reason_engine.py", "memory.py", "nightly.py", "path_validator.py"]:
+                (tmp_path / name).touch()
+
+            def raise_os(*a, **k):
+                raise OSError("python3 not found")
+
+            with patch.object(venv, "ADWI", tmp_path), \
+                 patch("subprocess.run", side_effect=raise_os):
+                status, detail = venv.chk_syntax()
+
+        self.assertEqual(status, "fail")
+
+    def test_timeout_reported_as_fail(self):
+        """If subprocess.run raises TimeoutExpired, chk_syntax must fail gracefully."""
+        import subprocess
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            for name in ["adwi_cli.py", "reason_engine.py", "memory.py", "nightly.py", "path_validator.py"]:
+                (tmp_path / name).touch()
+
+            def raise_timeout(*a, **k):
+                raise subprocess.TimeoutExpired(cmd="python3", timeout=30)
+
+            with patch.object(venv, "ADWI", tmp_path), \
+                 patch("subprocess.run", side_effect=raise_timeout):
+                status, detail = venv.chk_syntax()
+
+        self.assertEqual(status, "fail")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

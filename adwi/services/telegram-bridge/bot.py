@@ -332,6 +332,14 @@ def poll_loop(token: str, allowed_uid: int, secret: str) -> None:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
+def _log_command_registry() -> None:
+    """Log all registered commands and their destinations at startup."""
+    log.info("Command registry (%d commands):", len(TELEGRAM_COMMANDS))
+    for cmd, route in sorted(TELEGRAM_COMMANDS.items()):
+        dest = route if route else f"local ({_LOCAL_RESPONSES.get(cmd, 'help-text')[:20]!r}...)"
+        log.info("  %-16s → %s", cmd, dest)
+
+
 def main() -> None:
     _load_env()
     token   = os.environ.get("TELEGRAM_BOT_TOKEN", "")
@@ -352,6 +360,7 @@ def main() -> None:
     if not secret:
         print("[WARNING] ADWI_LOCAL_SECRET not set — command API auth is disabled")
 
+    _log_command_registry()
     poll_loop(token, allowed_uid, secret)
 
 

@@ -106,12 +106,17 @@ def chk_syntax() -> tuple[str, str]:
         if not f.exists():
             bad.append(f"{f.name} (missing)")
             continue
-        r = subprocess.run(
-            [sys.executable, "-m", "py_compile", str(f)],
-            capture_output=True, text=True
-        )
-        if r.returncode != 0:
-            bad.append(f"{f.name}: {r.stderr.strip()}")
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "py_compile", str(f)],
+                capture_output=True, text=True, timeout=30,
+            )
+            if r.returncode != 0:
+                bad.append(f"{f.name}: {r.stderr.strip()}")
+        except subprocess.TimeoutExpired:
+            bad.append(f"{f.name}: py_compile timed out")
+        except OSError as exc:
+            bad.append(f"{f.name}: {exc}")
     if bad:
         return "fail", "; ".join(bad)
     return "pass", f"{len(targets)} files pass py_compile"

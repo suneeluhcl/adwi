@@ -24,6 +24,13 @@ _mod  = importlib.util.module_from_spec(_spec)   # type: ignore[arg-type]
 _spec.loader.exec_module(_mod)                    # type: ignore[union-attr]
 bridge = _mod
 
+# ── Load server module for cross-reference tests ──────────────────────────────
+_SERVER_PATH = Path(__file__).parent.parent / "services" / "command-api" / "server.py"
+_sspec = importlib.util.spec_from_file_location("command_api_server", _SERVER_PATH)
+_smod  = importlib.util.module_from_spec(_sspec)   # type: ignore[arg-type]
+_sspec.loader.exec_module(_smod)                   # type: ignore[union-attr]
+server = _smod
+
 TOKEN       = "1234567890:fake_token_for_tests"
 ALLOWED_UID = 123456789
 SECRET      = "test-secret-value"
@@ -614,6 +621,64 @@ class TestDeniedCommandUX(unittest.TestCase):
         replies = _replies(_make_update(ALLOWED_UID, "/help"))
         self.assertIn("/ping", replies[0])
         self.assertIn("/status", replies[0])
+
+
+# ── M1: Static safety — Telegram routes must exist in Safe API ────────────────
+
+class TestSafeApiCoverage(unittest.TestCase):
+    """Every non-None Telegram route must exist in Safe Command API ALLOWED_COMMANDS."""
+
+    def test_all_telegram_routes_in_safe_api(self):
+        allowed = set(server.ALLOWED_COMMANDS.keys())
+        for cmd, route in bridge.TELEGRAM_COMMANDS.items():
+            if route is None:
+                continue   # local handler — no API call needed
+            with self.subTest(cmd=cmd, route=route):
+                self.assertIn(
+                    route, allowed,
+                    f"Telegram {cmd} → {route!r} is not in Safe API ALLOWED_COMMANDS.\n"
+                    f"Add it to server.py ALLOWED_COMMANDS or remove from bot.py.",
+                )
+
+    def test_no_telegram_route_is_empty_string(self):
+        for cmd, route in bridge.TELEGRAM_COMMANDS.items():
+            if route is not None:
+                self.assertTrue(route.startswith("/"), f"{cmd} route must start with /")
+                self.assertGreater(len(route), 1, f"{cmd} route must not be empty")
+
+
+# ── T10: Startup banner ───────────────────────────────────────────────────────
+
+class TestStartupBanner(unittest.TestCase):
+    """_log_command_registry must log every registered command."""
+
+    def test_registry_logger_exists(self):
+        self.assertTrue(
+            callable(getattr(bridge, "_log_command_registry", None)),
+            "_log_command_registry must be defined in bot.py",
+        )
+
+    def test_registry_logs_all_commands(self):
+        logged: list[str] = []
+        import logging
+
+        class Capture(logging.Handler):
+            def emit(self, record: logging.LogRecord) -> None:
+                logged.append(record.getMessage())
+
+        handler = Capture()
+        bridge.log.addHandler(handler)
+        try:
+            bridge._log_command_registry()
+        finally:
+            bridge.log.removeHandler(handler)
+
+        # Every command must appear in at least one logged line
+        for cmd in bridge.TELEGRAM_COMMANDS:
+            self.assertTrue(
+                any(cmd in line for line in logged),
+                f"/cmd {cmd!r} must appear in startup log",
+            )
 
 
 if __name__ == "__main__":
