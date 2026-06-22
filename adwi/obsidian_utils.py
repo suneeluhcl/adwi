@@ -5,7 +5,7 @@ Used by: adwi_cli.py, nightly.py, services/mcp/obsidian-bridge/server.py
 """
 
 import re
-from datetime import datetime
+from datetime import date as _date, datetime, timedelta
 from pathlib import Path
 
 _TEMPLATE = (
@@ -16,6 +16,29 @@ _TEMPLATE = (
     "## Bugs / Fixes\n\n\n"
     "## Pending Approval\n\n\n"
 )
+
+# Sections scanned by the review workflow.
+REVIEW_SECTIONS = [
+    "## Current Focus",
+    "## Decisions",
+    "## Ideas",
+    "## Bugs / Fixes",
+    "## Pending Approval",
+    "## Notes",
+]
+
+# Matches a leading "- HH:MM — " or "- HH:MM - " timestamp on a bullet entry.
+_TS_PREFIX_RE = re.compile(r"^-\s*\d{2}:\d{2}\s*[—–-]+\s*")
+
+# Section boundary pattern (used by append/extract helpers).
+_SECTION_PAT_TMPL = r"^{heading}\n(.*?)(?=^##\s|^<!-- ADWI:|\Z)"
+
+
+def _entry_body(s: str) -> str:
+    """Return entry text with leading '- HH:MM — ' timestamp stripped (if present)."""
+    stripped = s.strip()
+    m = _TS_PREFIX_RE.match(stripped)
+    return stripped[m.end():].strip() if m else stripped
 
 
 def replace_marker_block(text: str, marker: str, block_body: str) -> str:
@@ -51,21 +74,27 @@ def append_under_heading(text: str, heading: str, entry: str) -> str:
 
     - heading: full heading line e.g. "## Ideas"
     - entry:   text to append  e.g. "- 14:32 — bought groceries"
-    - Skips silently if the exact entry already exists under that heading.
+    - Deduplication ignores the '- HH:MM — ' timestamp prefix so the same
+      text captured at different times is not written twice to the same note.
     - Creates the heading at the end of *text* if it is absent.
     - Never inserts inside a <!-- ADWI:...: --> marker block.
     """
     h = heading.rstrip()
-    entry_line = entry.rstrip("\n")
+    entry_line  = entry.rstrip("\n")
+    entry_body  = _entry_body(entry_line)
 
-    # Match heading + all content until next ##-heading, ADWI marker, or EOF.
     pat = re.compile(
-        r"^" + re.escape(h) + r"\n(.*?)(?=^##\s|^<!-- ADWI:|\Z)",
+        _SECTION_PAT_TMPL.format(heading=re.escape(h)),
         re.DOTALL | re.MULTILINE,
     )
     m = pat.search(text)
     if m:
         body = m.group(1)
+        # Dedup: compare body text, ignoring timestamps.
+        for line in body.splitlines():
+            if _entry_body(line) == entry_body and entry_body:
+                return text
+        # Exact-match fallback for non-timestamped entries.
         if entry_line in body:
             return text
         body_stripped = body.rstrip("\n")
@@ -93,3 +122,56 @@ def append_to_daily_section(vault: Path, date: str, section: str, entry: str) ->
         return True, str(note_path)
     except Exception as exc:
         return False, str(exc)
+
+
+def extract_sections(text: str, sections: list | None = None) -> dict:
+    """Extract bullet entries from named sections in a daily note.
+
+    Returns dict: section_heading → list of bullet entry strings.
+    Only sections that have at least one bullet entry are included.
+    """
+    if sections is None:
+        sections = REVIEW_SECTIONS
+    result = {}
+    for section in sections:
+        h = section.rstrip()
+        pat = re.compile(
+            _SECTION_PAT_TMPL.format(heading=re.escape(h)),
+            re.DOTALL | re.MULTILINE,
+        )
+        m = pat.search(text)
+        if m:
+            entries = [
+                line.strip()
+                for line in m.group(1).splitlines()
+                if line.strip().startswith("- ") or line.strip().startswith("* ")
+            ]
+            if entries:
+                result[section] = entries
+    return result
+
+
+def collect_daily_entries(vault: Path, start_date: str, end_date: str,
+                           sections: list | None = None) -> list:
+    """Scan daily notes from *start_date* to *end_date* inclusive (YYYY-MM-DD).
+
+    Returns list of dicts: {date, section, entries, path}.
+    Records with no entries are omitted.
+    """
+    d_start = _date.fromisoformat(start_date)
+    d_end   = _date.fromisoformat(end_date)
+    result  = []
+    current = d_start
+    while current <= d_end:
+        ds        = current.isoformat()
+        note_path = vault / "daily-notes" / f"{ds}.md"
+        if note_path.exists():
+            text      = note_path.read_text(encoding="utf-8")
+            extracted = extract_sections(text, sections)
+            for section, entries in extracted.items():
+                result.append(
+                    {"date": ds, "section": section,
+                     "entries": entries, "path": str(note_path)}
+                )
+        current += timedelta(days=1)
+    return result

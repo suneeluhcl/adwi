@@ -82,6 +82,7 @@ Quick orientation — what runs where.
 
 *New daily notes are written automatically by `adwi/nightly.py` at 2 AM. The `/daily-brief` command updates today's brief block.*
 *See [[knowledge/Obsidian Maintenance]] for how marker blocks work and recovery steps.*
+*Review captured items weekly: [[knowledge/Review Workflow]]*
 
 ---
 

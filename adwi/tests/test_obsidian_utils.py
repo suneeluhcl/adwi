@@ -17,6 +17,8 @@ daily_note_template     = _mod.daily_note_template
 today_note_path         = _mod.today_note_path
 append_under_heading    = _mod.append_under_heading
 append_to_daily_section = _mod.append_to_daily_section
+extract_sections        = _mod.extract_sections
+collect_daily_entries   = _mod.collect_daily_entries
 
 
 class TestReplaceMarkerBlock(unittest.TestCase):
@@ -235,6 +237,139 @@ class TestAppendToDailySection(unittest.TestCase):
         self.assertIsInstance(msg, str)
         self.assertTrue(ok)
         self.assertIn("2026-01-02", msg)
+
+
+class TestTimestampDedup(unittest.TestCase):
+    """append_under_heading should dedup by text body, ignoring - HH:MM — prefix."""
+
+    def test_same_text_different_timestamp_not_duplicated(self):
+        text = "# 2026-01-01\n\n## Ideas\n\n"
+        r1 = append_under_heading(text, "## Ideas", "- 14:00 — my idea")
+        r2 = append_under_heading(r1, "## Ideas", "- 15:30 — my idea")
+        self.assertEqual(r1, r2)
+        self.assertEqual(r1.count("my idea"), 1)
+
+    def test_different_text_different_timestamp_both_written(self):
+        text = "# 2026-01-01\n\n## Ideas\n\n"
+        r1 = append_under_heading(text, "## Ideas", "- 14:00 — first idea")
+        r2 = append_under_heading(r1, "## Ideas", "- 15:30 — second idea")
+        self.assertIn("first idea", r2)
+        self.assertIn("second idea", r2)
+
+    def test_non_timestamp_entry_still_deduped(self):
+        text = "# 2026-01-01\n\n## Notes\n\n"
+        r1 = append_under_heading(text, "## Notes", "- some note")
+        r2 = append_under_heading(r1, "## Notes", "- some note")
+        self.assertEqual(r1, r2)
+        self.assertEqual(r1.count("some note"), 1)
+
+    def test_timestamp_and_plain_text_same_body_deduped(self):
+        text = "# 2026-01-01\n\n## Ideas\n\n"
+        r1 = append_under_heading(text, "## Ideas", "- 14:00 — cool idea")
+        # Same body without timestamp → should not add again
+        r2 = append_under_heading(r1, "## Ideas", "- 16:00 — cool idea")
+        self.assertEqual(r2.count("cool idea"), 1)
+
+
+class TestExtractSections(unittest.TestCase):
+
+    _NOTE = (
+        "# 2026-01-15\n\n"
+        "## Current Focus\n\n"
+        "- 09:00 — finish the NLU audit\n"
+        "- 10:00 — write tests\n\n"
+        "## Decisions\n\n"
+        "- 11:30 — use stdlib-only in bridge\n\n"
+        "## Ideas\n\n\n"
+        "## Bugs / Fixes\n\n"
+        "- found null-pointer in backup\n\n"
+        "## Pending Approval\n\n"
+        "<!-- ADWI:DAILY-SUMMARY:START -->\ngenerated\n<!-- ADWI:DAILY-SUMMARY:END -->\n"
+    )
+
+    def test_extracts_populated_sections(self):
+        result = extract_sections(self._NOTE)
+        self.assertIn("## Current Focus", result)
+        self.assertIn("## Decisions", result)
+        self.assertIn("## Bugs / Fixes", result)
+
+    def test_empty_section_not_in_result(self):
+        result = extract_sections(self._NOTE)
+        self.assertNotIn("## Ideas", result)
+
+    def test_entry_values_are_bullet_lines(self):
+        result = extract_sections(self._NOTE)
+        for entry in result["## Current Focus"]:
+            self.assertTrue(entry.startswith("- ") or entry.startswith("* "))
+
+    def test_marker_block_content_excluded(self):
+        result = extract_sections(self._NOTE)
+        all_entries = [e for entries in result.values() for e in entries]
+        self.assertNotIn("generated", all_entries)
+
+    def test_specific_sections_filter(self):
+        result = extract_sections(self._NOTE, ["## Decisions"])
+        self.assertIn("## Decisions", result)
+        self.assertNotIn("## Current Focus", result)
+
+    def test_count_of_focus_entries(self):
+        result = extract_sections(self._NOTE)
+        self.assertEqual(len(result["## Current Focus"]), 2)
+
+
+class TestCollectDailyEntries(unittest.TestCase):
+
+    def setUp(self):
+        import tempfile, shutil
+        self._tmp = Path(tempfile.mkdtemp())
+        self._vault = self._tmp / "vault"
+        (self._vault / "daily-notes").mkdir(parents=True)
+        self._note_16 = (
+            "# 2026-01-16\n\n"
+            "## Ideas\n\n"
+            "- 09:00 — idea on the 16th\n\n"
+        )
+        self._note_17 = (
+            "# 2026-01-17\n\n"
+            "## Decisions\n\n"
+            "- 10:00 — decided to use stdlib\n\n"
+        )
+        (self._vault / "daily-notes" / "2026-01-16.md").write_text(self._note_16)
+        (self._vault / "daily-notes" / "2026-01-17.md").write_text(self._note_17)
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_collects_entries_across_range(self):
+        result = collect_daily_entries(self._vault, "2026-01-16", "2026-01-17")
+        dates = {r["date"] for r in result}
+        self.assertIn("2026-01-16", dates)
+        self.assertIn("2026-01-17", dates)
+
+    def test_missing_dates_skipped(self):
+        result = collect_daily_entries(self._vault, "2026-01-14", "2026-01-17")
+        dates = {r["date"] for r in result}
+        self.assertNotIn("2026-01-14", dates)
+        self.assertNotIn("2026-01-15", dates)
+
+    def test_result_structure(self):
+        result = collect_daily_entries(self._vault, "2026-01-16", "2026-01-16")
+        self.assertEqual(len(result), 1)
+        r = result[0]
+        self.assertIn("date", r)
+        self.assertIn("section", r)
+        self.assertIn("entries", r)
+        self.assertIn("path", r)
+
+    def test_empty_range_returns_empty(self):
+        result = collect_daily_entries(self._vault, "2026-02-01", "2026-02-05")
+        self.assertEqual(result, [])
+
+    def test_single_day_entries_correct(self):
+        result = collect_daily_entries(self._vault, "2026-01-16", "2026-01-16")
+        self.assertEqual(result[0]["section"], "## Ideas")
+        self.assertIn("- 09:00 — idea on the 16th", result[0]["entries"])
 
 
 if __name__ == "__main__":

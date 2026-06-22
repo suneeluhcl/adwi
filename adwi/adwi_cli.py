@@ -3522,6 +3522,8 @@ _replace_vault_block    = _ou_mod.replace_marker_block
 _daily_note_template_fn = _ou_mod.daily_note_template
 _append_under_heading    = _ou_mod.append_under_heading
 _append_to_daily_section = _ou_mod.append_to_daily_section
+_extract_sections        = _ou_mod.extract_sections
+_collect_daily_entries   = _ou_mod.collect_daily_entries
 del _ilu_ou, _ou_spec, _ou_mod
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -3691,6 +3693,230 @@ def cmd_obsidian_capture(args: str = "") -> None:
             )
             approval_path.write_text(updated, encoding="utf-8")
             cprint(f"  {GREEN}✓ Also logged → knowledge/Pending Approval.md{RESET}", "")
+
+
+_REVIEW_SECTION_ORDER = [
+    "## Current Focus",
+    "## Decisions",
+    "## Ideas",
+    "## Bugs / Fixes",
+    "## Pending Approval",
+    "## Notes",
+]
+_REVIEW_SECTION_LABELS = {
+    "## Current Focus":    "Focus / Tasks",
+    "## Decisions":        "Decisions",
+    "## Ideas":            "Ideas to Promote",
+    "## Bugs / Fixes":     "Bugs / Fixes",
+    "## Pending Approval": "Pending Approval",
+    "## Notes":            "Notes",
+}
+
+
+def cmd_obsidian_review(args: str = "") -> None:
+    """Print a read-only review of captured items from the last N daily notes.
+
+    Usage: /obsidian-review [days]  (default 7, max 30)
+    """
+    from datetime import date as _dt, timedelta as _td
+    try:
+        days = max(1, min(30, int(args.strip()))) if args.strip() else 7
+    except ValueError:
+        cprint(f"  {YELLOW}Usage: /obsidian-review [days]{RESET}", ""); return
+
+    today = _dt.today()
+    start = (today - _td(days=days - 1)).isoformat()
+    end   = today.isoformat()
+
+    records = _collect_daily_entries(OBSIDIAN_VAULT, start, end)
+    if not records:
+        cprint(f"\n  {YELLOW}No entries found in daily notes for the last {days} day(s).{RESET}", "")
+        cprint(f"  {GRAY}(Notes scanned: {start} → {end}){RESET}", "")
+        return
+
+    adwi_head(f"Obsidian Review — last {days} day(s)  ({start} → {end})")
+
+    # Group by section preserving order.
+    by_section: dict = {}
+    for rec in records:
+        by_section.setdefault(rec["section"], [])
+        for entry in rec["entries"]:
+            by_section[rec["section"]].append((rec["date"], entry))
+
+    total = sum(len(v) for v in by_section.values())
+
+    for sec in _REVIEW_SECTION_ORDER:
+        if sec not in by_section:
+            continue
+        label = _REVIEW_SECTION_LABELS[sec]
+        cprint(f"\n  {BOLD}{label}{RESET}", "")
+        for date_str, entry in by_section[sec]:
+            cprint(f"    {entry}  {GRAY}[{date_str}]{RESET}", "")
+
+    cprint(f"\n  {GRAY}{total} item(s) across {len(by_section)} section(s){RESET}", "")
+    cprint(f"  {GRAY}Save this review: /obsidian-review-save {days}{RESET}", "")
+
+
+def cmd_obsidian_review_save(args: str = "") -> None:
+    """Generate and save a weekly-review note.
+
+    Usage: /obsidian-review-save [days]  (default 7)
+    Saved to: obsidian-vault/reviews/YYYY-MM-DD-weekly-review.md
+    Re-running on the same day updates the ADWI:REVIEW-CONTENT block in-place.
+    """
+    from datetime import date as _dt, timedelta as _td
+    try:
+        days = max(1, min(30, int(args.strip()))) if args.strip() else 7
+    except ValueError:
+        cprint(f"  {YELLOW}Usage: /obsidian-review-save [days]{RESET}", ""); return
+
+    today = _dt.today()
+    start = (today - _td(days=days - 1)).isoformat()
+    end   = today.isoformat()
+
+    records = _collect_daily_entries(OBSIDIAN_VAULT, start, end)
+
+    by_section: dict = {}
+    for rec in records:
+        by_section.setdefault(rec["section"], [])
+        for entry in rec["entries"]:
+            by_section[rec["section"]].append((rec["date"], entry))
+
+    dates_covered = sorted({rec["date"] for rec in records})
+
+    def _fmt(sec_key, label):
+        items = by_section.get(sec_key, [])
+        if not items:
+            return f"### {label}\n\n*none*\n"
+        lines = [f"### {label}\n"]
+        for date_str, entry in items:
+            lines.append(f"{entry}  *(from {date_str})*")
+        return "\n".join(lines) + "\n"
+
+    block_lines = [
+        f"## Review Summary",
+        f"*Generated {end} — last {days} day(s) ({start} → {end})*",
+        f"",
+        f"Notes reviewed: {len(dates_covered)}  |  "
+        f"Total entries: {sum(len(v) for v in by_section.values())}",
+        f"",
+        _fmt("## Current Focus",    "Focus / Tasks"),
+        _fmt("## Decisions",        "Decisions"),
+        _fmt("## Ideas",            "Ideas to Promote"),
+        _fmt("## Bugs / Fixes",     "Bugs / Fixes"),
+        _fmt("## Pending Approval", "Pending Approval"),
+        _fmt("## Notes",            "Notes"),
+    ]
+    if dates_covered:
+        block_lines += ["### Source Daily Notes", ""]
+        block_lines += [f"- [[daily-notes/{d}]]" for d in dates_covered]
+
+    block_body = "\n".join(block_lines)
+
+    reviews_dir = OBSIDIAN_VAULT / "reviews"
+    reviews_dir.mkdir(exist_ok=True)
+    review_path = reviews_dir / f"{end}-weekly-review.md"
+
+    if review_path.exists():
+        existing = review_path.read_text(encoding="utf-8")
+    else:
+        note_links = ", ".join(f"[[daily-notes/{d}]]" for d in dates_covered) or "none"
+        existing = (
+            f"---\ntype: weekly-review\nstatus: active\n"
+            f"period: {start} to {end}\nupdated: {end}\n---\n\n"
+            f"# Weekly Review — {end}\n\n"
+            f"*Review of captured items from the last {days} day(s).*\n\n"
+            f"**Notes reviewed:** {note_links}\n\n"
+        )
+
+    review_path.write_text(
+        _replace_vault_block(existing, "ADWI:REVIEW-CONTENT", block_body),
+        encoding="utf-8",
+    )
+    rel = str(review_path.relative_to(OBSIDIAN_VAULT))
+    cprint(f"\n  {GREEN}✓ Review saved → {rel}{RESET}", "")
+    cprint(f"  {GRAY}Promote ideas: /obsidian-promote-idea <Title> -- <description>{RESET}", "")
+
+
+def cmd_obsidian_promote_idea(args: str = "") -> None:
+    """Promote a captured idea to a project idea note.
+
+    Usage: /obsidian-promote-idea <Title> -- <description>
+    Creates: obsidian-vault/projects/ideas/<Title>.md
+    Also links the idea in knowledge/Ideas Index.md under Active Ideas.
+    If the note already exists, appends a Captured Updates entry instead.
+    """
+    if " -- " not in args:
+        cprint(f"\n  {YELLOW}Usage: /obsidian-promote-idea <Title> -- <description>{RESET}", "")
+        return
+
+    title, _, description = args.partition(" -- ")
+    title       = title.strip()
+    description = description.strip()
+    if not title:
+        cprint(f"\n  {YELLOW}Title cannot be empty.{RESET}", ""); return
+
+    from datetime import date as _dt
+    import re as _re
+    today      = _dt.today().isoformat()
+    safe_title = _re.sub(r'[\\/:*?"<>|]', "", title)
+    idea_path  = OBSIDIAN_VAULT / "projects" / "ideas" / f"{safe_title}.md"
+
+    if idea_path.exists():
+        existing = idea_path.read_text(encoding="utf-8")
+        updated  = _append_under_heading(
+            existing, "## Captured Updates", f"*{today}:* {description}"
+        )
+        idea_path.write_text(updated, encoding="utf-8")
+        cprint(f"\n  {YELLOW}⚠ Note already exists — appended update to ## Captured Updates{RESET}", "")
+        cprint(f"  {GRAY}projects/ideas/{safe_title}.md{RESET}", "")
+    else:
+        idea_path.parent.mkdir(parents=True, exist_ok=True)
+        idea_path.write_text(
+            f"---\ntype: idea\nstatus: planned\ntags: [idea, roadmap]\n"
+            f"updated: {today}\n---\n\n"
+            f"# {title}\n\n#idea #roadmap\n\n"
+            f"## Status\n🔵 Planned — not started\n\n"
+            f"## Why It Matters\n{description}\n\n"
+            f"## Existing Related Files\n\n*Add relevant files here.*\n\n"
+            f"## Implementation Sketch\n\n1. *Add steps here.*\n\n"
+            f"## Risks\n\n*Add risks here.*\n\n"
+            f"## Next Action\n\n*Add next action here.*\n\n"
+            f"## Related Notes\n\n"
+            f"- [[knowledge/Ideas Index]]\n- [[projects/Adwi]]\n",
+            encoding="utf-8",
+        )
+        cprint(f"\n  {GREEN}✓ Created → projects/ideas/{safe_title}.md{RESET}", "")
+
+    # Link in Ideas Index under Active Ideas table.
+    idx_path = OBSIDIAN_VAULT / "knowledge" / "Ideas Index.md"
+    if idx_path.exists():
+        idx_text = idx_path.read_text(encoding="utf-8")
+        link = f"[[projects/ideas/{safe_title}]]"
+        if link not in idx_text:
+            new_row = f"| {title} | Medium | {link} |"
+            # Insert new row after the last | row in the Active Ideas section.
+            import re as _re2
+            pat = _re2.compile(
+                r"^## Active Ideas.*?\n(.*?)(?=^##\s|^<!-- ADWI:|\Z)",
+                _re2.DOTALL | _re2.MULTILINE,
+            )
+            m = pat.search(idx_text)
+            if m:
+                body  = m.group(1)
+                lines = body.split("\n")
+                last_table = max(
+                    (i for i, ln in enumerate(lines) if ln.strip().startswith("|")),
+                    default=-1,
+                )
+                if last_table >= 0:
+                    lines.insert(last_table + 1, new_row)
+                    new_body = "\n".join(lines)
+                    idx_path.write_text(
+                        idx_text[: m.start(1)] + new_body + idx_text[m.start(1) + len(body) :],
+                        encoding="utf-8",
+                    )
+                    cprint(f"  {GREEN}✓ Linked in knowledge/Ideas Index.md → Active Ideas{RESET}", "")
 
 
 # ── import for obsidian URL quoting ──────────────────────────────────────────
@@ -10859,6 +11085,12 @@ def handle(line: str) -> bool:
     elif line == "/obsidian-daily": cmd_obsidian_daily()
     elif line.startswith("/obsidian-capture "): cmd_obsidian_capture(line[18:].strip())
     elif line == "/obsidian-capture": cmd_obsidian_capture()
+    elif line.startswith("/obsidian-review-save "): cmd_obsidian_review_save(line[22:].strip())
+    elif line == "/obsidian-review-save": cmd_obsidian_review_save()
+    elif line.startswith("/obsidian-review "): cmd_obsidian_review(line[17:].strip())
+    elif line == "/obsidian-review": cmd_obsidian_review()
+    elif line.startswith("/obsidian-promote-idea "): cmd_obsidian_promote_idea(line[23:].strip())
+    elif line == "/obsidian-promote-idea": cmd_obsidian_promote_idea()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
@@ -11191,6 +11423,9 @@ You can say things like:
                                    types: focus, decision, idea, task, bug, fix, approval, note
                                    idea → also logs to knowledge/Ideas Index.md
                                    approval → also logs to knowledge/Pending Approval.md
+  /obsidian-review [days]          Print review of last N daily notes (default 7, read-only)
+  /obsidian-review-save [days]     Save review to reviews/YYYY-MM-DD-weekly-review.md
+  /obsidian-promote-idea <Title> -- <desc>  Create idea note in projects/ideas/ + link in index
   /obsidian-search <query>   Full-text search across all vault notes
   /obsidian-read <path>      Read a vault note (relative to vault root)
   /obsidian-write <path> -- <content>  Append content to a vault note

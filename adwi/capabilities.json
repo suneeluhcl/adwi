@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-06-21",
+  "updated": "2026-06-22",
   "workspace": "/Users/MAC/SuneelWorkSpace",
   "capabilities": [
     {
@@ -1567,6 +1567,40 @@
       "risk": "low",
       "files_touched": [
         "obsidian-vault/daily-notes/YYYY-MM-DD.md"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Review",
+      "command": "/obsidian-review [days]",
+      "description": "Print a read-only review of captured items from the last N daily notes (default 7). Groups entries by section: Focus/Tasks, Decisions, Ideas, Bugs/Fixes, Pending Approval, Notes.",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Review Save",
+      "command": "/obsidian-review-save [days]",
+      "description": "Generate and save a weekly review note to obsidian-vault/reviews/YYYY-MM-DD-weekly-review.md. Re-running on the same day updates the ADWI:REVIEW-CONTENT block in-place.",
+      "risk": "low",
+      "files_touched": [
+        "obsidian-vault/reviews/YYYY-MM-DD-weekly-review.md"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Promote Idea",
+      "command": "/obsidian-promote-idea <Title> -- <description>",
+      "description": "Create a structured idea note at obsidian-vault/projects/ideas/<Title>.md and link it in knowledge/Ideas Index.md. If the note already exists, appends a Captured Updates entry.",
+      "risk": "low",
+      "files_touched": [
+        "obsidian-vault/projects/ideas/"
       ],
       "uses_secrets": false,
       "logs": "notes/adwi-action-logs",
