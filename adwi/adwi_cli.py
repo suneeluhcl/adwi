@@ -4104,6 +4104,18 @@ def cmd_obsidian_status() -> None:
     cprint(f"  .obsidian dir:   {'present' if (vault / '.obsidian').exists() else 'absent'}", "")
 
 
+def cmd_obsidian_validate() -> None:
+    """Run the Obsidian vault health check script."""
+    import subprocess as _sp
+    script = Path(__file__).resolve().with_name("scripts") / "validate_obsidian_vault.py"
+    if not script.exists():
+        cprint(f"  {RED}✗ Validator not found: {script}{RESET}", ""); return
+    adwi_head("Obsidian Vault Validation")
+    r = _sp.run([sys.executable, str(script)], capture_output=False, text=True)
+    if r.returncode != 0:
+        cprint(f"\n  {RED}✗ Validation failed (see above){RESET}", "")
+
+
 # ── import for obsidian URL quoting ──────────────────────────────────────────
 import urllib.parse as _urlparse_mod
 # Bind to local name used inside _obsidian_api and cmd_obsidian_read
@@ -11280,6 +11292,7 @@ def handle(line: str) -> bool:
     elif line == "/obsidian-plan": cmd_obsidian_plan()
     elif line == "/obsidian-plan-clear": cmd_obsidian_plan_clear()
     elif line == "/obsidian-status": cmd_obsidian_status()
+    elif line == "/obsidian-validate": cmd_obsidian_validate()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
@@ -11615,6 +11628,7 @@ You can say things like:
   /obsidian-plan [days]            Generate today's ADWI:DAILY-PLAN block from last N days
   /obsidian-plan-clear             Clear today's ADWI:DAILY-PLAN block
   /obsidian-status                 Vault summary: notes, today's plan, latest review
+  /obsidian-validate               Run Obsidian vault health check (structure, templates, config, markers)
   /obsidian-review [days]          Print review of last N daily notes (default 7, read-only)
   /obsidian-review-save [days]     Save review to reviews/YYYY-MM-DD-weekly-review.md
   /obsidian-promote-idea <Title> -- <desc>  Create idea note in projects/ideas/ + link in index

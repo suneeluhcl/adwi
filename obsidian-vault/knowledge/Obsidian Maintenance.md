@@ -82,6 +82,17 @@ print(f"reset {p}")
 EOF
 ```
 
+**To validate vault health (structure, templates, config, markers):**
+```bash
+python3 adwi/scripts/validate_obsidian_vault.py
+# or from the Adwi REPL:
+# /obsidian-validate
+```
+
+Checks: required directories, all 6 templates present, `.obsidian` JSON config values, volatile files not tracked by git, Daily Note template section sync, Idea Note placeholders, knowledge notes, duplicate marker blocks in daily notes.
+
+---
+
 **To manually run the Obsidian home/pending refresh:**
 ```bash
 python3 -c "

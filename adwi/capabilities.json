@@ -1641,6 +1641,16 @@
       "test_command": "/test-adwi"
     },
     {
+      "name": "Obsidian Validate",
+      "command": "/obsidian-validate",
+      "description": "Run vault health check: structure, template files, .obsidian config, volatile file tracking, marker hygiene. Also runnable as: python3 adwi/scripts/validate_obsidian_vault.py",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
       "name": "Obsidian Read",
       "command": "/obsidian-read",
       "description": "Adwi command /obsidian-read",
