@@ -77,10 +77,11 @@ Quick orientation — what runs where.
 ## Daily Notes
 
 <!-- ADWI:HOME-STATUS:START -->
-*Not yet refreshed — run nightly loop or `/daily-brief` to populate.*
+*Not yet refreshed — will be populated by the nightly loop (2 AM).*
 <!-- ADWI:HOME-STATUS:END -->
 
-*New daily notes are written automatically by `adwi/nightly.py` at 2 AM and by `/daily-brief` during the day.*
+*New daily notes are written automatically by `adwi/nightly.py` at 2 AM. The `/daily-brief` command updates today's brief block.*
+*See [[knowledge/Obsidian Maintenance]] for how marker blocks work and recovery steps.*
 
 ---
 

@@ -18,6 +18,7 @@ Routes:
 All paths must be INSIDE the vault. Path traversal is rejected.
 """
 
+import importlib.util as _ilu_ou
 import json
 import os
 import re
@@ -25,6 +26,16 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+# ── Shared vault helpers ───────────────────────────────────────────────────────
+_adwi_dir = Path(__file__).resolve().parents[3]  # adwi/services/mcp/bridge → adwi/
+_ou_spec  = _ilu_ou.spec_from_file_location("obsidian_utils", _adwi_dir / "obsidian_utils.py")
+_ou_mod   = _ilu_ou.module_from_spec(_ou_spec)
+_ou_spec.loader.exec_module(_ou_mod)
+_replace_marker_block = _ou_mod.replace_marker_block
+_daily_note_tmpl      = _ou_mod.daily_note_template
+del _ilu_ou, _ou_spec, _ou_mod, _adwi_dir
+# ──────────────────────────────────────────────────────────────────────────────
 
 def _load_env():
     """Load config/.env into os.environ (setdefault — does not override shell env)."""
@@ -221,23 +232,8 @@ class Handler(BaseHTTPRequestHandler):
             rel      = f"daily-notes/{today}.md"
             p        = VAULT / "daily-notes" / f"{today}.md"
             p.parent.mkdir(parents=True, exist_ok=True)
-            _TEMPLATE = (
-                f"# {today}\n\n## Current Focus\n\n\n"
-                "## Decisions\n\n\n## Ideas\n\n\n"
-                "## Bugs / Fixes\n\n\n## Pending Approval\n\n\n"
-            )
-            existing = p.read_text(encoding="utf-8") if p.exists() else _TEMPLATE
-            start_tag = f"<!-- {marker}:START -->"
-            end_tag   = f"<!-- {marker}:END -->"
-            new_block = f"{start_tag}\n{content}\n{end_tag}"
-            if start_tag in existing and end_tag in existing:
-                updated = re.sub(
-                    re.escape(start_tag) + r".*?" + re.escape(end_tag),
-                    new_block, existing, flags=re.DOTALL,
-                )
-            else:
-                updated = existing.rstrip("\n") + "\n\n" + new_block + "\n"
-            p.write_text(updated, encoding="utf-8")
+            existing = p.read_text(encoding="utf-8") if p.exists() else _daily_note_tmpl(today)
+            p.write_text(_replace_marker_block(existing, marker, content), encoding="utf-8")
             self._json(200, {"daily_note": rel, "total_bytes": p.stat().st_size})
 
         else:

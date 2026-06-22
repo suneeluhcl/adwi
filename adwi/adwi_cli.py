@@ -3511,32 +3511,17 @@ def _obsidian_api(method: str, route: str, body: dict | None = None) -> dict:
         return {"error": str(e)}
 
 
-_DAILY_NOTE_TEMPLATE = (
-    "# {date}\n\n"
-    "## Current Focus\n\n\n"
-    "## Decisions\n\n\n"
-    "## Ideas\n\n\n"
-    "## Bugs / Fixes\n\n\n"
-    "## Pending Approval\n\n\n"
+# ── Shared vault helpers (from obsidian_utils.py) ────────────────────────────
+import importlib.util as _ilu_ou
+_ou_spec = _ilu_ou.spec_from_file_location(
+    "obsidian_utils", Path(__file__).resolve().with_name("obsidian_utils.py")
 )
-
-
-def _replace_vault_block(text: str, marker: str, block_body: str) -> str:
-    """Replace a marker-delimited block in-place, or append if absent.
-
-    Prevents duplicate generated sections in daily notes.
-    marker example: 'ADWI:DAILY-BRIEF'
-    """
-    import re as _re
-    start_tag = f"<!-- {marker}:START -->"
-    end_tag   = f"<!-- {marker}:END -->"
-    new_block = f"{start_tag}\n{block_body}\n{end_tag}"
-    if start_tag in text and end_tag in text:
-        return _re.sub(
-            _re.escape(start_tag) + r".*?" + _re.escape(end_tag),
-            new_block, text, flags=_re.DOTALL,
-        )
-    return text.rstrip("\n") + "\n\n" + new_block + "\n"
+_ou_mod = _ilu_ou.module_from_spec(_ou_spec)
+_ou_spec.loader.exec_module(_ou_mod)
+_replace_vault_block    = _ou_mod.replace_marker_block
+_daily_note_template_fn = _ou_mod.daily_note_template
+del _ilu_ou, _ou_spec, _ou_mod
+# ──────────────────────────────────────────────────────────────────────────────
 
 
 def _obsidian_daily_write_block(marker: str, block_body: str) -> tuple:
@@ -3548,7 +3533,7 @@ def _obsidian_daily_write_block(marker: str, block_body: str) -> tuple:
         existing = (
             note_path.read_text(encoding="utf-8")
             if note_path.exists()
-            else _DAILY_NOTE_TEMPLATE.format(date=today)
+            else _daily_note_template_fn(today)
         )
         note_path.write_text(_replace_vault_block(existing, marker, block_body), encoding="utf-8")
         return True, str(note_path)

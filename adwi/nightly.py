@@ -8,6 +8,18 @@ import json, os, re, subprocess, sys, time, urllib.error, urllib.parse, urllib.r
 from datetime import datetime
 from pathlib import Path
 
+# ── Shared vault helper ────────────────────────────────────────────────────────
+import importlib.util as _ilu_ou
+_ou_spec = _ilu_ou.spec_from_file_location(
+    "obsidian_utils", Path(__file__).resolve().with_name("obsidian_utils.py")
+)
+_ou_mod = _ilu_ou.module_from_spec(_ou_spec)
+_ou_spec.loader.exec_module(_ou_mod)
+_replace_block          = _ou_mod.replace_marker_block
+_daily_note_template_fn = _ou_mod.daily_note_template
+del _ilu_ou, _ou_spec, _ou_mod
+# ──────────────────────────────────────────────────────────────────────────────
+
 HOME      = Path.home()
 WORKSPACE = HOME / "SuneelWorkSpace"
 ADWI_DIR  = WORKSPACE / "adwi"
@@ -814,43 +826,7 @@ def step_web_research() -> dict:
 
 
 # ── Step 10: Obsidian Daily Note ─────────────────────────────────────────────
-
-def _replace_block(text: str, marker: str, block_body: str) -> str:
-    """Replace a marker-delimited block in-place, or append it if absent.
-
-    marker example: 'ADWI:DAILY-SUMMARY'
-    Keeps everything outside the markers untouched.
-    """
-    start_tag = f"<!-- {marker}:START -->"
-    end_tag   = f"<!-- {marker}:END -->"
-    new_block = f"{start_tag}\n{block_body}\n{end_tag}"
-    if start_tag in text and end_tag in text:
-        return re.sub(
-            re.escape(start_tag) + r".*?" + re.escape(end_tag),
-            new_block, text, flags=re.DOTALL,
-        )
-    return text.rstrip("\n") + "\n\n" + new_block + "\n"
-
-
-_DAILY_NOTE_TEMPLATE = """\
-# {date}
-
-## Current Focus
-
-
-## Decisions
-
-
-## Ideas
-
-
-## Bugs / Fixes
-
-
-## Pending Approval
-
-
-"""
+# _replace_block and _daily_note_template_fn are imported from obsidian_utils at module top.
 
 
 def step_obsidian_daily_note(data: dict) -> str | None:
@@ -898,7 +874,7 @@ def step_obsidian_daily_note(data: dict) -> str | None:
     existing = (
         note_path.read_text(encoding="utf-8")
         if note_path.exists()
-        else _DAILY_NOTE_TEMPLATE.format(date=DATE_STR)
+        else _daily_note_template_fn(DATE_STR)
     )
     updated = _replace_block(existing, "ADWI:DAILY-SUMMARY", "\n".join(lines))
     note_path.write_text(updated, encoding="utf-8")
@@ -1182,16 +1158,16 @@ def main():
 
     data: dict = {}
 
-    _pr("[1/6] Services health check...")
+    _pr("[1/13] Services health check...")
     data["services"] = step_services()
     svc = data["services"]
     _pr(f"  ollama={svc.get('ollama')}  docker_up={svc.get('docker_up')}")
 
-    _pr("[2/6] Reviewing logs...")
+    _pr("[2/13] Reviewing logs...")
     data["log_review"] = step_review_logs()
     _pr(f"  {data['log_review'].get('repair_count', 0)} repair logs reviewed")
 
-    _pr("[3/7] AI skill discovery...")
+    _pr("[3/13] AI skill discovery...")
     if _ollama_ok():
         data["skill_suggestions"] = step_skill_discovery(data["log_review"])
         _save_pending(data["skill_suggestions"])
@@ -1200,7 +1176,7 @@ def main():
         data["skill_suggestions"] = "[Ollama offline — skipped]"
         _pr("  ⚠ Ollama offline, skipping")
 
-    _pr("[3b/7] Aider self-healing (detect & fix test failures)...")
+    _pr("[4/13] Aider self-healing (detect & fix test failures)...")
     data["aider_heal"] = step_aider_heal()
     ah = data["aider_heal"]
     if ah.get("skipped_reason"):
@@ -1210,12 +1186,12 @@ def main():
     elif not ah.get("tests_passed_before"):
         _pr(f"  ✗ Could not auto-fix — check ~/Desktop for report")
 
-    _pr("[4/7] Running evals...")
+    _pr("[5/13] Running evals...")
     data["evals"] = step_evals()
     ev = data["evals"]
     _pr(f"  Syntax: {'OK' if ev.get('syntax_ok') else 'FAIL: ' + ev.get('syntax_error','')}")
 
-    _pr("[5/7] Memory scan (terminal + git + notes)...")
+    _pr("[6/13] Memory scan (terminal + git + notes)...")
     try:
         import importlib.util as _ilu
         _spec = _ilu.spec_from_file_location("memory", ADWI_DIR / "memory.py")
@@ -1232,12 +1208,12 @@ def main():
         data["memory_scan"] = {"error": str(_e)}
         _pr(f"  ⚠ memory scan: {_e}")
 
-    _pr("[5b/10] System health audit (brew, npm, disk, docker)...")
+    _pr("[7/13] System health audit (brew, npm, disk, docker)...")
     data["sys_health"] = step_system_health()
     sh = data["sys_health"]
     _pr(f"  disk {sh.get('disk_avail','?')} free | brew outdated: {sh.get('brew_outdated_count',0)} | npm outdated: {sh.get('npm_outdated_count',0)}")
 
-    _pr("[5c/10] Web research (SearXNG release note queries)...")
+    _pr("[8/13] Web research (SearXNG release note queries)...")
     try:
         data["web_research"] = step_web_research()
         _pr(f"  searched {len(data['web_research'])} tool(s)")
@@ -1245,7 +1221,7 @@ def main():
         data["web_research"] = {}
         _pr(f"  ⚠ web research: {_e}")
 
-    _pr("[6/10] Capability sync...")
+    _pr("[9/13] Capability sync...")
     data["cap_sync"] = step_capability_sync()
     cs = data["cap_sync"]
     if "error" not in cs:
@@ -1253,7 +1229,7 @@ def main():
     else:
         _pr(f"  ⚠ {cs['error']}")
 
-    _pr("[7/10] Git commit + push...")
+    _pr("[10/13] Git commit + push...")
     data["git_commit"] = step_git_commit()
     gc = data["git_commit"]
     if gc.get("success"):
@@ -1262,21 +1238,21 @@ def main():
     else:
         _pr(f"  ⚠ {gc.get('message','no changes')}")
 
-    _pr("[8/10] Writing Obsidian daily note...")
+    _pr("[11/13] Writing Obsidian daily note...")
     try:
         note_path = step_obsidian_daily_note(data)
         _pr(f"  ✓ {note_path}")
     except Exception as _e:
         _pr(f"  ⚠ daily note: {_e}")
 
-    _pr("[9/10] Updating Obsidian home dashboard...")
+    _pr("[12/13] Updating Obsidian home dashboard...")
     try:
         step_update_obsidian_home(data)
         _pr("  ✓ Adwi Home.md updated")
     except Exception as _e:
         _pr(f"  ⚠ home update: {_e}")
 
-    _pr("[10/10] Updating Pending Approval note...")
+    _pr("[13/13] Updating Pending Approval note...")
     try:
         step_update_obsidian_pending(data)
         _pr("  ✓ Pending Approval.md updated")
