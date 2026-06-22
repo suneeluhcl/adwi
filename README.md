@@ -17,7 +17,7 @@
 |---|---|---|
 | [§1](#1-system-dna--model-matrix) | System DNA & Model Matrix | Hardware, models, NLU pipeline |
 | [§2](#2-infrastructure-topography) | Infrastructure Topography | Every port, container, agent, data flow |
-| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 184+ commands, args, behaviors |
+| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 193+ commands, args, behaviors |
 | [§3a](#3a-gmail-capability-surface) | Gmail Capability Surface | Full Gmail feature inventory — read/write/draft/send/schedule/rules |
 | [§4](#4-agentic-lifecycle-flows) | Agentic Lifecycle Flows | ASCII diagrams of every execution path (Flows A–G) |
 | [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation, API auth status |
@@ -156,10 +156,12 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 | `adwi-nightly` | 2:00 AM |
 | `adwi-scheduled-send` | every 2min |
 | `caffeinate` | KeepAlive |
+| `command-api` | KeepAlive |
 | `obsidian-bridge` | KeepAlive |
 | `openwebui-knowledge-watcher` | KeepAlive |
 | `phoenix` | KeepAlive |
 | `qdrant` | on demand |
+| `telegram-bridge` | KeepAlive |
 *Auto-updated: 2026-06-22*
 <!-- /AUTO:AGENTS -->
 
@@ -903,7 +905,7 @@ Enforced by `_classify_cli_risk()` (adwi_cli.py) and `classify_risk()` (reason_e
 SuneelWorkSpace/
 │
 ├── adwi/                              # Core AI brain
-│   ├── adwi_cli.py                    # 11,296 lines · 184 commands · REPL entry point
+│   ├── adwi_cli.py                    # 11,905 lines · 193 commands · REPL entry point
 │   ├── reason_engine.py               # LangGraph: Planner→Executor→Critic (861 lines)
 │   ├── memory.py                      # AdwiMemory: SQLite + nomic-embed cosine search (96 NLU fixtures)
 │   ├── path_validator.py              # Deny-first path containment; hard-blocks credential dirs
@@ -966,7 +968,7 @@ SuneelWorkSpace/
 │   │   ├── BOOTSTRAP_CHECKLIST.md     # Step-by-step new machine checklist
 │   │   ├── OPERATOR_HANDBOOK.md       # Day-to-day operator reference
 │   │   ├── COMMAND_REGISTRY_WIRING_PLAN.md # Phase migration plan for CommandRegistry
-│   │   ├── LLM_SYSTEM_PRIMING.md      # Compact unambiguous priming reference (115 intents, 184 commands)
+│   │   ├── LLM_SYSTEM_PRIMING.md      # Compact unambiguous priming reference (115 intents, 193 commands)
 │   │   ├── TELEGRAM_BRIDGE_SETUP.md   # Telegram bridge config and launch guide
 │   │   ├── TELEGRAM_COMMAND_REFERENCE.md # All 9 Telegram commands with examples
 │   │   └── CODEX_COLLABORATION.md     # How to use Codex as a reviewer alongside Claude
