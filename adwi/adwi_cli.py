@@ -3520,6 +3520,8 @@ _ou_mod = _ilu_ou.module_from_spec(_ou_spec)
 _ou_spec.loader.exec_module(_ou_mod)
 _replace_vault_block    = _ou_mod.replace_marker_block
 _daily_note_template_fn = _ou_mod.daily_note_template
+_append_under_heading    = _ou_mod.append_under_heading
+_append_to_daily_section = _ou_mod.append_to_daily_section
 del _ilu_ou, _ou_spec, _ou_mod
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -3623,6 +3625,72 @@ def cmd_obsidian_daily(content: str = "") -> None:
         cprint(f"  ✗ {result['error']}", RED)
     else:
         cprint(f"  ✓ Added to daily note → {result.get('daily_note', '?')}", GREEN)
+
+
+_CAPTURE_SECTIONS: dict = {
+    "focus":    "## Current Focus",
+    "decision": "## Decisions",
+    "idea":     "## Ideas",
+    "task":     "## Current Focus",
+    "bug":      "## Bugs / Fixes",
+    "fix":      "## Bugs / Fixes",
+    "approval": "## Pending Approval",
+    "note":     "## Notes",
+}
+
+
+def cmd_obsidian_capture(args: str = "") -> None:
+    """Append a timestamped entry to a section of today's daily note.
+
+    Usage: /obsidian-capture <type> <text>
+    Types: focus, decision, idea, task, bug, fix, approval, note
+    """
+    parts = args.strip().split(None, 1)
+    if len(parts) < 2:
+        cprint(f"\n  {YELLOW}Usage: /obsidian-capture <type> <text>{RESET}", "")
+        cprint(f"  Types: {', '.join(_CAPTURE_SECTIONS)}", "")
+        return
+
+    cap_type = parts[0].lower()
+    text     = parts[1].strip()
+
+    if cap_type not in _CAPTURE_SECTIONS:
+        valid = ", ".join(_CAPTURE_SECTIONS)
+        cprint(f"\n  {YELLOW}Unknown type '{cap_type}'. Valid: {valid}{RESET}", "")
+        return
+
+    section = _CAPTURE_SECTIONS[cap_type]
+    now     = datetime.now()
+    today   = now.strftime("%Y-%m-%d")
+    entry   = f"- {now.strftime('%H:%M')} — {text}"
+
+    ok, msg = _append_to_daily_section(OBSIDIAN_VAULT, today, section, entry)
+    if not ok:
+        cprint(f"\n  {RED}✗ Capture failed: {msg}{RESET}", "")
+        return
+    cprint(f"\n  {GREEN}✓ Captured → {section} in {today}.md{RESET}", "")
+
+    if cap_type == "idea":
+        ideas_path = OBSIDIAN_VAULT / "knowledge" / "Ideas Index.md"
+        if ideas_path.exists():
+            updated = _append_under_heading(
+                ideas_path.read_text(encoding="utf-8"),
+                "## Captured Ideas",
+                f"- {today} — {text}",
+            )
+            ideas_path.write_text(updated, encoding="utf-8")
+            cprint(f"  {GREEN}✓ Also logged → knowledge/Ideas Index.md{RESET}", "")
+
+    elif cap_type == "approval":
+        approval_path = OBSIDIAN_VAULT / "knowledge" / "Pending Approval.md"
+        if approval_path.exists():
+            updated = _append_under_heading(
+                approval_path.read_text(encoding="utf-8"),
+                "## Manual Pending Items",
+                f"- {today} — {text}",
+            )
+            approval_path.write_text(updated, encoding="utf-8")
+            cprint(f"  {GREEN}✓ Also logged → knowledge/Pending Approval.md{RESET}", "")
 
 
 # ── import for obsidian URL quoting ──────────────────────────────────────────
@@ -10789,6 +10857,8 @@ def handle(line: str) -> bool:
     elif line == "/obsidian-write": cmd_obsidian_write()
     elif line.startswith("/obsidian-daily "): cmd_obsidian_daily(line[16:].strip())
     elif line == "/obsidian-daily": cmd_obsidian_daily()
+    elif line.startswith("/obsidian-capture "): cmd_obsidian_capture(line[18:].strip())
+    elif line == "/obsidian-capture": cmd_obsidian_capture()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
@@ -11115,6 +11185,16 @@ You can say things like:
   /eval-adwi                 Full eval: smoke + routing + capability audit
   /export-training-example   Save a high-quality interaction to training data
   /training-plan             Show fine-tuning readiness status
+
+{BOLD}Obsidian Vault:{RESET}
+  /obsidian-capture <type> <text>  Append timestamped entry to today's daily note
+                                   types: focus, decision, idea, task, bug, fix, approval, note
+                                   idea → also logs to knowledge/Ideas Index.md
+                                   approval → also logs to knowledge/Pending Approval.md
+  /obsidian-search <query>   Full-text search across all vault notes
+  /obsidian-read <path>      Read a vault note (relative to vault root)
+  /obsidian-write <path> -- <content>  Append content to a vault note
+  /obsidian-daily [entry]    Quick-append to today's daily note
 
 {BOLD}Ideas + Tools:{RESET}
   /extract-ideas [src]       Extract implementable ideas from URL/file/text

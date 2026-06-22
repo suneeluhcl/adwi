@@ -144,8 +144,8 @@ Items that Adwi generated but need human review before applying.
 - `daily-notes/YYYY-MM-DD.md` — nightly summary (2 AM) and daily brief (on demand)
 - Generated sections are wrapped in `<!-- ADWI:...:START/END -->` markers and replaced, not appended
 
-**What you write manually:**
-- Current Focus, Decisions, Ideas, Bugs / Fixes in daily notes
+**What you write manually (or via `/obsidian-capture`):**
+- Current Focus, Decisions, Ideas, Bugs / Fixes in daily notes via [[knowledge/Capture Workflow]]
 - Any note in `projects/`, `knowledge/`, or `automations/`
 
 **Where things go:**

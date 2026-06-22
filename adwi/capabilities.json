@@ -1561,6 +1561,18 @@
       "test_command": "/test-adwi"
     },
     {
+      "name": "Obsidian Capture",
+      "command": "/obsidian-capture <type> <text>",
+      "description": "Append a timestamped entry to the matching section of today's daily note. Types: focus, decision, idea, task, bug, fix, approval, note. idea → also logs to knowledge/Ideas Index.md. approval → also logs to knowledge/Pending Approval.md. Works offline (direct vault write).",
+      "risk": "low",
+      "files_touched": [
+        "obsidian-vault/daily-notes/YYYY-MM-DD.md"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
       "name": "Obsidian Read",
       "command": "/obsidian-read",
       "description": "Adwi command /obsidian-read",

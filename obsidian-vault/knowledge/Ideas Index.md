@@ -35,6 +35,10 @@ All planned and evaluated capability ideas for Adwi.
 | SimLab bounded eval harness | 2026-06-18 | Phase 10 |
 | Gmail integration (50+ commands) | 2026-06-17 | Phases 7–16B |
 
+## Captured Ideas
+
+*Quick ideas captured via `/obsidian-capture idea <text>`. Review and promote to Active Ideas or a project note.*
+
 ## How to Add a New Idea
 
 1. Use `/add-capability-plan <idea>` in the Adwi REPL — adds to `adwi/notes/adwi-capability-roadmap.md`
