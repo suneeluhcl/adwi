@@ -118,4 +118,5 @@ Adwi writes into notes using `<!-- ADWI:MARKER-NAME:START/END -->`. Content insi
 - [[knowledge/Planning Workflow]]
 - [[knowledge/Template Guide]]
 - [[knowledge/Obsidian Maintenance]]
+- [[knowledge/Obsidian Upgrade Handoff]]
 - [[Adwi Home]]

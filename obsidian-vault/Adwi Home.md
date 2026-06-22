@@ -128,7 +128,7 @@ Items that Adwi generated but need human review before applying.
 /obsidian-help                      # print this cheat sheet
 ```
 
-→ Full playbook: [[knowledge/Obsidian Operator Guide]]
+→ Full playbook: [[knowledge/Obsidian Operator Guide]] · [[knowledge/Obsidian Upgrade Handoff]]
 
 ---
 

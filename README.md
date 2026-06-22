@@ -267,7 +267,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **new**: `/new-session`
 **nightly**: `/nightly-log`  `/nightly-run`  `/nightly-status`
 **notify**: `/notify`
-**obsidian**: `/obsidian-capture`  `/obsidian-daily`  `/obsidian-plan`  `/obsidian-plan-clear`  `/obsidian-promote-idea`  `/obsidian-read`  `/obsidian-review`  `/obsidian-review-save`  `/obsidian-search`  `/obsidian-status`  `/obsidian-validate`  `/obsidian-write`
+**obsidian**: `/obsidian-capture`  `/obsidian-daily`  `/obsidian-help`  `/obsidian-plan`  `/obsidian-plan-clear`  `/obsidian-promote-idea`  `/obsidian-read`  `/obsidian-review`  `/obsidian-review-save`  `/obsidian-search`  `/obsidian-status`  `/obsidian-validate`  `/obsidian-write`
 **old**: `/old-files`
 **organize**: `/organize`
 **owui**: `/owui`
