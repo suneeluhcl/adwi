@@ -95,6 +95,7 @@ If you change `templates/Idea Note.md` headings, the `/obsidian-promote-idea` co
 
 ## Related Notes
 
+- [[knowledge/Obsidian Operator Guide]]
 - [[knowledge/Capture Workflow]]
 - [[knowledge/Review Workflow]]
 - [[knowledge/Planning Workflow]]

@@ -4128,6 +4128,29 @@ def cmd_obsidian_validate() -> None:
         cprint(f"\n  {RED}✗ Validation failed (see above){RESET}", "")
 
 
+_OBSIDIAN_CHEAT_SHEET = """\
+  Obsidian Command Cheat Sheet
+  ─────────────────────────────────────────────────────────
+  /obsidian-status                    vault summary + last nightly validation
+  /obsidian-plan [days]               generate today's plan (default 7 days)
+  /obsidian-plan-clear                blank today's plan block
+  /obsidian-capture <type> <text>     capture to daily note
+    types: focus | decision | idea | task | bug | fix | approval | note
+  /obsidian-review [days]             grouped summary (default 7 days)
+  /obsidian-review-save [days]        save review to reviews/
+  /obsidian-promote-idea Title -- desc  create idea note + link in index
+  /obsidian-validate                  full vault health check
+  /obsidian-help                      show this cheat sheet
+  ─────────────────────────────────────────────────────────
+  Daily playbook: obsidian-vault/knowledge/Obsidian Operator Guide.md
+"""
+
+
+def cmd_obsidian_help() -> None:
+    """Print the Obsidian command cheat sheet."""
+    print(_OBSIDIAN_CHEAT_SHEET)
+
+
 # ── import for obsidian URL quoting ──────────────────────────────────────────
 import urllib.parse as _urlparse_mod
 # Bind to local name used inside _obsidian_api and cmd_obsidian_read
@@ -11305,6 +11328,7 @@ def handle(line: str) -> bool:
     elif line == "/obsidian-plan-clear": cmd_obsidian_plan_clear()
     elif line == "/obsidian-status": cmd_obsidian_status()
     elif line == "/obsidian-validate": cmd_obsidian_validate()
+    elif line == "/obsidian-help": cmd_obsidian_help()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
@@ -11641,6 +11665,7 @@ You can say things like:
   /obsidian-plan-clear             Clear today's ADWI:DAILY-PLAN block
   /obsidian-status                 Vault summary: notes, today's plan, latest review
   /obsidian-validate               Run Obsidian vault health check (structure, templates, config, markers)
+  /obsidian-help                   Print Obsidian command cheat sheet
   /obsidian-review [days]          Print review of last N daily notes (default 7, read-only)
   /obsidian-review-save [days]     Save review to reviews/YYYY-MM-DD-weekly-review.md
   /obsidian-promote-idea <Title> -- <desc>  Create idea note in projects/ideas/ + link in index

@@ -151,6 +151,7 @@ If you add a community plugin, its config appears in `.obsidian/plugins/` — th
 
 ## Related Notes
 
+- [[knowledge/Obsidian Operator Guide]]
 - [[Adwi Home]]
 - [[knowledge/Template Guide]]
 - [[knowledge/Pending Approval]]

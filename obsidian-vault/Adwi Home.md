@@ -85,6 +85,7 @@ Quick orientation — what runs where.
 *Review captured items weekly: [[knowledge/Review Workflow]]*
 *Generate today's plan: [[knowledge/Planning Workflow]] · `/obsidian-plan`*
 *Use templates when creating notes manually: [[knowledge/Template Guide]]*
+*Daily playbook: [[knowledge/Obsidian Operator Guide]]*
 
 ---
 
@@ -111,6 +112,23 @@ Items that Adwi generated but need human review before applying.
 → [[knowledge/Pending Approval]]
 
 *The nightly loop places AI skill suggestions here. Review and apply manually.*
+
+---
+
+## Obsidian Command Cheat Sheet
+
+```bash
+/obsidian-status                    # vault summary + last nightly validation
+/obsidian-plan 7                    # generate today's plan from last 7 days
+/obsidian-capture idea <text>       # capture to daily note + ideas index
+/obsidian-review 7                  # grouped summary of last 7 days
+/obsidian-review-save 7             # save review to reviews/
+/obsidian-promote-idea Title -- desc  # create idea note + link in index
+/obsidian-validate                  # full vault health check
+/obsidian-help                      # print this cheat sheet
+```
+
+→ Full playbook: [[knowledge/Obsidian Operator Guide]]
 
 ---
 

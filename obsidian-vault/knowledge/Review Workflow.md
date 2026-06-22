@@ -121,6 +121,7 @@ Also inserts a row in `knowledge/Ideas Index.md → ## Active Ideas` table if no
 
 ## Related Notes
 
+- [[knowledge/Obsidian Operator Guide]]
 - [[knowledge/Planning Workflow]]
 - [[knowledge/Capture Workflow]]
 - [[knowledge/Template Guide]]

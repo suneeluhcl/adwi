@@ -125,6 +125,7 @@ This keeps the brief short — the plan itself is the detail.
 
 ## Related Notes
 
+- [[knowledge/Obsidian Operator Guide]]
 - [[knowledge/Capture Workflow]]
 - [[knowledge/Review Workflow]]
 - [[knowledge/Template Guide]]

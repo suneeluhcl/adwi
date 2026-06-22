@@ -1651,6 +1651,16 @@
       "test_command": "/test-adwi"
     },
     {
+      "name": "Obsidian Help",
+      "command": "/obsidian-help",
+      "description": "Print Obsidian command cheat sheet: all obsidian commands with one-line descriptions and a link to the Operator Guide.",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
       "name": "Obsidian Read",
       "command": "/obsidian-read",
       "description": "Adwi command /obsidian-read",
