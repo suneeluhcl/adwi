@@ -3678,5 +3678,40 @@ class TestFIXIMPL001BuildFeatureNoPronoun(unittest.TestCase):
         self.assertNotEqual(_classify("build a house"), "implement_idea")
 
 
+class TestFIXGCC001AddPersonCC(unittest.TestCase):
+    """FIX-GCC-001: 'add [person] to CC/BCC' → gmail_add_cc / gmail_add_bcc."""
+
+    def test_add_person_to_cc(self):
+        self.assertEqual(_classify("add Alex to CC"), "gmail_add_cc")
+
+    def test_add_person_to_cc_the(self):
+        self.assertEqual(_classify("add Sarah to the CC"), "gmail_add_cc")
+
+    def test_add_person_to_bcc(self):
+        self.assertEqual(_classify("add Bob to BCC"), "gmail_add_bcc")
+
+    def test_add_person_as_bcc(self):
+        self.assertEqual(_classify("add her as BCC"), "gmail_add_bcc")
+
+
+class TestFIXGCANCEL001ContextualCancel(unittest.TestCase):
+    """FIX-GCANCEL-001: 'cancel this email', 'discard this reply', 'cancel sending' → gmail_cancel."""
+
+    def test_cancel_this_email(self):
+        self.assertEqual(_classify("cancel this email"), "gmail_cancel")
+
+    def test_cancel_sending(self):
+        self.assertEqual(_classify("cancel sending"), "gmail_cancel")
+
+    def test_discard_this_reply(self):
+        self.assertEqual(_classify("discard this reply"), "gmail_cancel")
+
+    def test_abort_it(self):
+        self.assertEqual(_classify("abort it"), "gmail_cancel")
+
+    def test_cancel_scheduled_not_confused(self):
+        self.assertEqual(_classify("cancel the scheduled email"), "gmail_cancel_scheduled_send")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

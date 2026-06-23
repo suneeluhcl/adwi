@@ -1340,9 +1340,13 @@ _REGEX_INTENTS = [
     # gmail_add_cc — "add cc Priya", "cc Priya to the draft", "cc Priya on this email"
     (re.compile(r"\b(?:add|also)\s+cc\b|\bcc\s+(?:my|the)\b", re.I), "gmail_add_cc"),
     (re.compile(r"\bcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_cc"),
+    # FIX-GCC-001: "add [person] to CC" — person name between add and CC
+    (re.compile(r"\badd\b.{0,40}\bto\s+(?:the\s+)?cc\b", re.I), "gmail_add_cc"),
     # gmail_add_bcc — "add bcc me", "bcc Rahul on this draft", "bcc me on the email"
     (re.compile(r"\b(?:add|also)\s+bcc\b|\bbcc\s+(?:my|the)\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
+    # FIX-GCC-001: "add [person] as BCC" / "add [person] to BCC"
+    (re.compile(r"\badd\b.{0,40}\b(?:to\s+(?:the\s+)?bcc|as\s+bcc)\b", re.I), "gmail_add_bcc"),
 
     # ── Gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (attachments) ──
     # gmail_open_scheduled_draft needs to beat gmail_save_attachment ("open...invoice")
@@ -1530,9 +1534,13 @@ _REGEX_INTENTS = [
     (re.compile(r"^undo\s+that\s*$", re.I), "gmail_undo"),
     (re.compile(r"\bundo\b.{0,30}\b(?:archive|trash|that\s+archive|that\s+trash|mark|last\s+action|that\s+action)\b", re.I), "gmail_undo"),
     (re.compile(r"\b(?:bring\s+back|restore)\b.{0,25}\b(?:those|them|those\s+emails?|that\s+email)\b", re.I), "gmail_undo"),
-    # gmail_cancel — anchored
+    # gmail_cancel — anchored bare commands
     (re.compile(r"^cancel(?:\s+that)?\s*$", re.I), "gmail_cancel"),
     (re.compile(r"^(?:never\s+mind|abort|stop\s+that)\s*$", re.I), "gmail_cancel"),
+    # FIX-GCANCEL-001: contextual cancel/discard forms ("cancel this email", "discard this reply")
+    (re.compile(r"\b(?:cancel|abort)\b.{0,20}\b(?:this|the|my)\b.{0,15}\b(?:email|message|reply)\b", re.I), "gmail_cancel"),
+    (re.compile(r"\b(?:discard|scrap)\b.{0,20}\b(?:this|the|my)\b.{0,15}\b(?:email|message|reply)\b", re.I), "gmail_cancel"),
+    (re.compile(r"\b(?:cancel|abort)\s+(?:sending|send|it)\b", re.I), "gmail_cancel"),
     # gmail_mark_read — before mark_unread: "those unread emails as read" must route here
     (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?read\b", re.I), "gmail_mark_read"),
     # gmail_mark_unread
