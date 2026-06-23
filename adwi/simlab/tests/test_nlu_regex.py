@@ -3496,5 +3496,34 @@ class TestNightlyStatusCoverage(unittest.TestCase):
         self.assertEqual(_classify("show nightly report"), "nightly_status")
 
 
+class TestFIXGMAILCOMPOSE001DraftEmail(unittest.TestCase):
+    """FIX-GMAILCOMPOSE-001: 'draft' verb for email composition → gmail_compose."""
+
+    def test_draft_an_email(self):
+        self.assertEqual(_classify("draft an email to Alex"), "gmail_compose")
+
+    def test_draft_new_message(self):
+        self.assertEqual(_classify("draft a new message for the team"), "gmail_compose")
+
+    def test_draft_email_about(self):
+        self.assertEqual(_classify("draft an email about the project update"), "gmail_compose")
+
+
+class TestFIXFE004TracebackContext(unittest.TestCase):
+    """FIX-FE-004: 'look at/here is traceback/stack trace/crash' → fix_error."""
+
+    def test_look_at_traceback(self):
+        self.assertEqual(_classify("look at this traceback"), "fix_error")
+
+    def test_here_is_stack_trace(self):
+        self.assertEqual(_classify("here is the stack trace"), "fix_error")
+
+    def test_check_out_crash(self):
+        self.assertEqual(_classify("check out this crash"), "fix_error")
+
+    def test_look_at_exception(self):
+        self.assertEqual(_classify("look at this exception"), "fix_error")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

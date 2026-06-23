@@ -1141,6 +1141,8 @@ _REGEX_INTENTS = [
     # FIX-FE-003: "debug/troubleshoot/diagnose this error/bug/issue/crash" → fix_error
     (re.compile(r"\b(?:debug|troubleshoot|diagnose)\b.{0,25}\b(?:this|the|my|that)\b.{0,20}\b(?:error|exception|bug|issue|problem|crash|failure)\b", re.I), "fix_error"),
     (re.compile(r"\b(?:debug|troubleshoot)\s+(?:this|that|my|the)\s+code\b", re.I), "fix_error"),
+    # FIX-FE-004: "look at this traceback/stack trace", "here's the stack trace" — pasted crash context
+    (re.compile(r"\b(?:look\s+at|check\s+out|here(?:['']s|\s+is))\b.{0,20}\b(?:this|the|my|a)\b.{0,20}\b(?:traceback|stack\s+trace|exception|crash)\b", re.I), "fix_error"),
     # CYCLE-3: pasted network/HTTP client errors (httpx, aiohttp, requests, urllib)
     (re.compile(r"\bhttpx\.(ConnectError|HTTPStatusError|TimeoutException|ReadTimeout|ConnectTimeout|RemoteProtocolError)\b", re.I), "fix_error"),
     (re.compile(r"\baiohttp\.(ClientConnectorError|ClientResponseError|ClientTimeout|ServerTimeoutError|ClientError)\b", re.I), "fix_error"),
@@ -1479,8 +1481,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\breply\b.{0,30}\b(?:saying|that|with|to\s+(?:it|this|that|the\s+email|the\s+thread|the\s+latest))\b", re.I), "gmail_draft_reply"),
     (re.compile(r"\b(?:respond|write\s+back)\b.{0,30}\b(?:saying|that|to\s+(?:it|this|that))\b", re.I), "gmail_draft_reply"),
     (re.compile(r"\breply\b.{0,30}\bto\s+(?:the\s+)?(?:latest|last|current)\b", re.I), "gmail_draft_reply"),
-    # gmail_compose — "compose an email to X", "email X saying Y", "write an email to X", "send an email to X"
-    (re.compile(r"\b(?:compose|write)\b.{0,20}\b(?:an?\s+)?(?:new\s+)?(?:email|mail|message)\b", re.I), "gmail_compose"),
+    # gmail_compose — "compose an email to X", "email X saying Y", "write/draft an email to X", "send an email to X"
+    (re.compile(r"\b(?:compose|write|draft)\b.{0,20}\b(?:an?\s+)?(?:new\s+)?(?:email|mail|message)\b", re.I), "gmail_compose"),
     (re.compile(r"\bemail\b.{0,40}\b(?:saying|to\s+say|to\s+tell|that)\b", re.I), "gmail_compose"),
     # FIX-STAGE3-003b: "send an email to X" is compose (send_draft requires "the" after FIX-STAGE3-003)
     (re.compile(r"\bsend\b.{0,15}\ban?\s+(?:email|mail|message)\b", re.I), "gmail_compose"),
