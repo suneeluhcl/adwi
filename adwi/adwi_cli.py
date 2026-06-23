@@ -737,6 +737,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(junk|garbage|clutter|cruft)\b.{0,20}files?\b", re.I), "cleanup"),
 
     # ── RAG / knowledge search — BEFORE file_search (notes-specific guard) ───────
+    # FIX-OBS-005: "look in my notes for X" → obsidian_search (verb-first form beats rag_search below)
+    (re.compile(r"\b(look|search|find)\b.{0,10}\bin\s+my\s+notes?\b.{0,5}\b(for|about|on)\b", re.I), "obsidian_search"),
+    # FIX-OBS-006: "find notes from last week", "find my notes on python" → obsidian_search
+    (re.compile(r"\b(?:find|search\s+for|look\s+for)\b.{0,10}\bnotes?\b.{0,10}\b(?:from|about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\b(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
     # rag_search beats obsidian_search for note-summarize and bare-notes search
@@ -1015,6 +1019,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bbackup\s+now\b", re.I), "backup_now"),
     (re.compile(r"\bcommit\s+and\s+push\b", re.I), "backup_now"),
     (re.compile(r"\bpush\s+and\s+commit\b", re.I), "backup_now"),
+    # FIX-BU-001: "push my changes/code/work" → backup_now
+    (re.compile(r"\bpush\b.{0,15}\bmy\b.{0,10}\b(changes|code|work|commits?|updates?)\b", re.I), "backup_now"),
     (re.compile(r"\bsave\b.{0,20}\b(my\s+)?(work|changes|code)\b.{0,20}\b(to\s+)?github\b", re.I), "backup_now"),
     (re.compile(r"\b(backup.{0,10}(status|health|check|recent|current)|last.{0,10}backup|when.{0,15}(was.{0,5})?backup)\b", re.I), "backup_status"),
     (re.compile(r"\bbackup.{0,15}(log|history|logs)\b", re.I), "backup_log"),
@@ -1532,6 +1538,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bscan\s+mem\w*\b", re.I), "memory_scan"),
     # CYCLE-5: embeddings generation → memory_scan
     (re.compile(r"\bgenerate\b.{0,20}\bembeddings?\b", re.I), "memory_scan"),
+    # FIX-MR-001: "what did I say/mention/note about X" → memory_recall
+    (re.compile(r"\bwhat\b.{0,10}\bi\b.{0,10}\b(?:said|say|mentioned|mention|noted|note|wrote|recorded)\b.{0,10}\babout\b", re.I), "memory_recall"),
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),

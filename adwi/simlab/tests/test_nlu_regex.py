@@ -2684,5 +2684,48 @@ class TestFIXNR002KickOffNightly(unittest.TestCase):
         self.assertEqual(_classify("start the nightly"), "nightly_run")
 
 
+class TestFIXOBS005006NoteSearch(unittest.TestCase):
+    """FIX-OBS-005/006: verb-first note search and time-qualified notes → obsidian_search."""
+
+    def test_look_in_my_notes_for_python(self):
+        # Previously: rag_search via 'in my notes ... for'
+        self.assertEqual(_classify("look in my notes for python"), "obsidian_search")
+
+    def test_find_notes_from_last_week(self):
+        self.assertEqual(_classify("find notes from last week"), "obsidian_search")
+
+    def test_find_my_notes_on_project(self):
+        self.assertEqual(_classify("find my notes on project alpha"), "obsidian_search")
+
+    def test_bare_search_my_notes_still_rag(self):
+        self.assertEqual(_classify("search my notes"), "rag_search")
+
+
+class TestFIXMR001WhatDidISay(unittest.TestCase):
+    """FIX-MR-001: 'what did I say/mention/note about X' → memory_recall."""
+
+    def test_what_did_i_say_about_project(self):
+        self.assertEqual(_classify("what did i say about project alpha"), "memory_recall")
+
+    def test_what_did_i_note_about_meeting(self):
+        self.assertEqual(_classify("what did i note about the meeting"), "memory_recall")
+
+    def test_what_have_i_mentioned_about(self):
+        self.assertEqual(_classify("what have i mentioned about my diet"), "memory_recall")
+
+
+class TestFIXBU001PushMyChanges(unittest.TestCase):
+    """FIX-BU-001: 'push my changes/code/work' → backup_now."""
+
+    def test_push_my_changes(self):
+        self.assertEqual(_classify("push my changes"), "backup_now")
+
+    def test_push_my_code(self):
+        self.assertEqual(_classify("push my code"), "backup_now")
+
+    def test_push_my_work(self):
+        self.assertEqual(_classify("push my work"), "backup_now")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
