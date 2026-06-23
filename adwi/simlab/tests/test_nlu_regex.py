@@ -2551,5 +2551,1167 @@ class TestDailyImproveContinuationPhrases(unittest.TestCase):
         self.assertEqual(self._match("continue the self improvement experiment"), "daily_improve")
 
 
+class TestFIXOBS004SearchMyNotesAboutTopic(unittest.TestCase):
+    """FIX-OBS-004: topic-qualified 'search my notes about X' → obsidian_search, not rag_search."""
+
+    def test_search_my_notes_about_research(self):
+        self.assertEqual(_classify("search my notes about research"), "obsidian_search")
+
+    def test_search_my_notes_about_python(self):
+        self.assertEqual(_classify("search my notes about python async"), "obsidian_search")
+
+    def test_search_my_notes_on_project_planning(self):
+        self.assertEqual(_classify("search my notes on project planning"), "obsidian_search")
+
+    def test_bare_search_my_notes_still_rag(self):
+        # bare "search my notes" (no topic) stays rag_search
+        self.assertEqual(_classify("search my notes"), "rag_search")
+
+    def test_search_my_notes_then_summarize_still_rag(self):
+        self.assertEqual(_classify("search my notes then summarize the results"), "rag_search")
+
+
+class TestFIXRES001ResearchWindowExpansion(unittest.TestCase):
+    """FIX-RES-001: research/investigate/look-into window {0,15}→{0,25} for longer phrases."""
+
+    def test_investigate_this_topic_deeply_for_me(self):
+        # 19 chars between "investigate" and "for me" — previously fell through
+        self.assertEqual(_classify("investigate this topic deeply for me"), "research")
+
+    def test_look_into_this_complex_issue_for_me(self):
+        self.assertEqual(_classify("look into this complex issue for me"), "research")
+
+
+class TestFIXTR002TechRadarWhatIs(unittest.TestCase):
+    """FIX-TR-002: tech_radar matches 'what is trending/new in tech' (space form)."""
+
+    def test_what_is_trending_in_tech_this_week(self):
+        self.assertEqual(_classify("what is trending in tech this week"), "tech_radar")
+
+    def test_what_is_new_in_ai_tools(self):
+        self.assertEqual(_classify("what is new in AI tools"), "tech_radar")
+
+    def test_whats_trending_still_works(self):
+        self.assertEqual(_classify("what's trending in ML"), "tech_radar")
+
+
+class TestFIXDAILY001WhatDoINeedToKnow(unittest.TestCase):
+    """FIX-DAILY-001: 'what do i need to know today' / 'what should i focus on today' → daily_brief."""
+
+    def test_what_do_i_need_to_know_today(self):
+        self.assertEqual(_classify("what do i need to know today"), "daily_brief")
+
+    def test_what_should_i_focus_on_today(self):
+        self.assertEqual(_classify("what should i focus on today"), "daily_brief")
+
+
+class TestFIXMEM001PruneTrimConsolidate(unittest.TestCase):
+    """FIX-MEM-001: prune/trim/consolidate memories → memory_curate."""
+
+    def test_prune_old_memories(self):
+        self.assertEqual(_classify("prune old memories"), "memory_curate")
+
+    def test_trim_my_memory(self):
+        self.assertEqual(_classify("trim my memory"), "memory_curate")
+
+    def test_consolidate_memories(self):
+        self.assertEqual(_classify("consolidate memories"), "memory_curate")
+
+
+class TestFIXAUS001AssistantUpgradeStatus(unittest.TestCase):
+    """FIX-AUS-001: natural phrasings for assistant_upgrade_status."""
+
+    def test_status_of_the_assistant_upgrade(self):
+        self.assertEqual(_classify("whats the status of the assistant upgrade"), "assistant_upgrade_status")
+
+    def test_upgrade_progress_bare(self):
+        self.assertEqual(_classify("upgrade progress"), "assistant_upgrade_status")
+
+    def test_how_is_the_upgrade_going(self):
+        self.assertEqual(_classify("how is the upgrade going"), "assistant_upgrade_status")
+
+
+class TestFIXFS001WhereSaved(unittest.TestCase):
+    """FIX-FS-001: 'where did i save X' → file_search, not gmail_save_attachment."""
+
+    def test_where_did_i_save_the_pdf(self):
+        self.assertEqual(_classify("where did i save the pdf"), "file_search")
+
+    def test_where_do_i_keep_tax_documents(self):
+        self.assertEqual(_classify("where do i keep my tax documents"), "file_search")
+
+    def test_save_attachment_still_gmail(self):
+        # "save the pdf attachment from that email" must stay gmail_save_attachment
+        self.assertEqual(_classify("save the pdf attachment from that email"), "gmail_save_attachment")
+
+
+class TestFIXFL001ListMyFiles(unittest.TestCase):
+    """FIX-FL-001: type/location-qualified file listing → file_list."""
+
+    def test_list_my_python_files(self):
+        self.assertEqual(_classify("list my python files"), "file_list")
+
+    def test_show_files_in_downloads(self):
+        self.assertEqual(_classify("show files in downloads"), "file_list")
+
+    def test_show_files_in_workspace(self):
+        self.assertEqual(_classify("show files in my workspace"), "file_list")
+
+
+class TestFIXST001SystemCheck(unittest.TestCase):
+    """FIX-ST-001: 'system check', 'all systems go' → status."""
+
+    def test_system_check(self):
+        self.assertEqual(_classify("system check"), "status")
+
+    def test_all_systems_go(self):
+        self.assertEqual(_classify("all systems go"), "status")
+
+    def test_all_systems_operational(self):
+        self.assertEqual(_classify("all systems operational"), "status")
+
+
+class TestFIXNR002KickOffNightly(unittest.TestCase):
+    """FIX-NR-002: 'kick off nightly', 'run the nightly job' → nightly_run."""
+
+    def test_kick_off_nightly(self):
+        self.assertEqual(_classify("kick off nightly"), "nightly_run")
+
+    def test_run_the_nightly_job(self):
+        self.assertEqual(_classify("run the nightly job"), "nightly_run")
+
+    def test_start_the_nightly(self):
+        self.assertEqual(_classify("start the nightly"), "nightly_run")
+
+
+class TestFIXOBS005006NoteSearch(unittest.TestCase):
+    """FIX-OBS-005/006: verb-first note search and time-qualified notes → obsidian_search."""
+
+    def test_look_in_my_notes_for_python(self):
+        # Previously: rag_search via 'in my notes ... for'
+        self.assertEqual(_classify("look in my notes for python"), "obsidian_search")
+
+    def test_find_notes_from_last_week(self):
+        self.assertEqual(_classify("find notes from last week"), "obsidian_search")
+
+    def test_find_my_notes_on_project(self):
+        self.assertEqual(_classify("find my notes on project alpha"), "obsidian_search")
+
+    def test_bare_search_my_notes_still_rag(self):
+        self.assertEqual(_classify("search my notes"), "rag_search")
+
+
+class TestFIXMR001WhatDidISay(unittest.TestCase):
+    """FIX-MR-001: 'what did I say/mention/note about X' → memory_recall."""
+
+    def test_what_did_i_say_about_project(self):
+        self.assertEqual(_classify("what did i say about project alpha"), "memory_recall")
+
+    def test_what_did_i_note_about_meeting(self):
+        self.assertEqual(_classify("what did i note about the meeting"), "memory_recall")
+
+    def test_what_have_i_mentioned_about(self):
+        self.assertEqual(_classify("what have i mentioned about my diet"), "memory_recall")
+
+
+class TestFIXBU001PushMyChanges(unittest.TestCase):
+    """FIX-BU-001: 'push my changes/code/work' → backup_now."""
+
+    def test_push_my_changes(self):
+        self.assertEqual(_classify("push my changes"), "backup_now")
+
+    def test_push_my_code(self):
+        self.assertEqual(_classify("push my code"), "backup_now")
+
+    def test_push_my_work(self):
+        self.assertEqual(_classify("push my work"), "backup_now")
+
+
+class TestFIXLFE001LearnFromError(unittest.TestCase):
+    """FIX-LFE-001: 'learn from this error/exception', 'extract lessons from failure' → learn_from_error."""
+
+    def test_learn_from_this_error(self):
+        self.assertEqual(_classify("learn from this error"), "learn_from_error")
+
+    def test_learn_from_that_exception(self):
+        self.assertEqual(_classify("learn from that exception"), "learn_from_error")
+
+    def test_learn_from_this_failure(self):
+        self.assertEqual(_classify("learn from this failure"), "learn_from_error")
+
+    def test_extract_lessons_from_error(self):
+        self.assertEqual(_classify("extract lessons from this error"), "learn_from_error")
+
+    def test_take_learnings_from_failure(self):
+        self.assertEqual(_classify("take learnings from this failure"), "learn_from_error")
+
+
+class TestFIXBST001BackupStatusState(unittest.TestCase):
+    """FIX-BST-001: 'is/did/has backup run/complete/fail' → backup_status."""
+
+    def test_is_backup_running(self):
+        self.assertEqual(_classify("is backup running"), "backup_status")
+
+    def test_did_backup_run(self):
+        self.assertEqual(_classify("did backup run"), "backup_status")
+
+    def test_has_backup_completed(self):
+        self.assertEqual(_classify("has backup completed"), "backup_status")
+
+    def test_was_backup_successful(self):
+        self.assertEqual(_classify("was backup successful"), "backup_status")
+
+    def test_did_backup_fail(self):
+        self.assertEqual(_classify("did backup fail"), "backup_status")
+
+    def test_is_backup_done(self):
+        self.assertEqual(_classify("is backup done"), "backup_status")
+
+
+class TestFIXGENIMG001ShowMePicture(unittest.TestCase):
+    """FIX-GENIMG-001: 'show me a picture/image of X' → generate_image."""
+
+    def test_show_me_a_picture_of(self):
+        self.assertEqual(_classify("show me a picture of a sunset"), "generate_image")
+
+    def test_show_me_an_image_of(self):
+        self.assertEqual(_classify("show me an image of a robot"), "generate_image")
+
+    def test_show_me_photo_of(self):
+        self.assertEqual(_classify("show me a photo of a mountain"), "generate_image")
+
+    def test_illustrate_for_me(self):
+        self.assertEqual(_classify("illustrate this concept for me"), "generate_image")
+
+
+class TestFIXTR003ToolRoadmapPlanned(unittest.TestCase):
+    """FIX-TR-003: 'what tools are planned', 'upcoming tools' → tool_roadmap."""
+
+    def test_what_tools_are_planned(self):
+        self.assertEqual(_classify("what tools are planned"), "tool_roadmap")
+
+    def test_which_tools_are_upcoming(self):
+        self.assertEqual(_classify("which tools are upcoming"), "tool_roadmap")
+
+    def test_upcoming_tools(self):
+        self.assertEqual(_classify("show me the upcoming tools"), "tool_roadmap")
+
+    def test_planned_tools(self):
+        self.assertEqual(_classify("what are the planned tools"), "tool_roadmap")
+
+    def test_future_tools(self):
+        self.assertEqual(_classify("future tools for adwi"), "tool_roadmap")
+
+
+class TestFIXEXT001ExtractIdeas(unittest.TestCase):
+    """FIX-EXT-001: 'identify key points', 'what are the main ideas', 'highlight takeaways' → extract_ideas."""
+
+    def test_identify_key_points(self):
+        self.assertEqual(_classify("identify the key points in this article"), "extract_ideas")
+
+    def test_identify_main_ideas(self):
+        self.assertEqual(_classify("identify the main ideas from this text"), "extract_ideas")
+
+    def test_what_are_the_main_ideas(self):
+        self.assertEqual(_classify("what are the main ideas here"), "extract_ideas")
+
+    def test_what_are_the_key_insights(self):
+        self.assertEqual(_classify("what are the key insights from this"), "extract_ideas")
+
+    def test_highlight_key_points(self):
+        self.assertEqual(_classify("highlight the key points from this document"), "extract_ideas")
+
+    def test_highlight_main_takeaways(self):
+        self.assertEqual(_classify("highlight the main takeaways please"), "extract_ideas")
+
+    def test_identify_core_themes(self):
+        self.assertEqual(_classify("identify the core themes in this paper"), "extract_ideas")
+
+
+class TestFIXUC001UseCloud(unittest.TestCase):
+    """FIX-UC-001: 'use cloud for this', 'fallback to cloud', 'offload to cloud' → use_cloud."""
+
+    def test_use_cloud_for_this(self):
+        self.assertEqual(_classify("use cloud for this"), "use_cloud")
+
+    def test_use_cloud_api(self):
+        self.assertEqual(_classify("use cloud api instead"), "use_cloud")
+
+    def test_try_cloud_inference(self):
+        self.assertEqual(_classify("try cloud inference for this"), "use_cloud")
+
+    def test_fallback_to_cloud(self):
+        self.assertEqual(_classify("fallback to cloud"), "use_cloud")
+
+    def test_fall_back_to_cloud(self):
+        self.assertEqual(_classify("fall back to cloud model"), "use_cloud")
+
+    def test_offload_to_cloud(self):
+        self.assertEqual(_classify("offload to cloud"), "use_cloud")
+
+
+class TestFIXROUTE001RouteDebug(unittest.TestCase):
+    """FIX-ROUTE-001: 'how would you route this', 'what intent does this match' → route."""
+
+    def test_how_would_you_route_this(self):
+        self.assertEqual(_classify("how would you route this query"), "route")
+
+    def test_how_would_adwi_handle_this(self):
+        self.assertEqual(_classify("how would adwi handle this"), "route")
+
+    def test_how_do_you_classify_this(self):
+        self.assertEqual(_classify("how do you classify this"), "route")
+
+    def test_what_intent_does_this_match(self):
+        self.assertEqual(_classify("what intent does this match"), "route")
+
+    def test_what_intent_would_this_become(self):
+        self.assertEqual(_classify("what intent would that become"), "route")
+
+
+class TestFIXRC002RunCodeSnippet(unittest.TestCase):
+    """FIX-RC-002: 'run/execute/try/test this snippet/function/block/cell' → run_code."""
+
+    def test_run_this_snippet(self):
+        self.assertEqual(_classify("run this snippet"), "run_code")
+
+    def test_execute_this_function(self):
+        self.assertEqual(_classify("execute this function"), "run_code")
+
+    def test_try_this_block(self):
+        self.assertEqual(_classify("try this block"), "run_code")
+
+    def test_test_this_method(self):
+        self.assertEqual(_classify("test this method"), "run_code")
+
+    def test_run_this_cell(self):
+        self.assertEqual(_classify("run this cell"), "run_code")
+
+
+class TestFIXDOC001SelfDiagnostic(unittest.TestCase):
+    """FIX-DOC-001: 'self-diagnostic', 'run self-check', 'comprehensive system check' → doctor."""
+
+    def test_run_self_diagnostic(self):
+        self.assertEqual(_classify("run self-diagnostic"), "doctor")
+
+    def test_self_check(self):
+        self.assertEqual(_classify("self-check"), "doctor")
+
+    def test_run_self_check(self):
+        self.assertEqual(_classify("run self-check"), "doctor")
+
+    def test_comprehensive_system_check(self):
+        self.assertEqual(_classify("comprehensive system check"), "doctor")
+
+    def test_comprehensive_diagnostic(self):
+        self.assertEqual(_classify("comprehensive diagnostic"), "doctor")
+
+
+class TestFIXGV001GithubVisibility(unittest.TestCase):
+    """FIX-GV-001: 'toggle repo visibility', 'change github visibility' → github_visibility."""
+
+    def test_toggle_repo_visibility(self):
+        self.assertEqual(_classify("toggle repo visibility"), "github_visibility")
+
+    def test_flip_repository_visibility(self):
+        self.assertEqual(_classify("flip repository visibility"), "github_visibility")
+
+    def test_change_github_visibility(self):
+        self.assertEqual(_classify("change github visibility"), "github_visibility")
+
+    def test_switch_github_visibility(self):
+        self.assertEqual(_classify("switch github repo visibility"), "github_visibility")
+
+
+class TestFIXDI003DailyImproveTrigger(unittest.TestCase):
+    """FIX-DI-003: 'do/trigger/kick off daily maintenance/improvement' → daily_improve."""
+
+    def test_do_daily_maintenance(self):
+        self.assertEqual(_classify("do daily maintenance"), "daily_improve")
+
+    def test_trigger_daily_improvement(self):
+        self.assertEqual(_classify("trigger daily improvement"), "daily_improve")
+
+    def test_kick_off_daily_routine(self):
+        self.assertEqual(_classify("kick off daily routine"), "daily_improve")
+
+    def test_start_daily_loop(self):
+        self.assertEqual(_classify("start daily loop"), "daily_improve")
+
+
+class TestFIXBL001BackupLogHistory(unittest.TestCase):
+    """FIX-BL-001: 'recent backups', 'show backup entries' → backup_log."""
+
+    def test_recent_backups(self):
+        self.assertEqual(_classify("recent backups"), "backup_log")
+
+    def test_show_recent_backups(self):
+        self.assertEqual(_classify("show recent backups"), "backup_log")
+
+    def test_show_backup_entries(self):
+        self.assertEqual(_classify("show backup entries"), "backup_log")
+
+    def test_show_backup_records(self):
+        self.assertEqual(_classify("show backup records"), "backup_log")
+
+
+class TestFIXBD001BrowseTo(unittest.TestCase):
+    """FIX-BD-001: 'browse to URL', 'open link in browser', 'visit webpage' → browser_delegate."""
+
+    def test_browse_to_url(self):
+        self.assertEqual(_classify("browse to this url"), "browser_delegate")
+
+    def test_navigate_to_page(self):
+        self.assertEqual(_classify("navigate to this page"), "browser_delegate")
+
+    def test_go_to_link(self):
+        self.assertEqual(_classify("go to this link"), "browser_delegate")
+
+    def test_open_url_in_browser(self):
+        self.assertEqual(_classify("open this url in browser"), "browser_delegate")
+
+    def test_visit_this_url(self):
+        self.assertEqual(_classify("visit this url"), "browser_delegate")
+
+    def test_visit_webpage(self):
+        self.assertEqual(_classify("visit this webpage"), "browser_delegate")
+
+    def test_fetch_this_link(self):
+        self.assertEqual(_classify("fetch this link"), "browser_delegate")
+
+    def test_fetch_page_and_summarize_is_browse(self):
+        # "fetch this page and summarize" has no url/link keyword → routes to browse, not browser_delegate
+        self.assertNotEqual(_classify("fetch this page and summarize it"), "browser_delegate")
+
+
+class TestFIXDU006DiskUsageFallthroughs(unittest.TestCase):
+    """FIX-DU-006: 'not enough space', 'filling up', 'need more storage', GB queries → disk_usage.
+    These were falling through to LLM which sometimes routes to __none__."""
+
+    def test_not_enough_space(self):
+        self.assertEqual(_classify("not enough space"), "disk_usage")
+
+    def test_not_enough_storage(self):
+        self.assertEqual(_classify("not enough storage"), "disk_usage")
+
+    def test_not_enough_disk_space(self):
+        self.assertEqual(_classify("not enough disk space"), "disk_usage")
+
+    def test_do_i_have_enough_space(self):
+        self.assertEqual(_classify("do i have enough space"), "disk_usage")
+
+    def test_do_i_have_enough_storage(self):
+        self.assertEqual(_classify("do i have enough storage"), "disk_usage")
+
+    def test_need_more_space(self):
+        self.assertEqual(_classify("i need more space"), "disk_usage")
+
+    def test_need_more_storage(self):
+        self.assertEqual(_classify("need more storage"), "disk_usage")
+
+    def test_ssd_filling_up(self):
+        self.assertEqual(_classify("ssd filling up"), "disk_usage")
+
+    def test_disk_filling_up(self):
+        self.assertEqual(_classify("disk is filling up"), "disk_usage")
+
+    def test_storage_getting_full(self):
+        self.assertEqual(_classify("storage getting full"), "disk_usage")
+
+    def test_drive_nearly_full(self):
+        self.assertEqual(_classify("drive nearly full"), "disk_usage")
+
+    def test_how_many_gb_left(self):
+        self.assertEqual(_classify("how many GB do I have left"), "disk_usage")
+
+    def test_how_many_tb_remaining(self):
+        self.assertEqual(_classify("how many TB remaining"), "disk_usage")
+
+    def test_how_many_gigabytes_available(self):
+        self.assertEqual(_classify("how many gigabytes available"), "disk_usage")
+
+
+class TestFIXVOC001NarrateVocalize(unittest.TestCase):
+    """FIX-VOC-001: 'narrate this', 'vocalize this' → voice_out."""
+
+    def test_narrate_this(self):
+        self.assertEqual(_classify("narrate this"), "voice_out")
+
+    def test_narrate_the_response(self):
+        self.assertEqual(_classify("narrate the response"), "voice_out")
+
+    def test_vocalize_this(self):
+        self.assertEqual(_classify("vocalize this"), "voice_out")
+
+    def test_vocalize_the_answer(self):
+        self.assertEqual(_classify("vocalize the answer"), "voice_out")
+
+
+class TestFIXDB002DailyBriefVariants(unittest.TestCase):
+    """FIX-DB-002: 'today's summary/overview', 'brief me for today', 'what do I have today' → daily_brief."""
+
+    def test_todays_summary(self):
+        self.assertEqual(_classify("today's summary"), "daily_brief")
+
+    def test_todays_overview(self):
+        self.assertEqual(_classify("today's overview"), "daily_brief")
+
+    def test_todays_rundown(self):
+        self.assertEqual(_classify("today's rundown"), "daily_brief")
+
+    def test_brief_me_for_today(self):
+        self.assertEqual(_classify("brief me for today"), "daily_brief")
+
+    def test_walk_me_through_my_day(self):
+        self.assertEqual(_classify("walk me through my day"), "daily_brief")
+
+    def test_what_do_i_have_today(self):
+        self.assertEqual(_classify("what do i have today"), "daily_brief")
+
+    def test_whats_on_my_plate_today(self):
+        self.assertEqual(_classify("what's on my plate today"), "daily_brief")
+
+    def test_whats_on_my_schedule_today(self):
+        self.assertEqual(_classify("what's on my schedule today"), "daily_brief")
+
+    def test_whats_on_my_agenda_today(self):
+        self.assertEqual(_classify("what's on my agenda today"), "daily_brief")
+
+
+class TestFIXII001AddThisFeature(unittest.TestCase):
+    """FIX-II-001: 'add this feature/functionality', 'create this feature' → implement_idea."""
+
+    def test_add_this_feature(self):
+        self.assertEqual(_classify("add this feature"), "implement_idea")
+
+    def test_create_this_feature(self):
+        self.assertEqual(_classify("create this feature"), "implement_idea")
+
+    def test_add_this_functionality(self):
+        self.assertEqual(_classify("add this functionality"), "implement_idea")
+
+    def test_add_the_feature(self):
+        self.assertEqual(_classify("add the feature"), "implement_idea")
+
+    def test_create_this_capability(self):
+        self.assertEqual(_classify("create this capability"), "implement_idea")
+
+
+class TestFIXOD001ObsidianDailyVerbs(unittest.TestCase):
+    """FIX-OD-001: 'check/view/update/write in/add to my daily note' → obsidian_daily."""
+
+    def test_check_my_daily_note(self):
+        self.assertEqual(_classify("check my daily note"), "obsidian_daily")
+
+    def test_view_my_daily_log(self):
+        self.assertEqual(_classify("view my daily log"), "obsidian_daily")
+
+    def test_update_my_daily_note(self):
+        self.assertEqual(_classify("update my daily note"), "obsidian_daily")
+
+    def test_write_in_my_daily_journal(self):
+        self.assertEqual(_classify("write in my daily journal"), "obsidian_daily")
+
+    def test_add_to_my_daily_note(self):
+        self.assertEqual(_classify("add to my daily note"), "obsidian_daily")
+
+    def test_add_something_to_my_daily_log(self):
+        self.assertEqual(_classify("add something to my daily log"), "obsidian_daily")
+
+
+class TestFIXVI001MicrophoneDictate(unittest.TestCase):
+    """FIX-VI-001: 'use microphone/mic', 'dictate', 'turn on voice' → voice_in."""
+
+    def test_use_microphone(self):
+        self.assertEqual(_classify("use microphone"), "voice_in")
+
+    def test_use_mic(self):
+        self.assertEqual(_classify("use mic"), "voice_in")
+
+    def test_enable_microphone(self):
+        self.assertEqual(_classify("enable microphone"), "voice_in")
+
+    def test_activate_mic(self):
+        self.assertEqual(_classify("activate mic"), "voice_in")
+
+    def test_turn_on_voice_input(self):
+        self.assertEqual(_classify("turn on voice input"), "voice_in")
+
+    def test_dictate(self):
+        self.assertEqual(_classify("dictate"), "voice_in")
+
+    def test_dictate_a_note(self):
+        self.assertEqual(_classify("dictate a note"), "voice_in")
+
+
+class TestFIXMC002MemoryContextView(unittest.TestCase):
+    """FIX-MC-002: 'view/check/print context', 'what's loaded in context' → memory_context."""
+
+    def test_view_context(self):
+        self.assertEqual(_classify("view context"), "memory_context")
+
+    def test_check_context(self):
+        self.assertEqual(_classify("check context"), "memory_context")
+
+    def test_print_context(self):
+        self.assertEqual(_classify("print context"), "memory_context")
+
+    def test_whats_in_context(self):
+        self.assertEqual(_classify("what's in context"), "memory_context")
+
+    def test_whats_loaded_in_context(self):
+        self.assertEqual(_classify("what's loaded in context"), "memory_context")
+
+
+class TestFIXFR002OpenFileFalsePositive(unittest.TestCase):
+    """FIX-FR-002/003: 'open [file with ext]' and 'open the config/README' → file_read.
+    Was false-positiving to gmail_save_attachment because open+file matched that pattern."""
+
+    def test_open_config_file(self):
+        self.assertEqual(_classify("open the config file"), "file_read")
+
+    def test_open_settings_file(self):
+        self.assertEqual(_classify("open the settings file"), "file_read")
+
+    def test_open_py_file(self):
+        self.assertEqual(_classify("open train.py"), "file_read")
+
+    def test_open_json_file(self):
+        self.assertEqual(_classify("open config.json"), "file_read")
+
+    def test_open_readme(self):
+        self.assertEqual(_classify("open the README"), "file_read")
+
+    def test_read_readme(self):
+        self.assertEqual(_classify("read the README"), "file_read")
+
+    def test_open_env_file(self):
+        self.assertEqual(_classify("open the env file"), "file_read")
+
+    def test_gmail_save_attachment_still_works(self):
+        # gmail_save_attachment should still work for email attachment context
+        self.assertEqual(_classify("open the attached invoice"), "gmail_save_attachment")
+
+    def test_save_attached_pdf_still_works(self):
+        self.assertEqual(_classify("save the attached pdf"), "gmail_save_attachment")
+
+
+class TestFIXFS002FindMyDocuments(unittest.TestCase):
+    """FIX-FS-002: 'where are my documents/photos', 'find my photos' → file_search."""
+
+    def test_where_are_my_documents(self):
+        self.assertEqual(_classify("where are my documents"), "file_search")
+
+    def test_where_are_my_photos(self):
+        self.assertEqual(_classify("where are my photos"), "file_search")
+
+    def test_where_are_my_files(self):
+        self.assertEqual(_classify("where are my files"), "file_search")
+
+    def test_find_my_photos(self):
+        self.assertEqual(_classify("find my photos"), "file_search")
+
+    def test_find_my_documents(self):
+        self.assertEqual(_classify("find my documents"), "file_search")
+
+    def test_find_my_photos_from_last_year(self):
+        self.assertEqual(_classify("find my photos from last year"), "file_search")
+
+
+class TestFIXFL002ShowAllFilesType(unittest.TestCase):
+    """FIX-FL-002: 'show me all pdf files', 'show me what files I have' → file_list."""
+
+    def test_show_me_all_pdf_files(self):
+        self.assertEqual(_classify("show me all pdf files"), "file_list")
+
+    def test_show_me_all_python_files(self):
+        self.assertEqual(_classify("show me all python files"), "file_list")
+
+    def test_show_me_all_log_files(self):
+        self.assertEqual(_classify("show me all log files"), "file_list")
+
+    def test_show_me_what_files_i_have(self):
+        self.assertEqual(_classify("show me what files i have"), "file_list")
+
+    def test_show_me_files_available(self):
+        self.assertEqual(_classify("show me what files are available"), "file_list")
+
+
+class TestFIXFE003DebugTroubleshoot(unittest.TestCase):
+    """FIX-FE-003: 'debug/troubleshoot/diagnose this error/bug/issue' → fix_error."""
+
+    def test_debug_this_error(self):
+        self.assertEqual(_classify("debug this error"), "fix_error")
+
+    def test_troubleshoot_this_issue(self):
+        self.assertEqual(_classify("troubleshoot this issue"), "fix_error")
+
+    def test_diagnose_the_problem(self):
+        self.assertEqual(_classify("diagnose the problem"), "fix_error")
+
+    def test_troubleshoot_this_bug(self):
+        self.assertEqual(_classify("troubleshoot this bug"), "fix_error")
+
+    def test_debug_this_crash(self):
+        self.assertEqual(_classify("debug this crash"), "fix_error")
+
+    def test_debug_this_code(self):
+        self.assertEqual(_classify("debug this code"), "fix_error")
+
+    def test_troubleshoot_my_code(self):
+        self.assertEqual(_classify("troubleshoot my code"), "fix_error")
+
+
+class TestFIXRES002InvestigateThis(unittest.TestCase):
+    """FIX-RES-002: 'investigate this/that', 'research this', 'look into topic deeply' → research."""
+
+    def test_investigate_this_topic(self):
+        self.assertEqual(_classify("investigate this topic"), "research")
+
+    def test_research_this(self):
+        self.assertEqual(_classify("research this"), "research")
+
+    def test_investigate_that_deeply(self):
+        self.assertEqual(_classify("investigate that deeply"), "research")
+
+    def test_look_into_topic_further(self):
+        self.assertEqual(_classify("look into this topic further"), "research")
+
+    def test_look_into_question_thoroughly(self):
+        self.assertEqual(_classify("look into this question thoroughly"), "research")
+
+    def test_investigate_subject(self):
+        self.assertEqual(_classify("investigate this subject"), "research")
+
+
+class TestFIXBU002PushToGithub(unittest.TestCase):
+    """FIX-BU-002: 'push to github', 'sync to github' → backup_now."""
+
+    def test_push_to_github(self):
+        self.assertEqual(_classify("push to github"), "backup_now")
+
+    def test_push_github(self):
+        self.assertEqual(_classify("push github"), "backup_now")
+
+    def test_sync_to_github(self):
+        self.assertEqual(_classify("sync to github"), "backup_now")
+
+    def test_sync_github(self):
+        self.assertEqual(_classify("sync github"), "backup_now")
+
+
+class TestFIXNR003RunMaintenance(unittest.TestCase):
+    """FIX-NR-003: 'run/trigger/schedule maintenance' → nightly_run."""
+
+    def test_run_maintenance(self):
+        self.assertEqual(_classify("run maintenance"), "nightly_run")
+
+    def test_schedule_maintenance(self):
+        self.assertEqual(_classify("schedule maintenance"), "nightly_run")
+
+    def test_trigger_maintenance(self):
+        self.assertEqual(_classify("trigger maintenance"), "nightly_run")
+
+    def test_start_maintenance(self):
+        self.assertEqual(_classify("start maintenance"), "nightly_run")
+
+
+class TestFIXOF002FilesOlderThan(unittest.TestCase):
+    """FIX-OF-002: 'files older than X', 'older than N days files' → old_files."""
+
+    def test_files_older_than_a_month(self):
+        self.assertEqual(_classify("files older than a month"), "old_files")
+
+    def test_files_older_than_a_year(self):
+        self.assertEqual(_classify("files older than a year"), "old_files")
+
+    def test_older_than_30_days_files(self):
+        self.assertEqual(_classify("older than 30 days files"), "old_files")
+
+    def test_files_older_than_90_days(self):
+        self.assertEqual(_classify("files older than 90 days"), "old_files")
+
+
+class TestFIXMR002WhatDoYouHaveInMemory(unittest.TestCase):
+    """FIX-MR-002: 'what do you have in memory' → memory_recall."""
+
+    def test_what_do_you_have_in_memory(self):
+        self.assertEqual(_classify("what do you have in memory"), "memory_recall")
+
+    def test_what_do_you_have_in_your_memory(self):
+        self.assertEqual(_classify("what do you have in your memory"), "memory_recall")
+
+
+class TestFIXMS002MemoryUsageStats(unittest.TestCase):
+    """FIX-MS-002: 'memory usage stats/statistics/metrics' → memory_stats."""
+
+    def test_memory_usage_stats(self):
+        self.assertEqual(_classify("memory usage stats"), "memory_stats")
+
+    def test_memory_usage_statistics(self):
+        self.assertEqual(_classify("memory usage statistics"), "memory_stats")
+
+    def test_memory_usage_metrics(self):
+        self.assertEqual(_classify("memory usage metrics"), "memory_stats")
+
+    def test_memory_usage_info(self):
+        self.assertEqual(_classify("memory usage info"), "memory_stats")
+
+
+class TestFIXMSCAN002ListMyMemories(unittest.TestCase):
+    """FIX-MSCAN-002: 'list/show my memories' → memory_scan."""
+
+    def test_list_my_memories(self):
+        self.assertEqual(_classify("list my memories"), "memory_scan")
+
+    def test_show_my_memories(self):
+        self.assertEqual(_classify("show my memories"), "memory_scan")
+
+    def test_display_my_memories(self):
+        self.assertEqual(_classify("display my memories"), "memory_scan")
+
+
+class TestFIXYT001SearchFindYoutube(unittest.TestCase):
+    """FIX-YT-001: verb-before-youtube forms (search/watch/find/play) → youtube."""
+
+    def test_search_youtube_for(self):
+        self.assertEqual(_classify("search youtube for deep learning tutorials"), "youtube")
+
+    def test_find_youtube_video(self):
+        self.assertEqual(_classify("find a youtube video about transformers"), "youtube")
+
+    def test_watch_youtube(self):
+        self.assertEqual(_classify("watch youtube video on python programming"), "youtube")
+
+    def test_play_youtube(self):
+        self.assertEqual(_classify("play youtube video"), "youtube")
+
+    def test_find_youtube_channel(self):
+        self.assertEqual(_classify("find the youtube channel for Andrej Karpathy"), "youtube")
+
+
+class TestFIXSYNC001UpdateKnowledge(unittest.TestCase):
+    """FIX-SYNC-001: update/refresh/rebuild knowledge + sync notes → sync."""
+
+    def test_update_knowledge_base(self):
+        self.assertEqual(_classify("update my knowledge base"), "sync")
+
+    def test_update_knowledge_base(self):
+        self.assertEqual(_classify("update my knowledge base"), "sync")
+
+    def test_update_notes(self):
+        self.assertEqual(_classify("update my notes"), "sync")
+
+    def test_sync_my_notes(self):
+        self.assertEqual(_classify("sync my notes"), "sync")
+
+    def test_sync_notes_not_github(self):
+        # "sync my notes to github" should stay backup_now (github guard in pattern)
+        self.assertEqual(_classify("sync my notes to github"), "backup_now")
+
+
+class TestFIXWN001WhatNextExtra(unittest.TestCase):
+    """FIX-WN-001: extra coverage for what_next patterns."""
+
+    def test_suggest_next_improvement(self):
+        self.assertEqual(_classify("suggest the next improvement for adwi"), "what_next")
+
+    def test_what_should_I_improve(self):
+        self.assertEqual(_classify("what should I improve in adwi"), "what_next")
+
+    def test_recommend_new_features(self):
+        self.assertEqual(_classify("recommend new features for my ai"), "what_next")
+
+
+class TestFIXGHC002GithubConnectedExtra(unittest.TestCase):
+    """FIX-GHC-002: additional github_connected phrasings."""
+
+    def test_github_account_connected(self):
+        self.assertEqual(_classify("is my github account connected"), "github_connected")
+
+    def test_github_linked(self):
+        self.assertEqual(_classify("is github linked to adwi"), "github_connected")
+
+    def test_github_working(self):
+        self.assertEqual(_classify("is github working"), "github_connected")
+
+
+class TestEvalAdwiCoverage(unittest.TestCase):
+    """Additional coverage for eval_adwi patterns."""
+
+    def test_run_eval_adwi(self):
+        self.assertEqual(_classify("run eval adwi"), "eval_adwi")
+
+    def test_evaluate_adwi(self):
+        self.assertEqual(_classify("evaluate adwi"), "eval_adwi")
+
+    def test_bare_eval(self):
+        self.assertEqual(_classify("eval"), "eval_adwi")
+
+    def test_generate_eval_scenarios(self):
+        self.assertEqual(_classify("generate eval scenarios for adwi"), "eval_adwi")
+
+    def test_start_adwi_eval(self):
+        self.assertEqual(_classify("start adwi eval"), "eval_adwi")
+
+
+class TestTestAdwiCoverage(unittest.TestCase):
+    """Additional coverage for test_adwi patterns."""
+
+    def test_test_adwi(self):
+        self.assertEqual(_classify("test adwi"), "test_adwi")
+
+    def test_run_adwi_tests(self):
+        self.assertEqual(_classify("run adwi tests"), "test_adwi")
+
+    def test_adwi_test_suite(self):
+        self.assertEqual(_classify("adwi test suite"), "test_adwi")
+
+    def test_run_unit_tests(self):
+        self.assertEqual(_classify("run unit tests"), "test_adwi")
+
+    def test_adwi_run_tests(self):
+        self.assertEqual(_classify("adwi run my tests"), "test_adwi")
+
+    def test_test_the_system(self):
+        self.assertEqual(_classify("test the system"), "test_adwi")
+
+
+class TestNightlyStatusCoverage(unittest.TestCase):
+    """Additional coverage for nightly_status patterns."""
+
+    def test_nightly_status(self):
+        self.assertEqual(_classify("nightly status"), "nightly_status")
+
+    def test_what_ran_last(self):
+        self.assertEqual(_classify("what last ran nightly"), "nightly_status")
+
+    def test_show_nightly_log(self):
+        self.assertEqual(_classify("show nightly log"), "nightly_status")
+
+    def test_last_nightly_run(self):
+        self.assertEqual(_classify("last nightly run"), "nightly_status")
+
+    def test_nightly_report(self):
+        self.assertEqual(_classify("show nightly report"), "nightly_status")
+
+
+class TestFIXGMAILCOMPOSE001DraftEmail(unittest.TestCase):
+    """FIX-GMAILCOMPOSE-001: 'draft' verb for email composition → gmail_compose."""
+
+    def test_draft_an_email(self):
+        self.assertEqual(_classify("draft an email to Alex"), "gmail_compose")
+
+    def test_draft_new_message(self):
+        self.assertEqual(_classify("draft a new message for the team"), "gmail_compose")
+
+    def test_draft_email_about(self):
+        self.assertEqual(_classify("draft an email about the project update"), "gmail_compose")
+
+
+class TestFIXFE004TracebackContext(unittest.TestCase):
+    """FIX-FE-004: 'look at/here is traceback/stack trace/crash' → fix_error."""
+
+    def test_look_at_traceback(self):
+        self.assertEqual(_classify("look at this traceback"), "fix_error")
+
+    def test_here_is_stack_trace(self):
+        self.assertEqual(_classify("here is the stack trace"), "fix_error")
+
+    def test_check_out_crash(self):
+        self.assertEqual(_classify("check out this crash"), "fix_error")
+
+    def test_look_at_exception(self):
+        self.assertEqual(_classify("look at this exception"), "fix_error")
+
+
+class TestFIXGFB001ShowMeCodeFalsePositive(unittest.TestCase):
+    """FIX-GFB-001: 'show me the code for X' was routing to gmail_filter_build."""
+
+    def test_show_me_code_for_not_filter(self):
+        self.assertNotEqual(_classify("show me the code for parsing"), "gmail_filter_build")
+
+    def test_show_me_function_for_not_filter(self):
+        self.assertNotEqual(_classify("show me the function for authentication"), "gmail_filter_build")
+
+    def test_show_me_rule_still_works(self):
+        self.assertEqual(_classify("show me the rule for newsletters"), "gmail_filter_build")
+
+    def test_show_me_filter_still_works(self):
+        self.assertEqual(_classify("show me the filter for promotions"), "gmail_filter_build")
+
+    def test_what_rule_still_works(self):
+        self.assertEqual(_classify("what rule would you make for spam"), "gmail_filter_build")
+
+
+class TestFIXDU007AlmostOutOfSpace(unittest.TestCase):
+    """FIX-DU-007: 'almost out of space', 'low on disk/space', 'not much space' → disk_usage."""
+
+    def test_almost_out_of_space(self):
+        self.assertEqual(_classify("almost out of space"), "disk_usage")
+
+    def test_almost_out_of_disk_space(self):
+        self.assertEqual(_classify("almost out of disk space"), "disk_usage")
+
+    def test_nearly_out_of_storage(self):
+        self.assertEqual(_classify("nearly out of storage"), "disk_usage")
+
+    def test_low_on_space(self):
+        self.assertEqual(_classify("low on space"), "disk_usage")
+
+    def test_low_on_disk(self):
+        self.assertEqual(_classify("low on disk"), "disk_usage")
+
+    def test_low_on_storage(self):
+        self.assertEqual(_classify("low on storage"), "disk_usage")
+
+    def test_not_much_space(self):
+        self.assertEqual(_classify("not much space left"), "disk_usage")
+
+    def test_not_almost_out_of_time(self):
+        self.assertNotEqual(_classify("almost out of time"), "disk_usage")
+
+
+class TestFIXLF002LargestBiggestFiles(unittest.TestCase):
+    """FIX-LF-002: 'largest/biggest files' bare forms → large_files."""
+
+    def test_which_files_are_largest(self):
+        self.assertEqual(_classify("which files are largest"), "large_files")
+
+    def test_biggest_files_on_system(self):
+        self.assertEqual(_classify("biggest files on my system"), "large_files")
+
+    def test_find_my_largest_files(self):
+        self.assertEqual(_classify("find my largest files"), "large_files")
+
+    def test_show_largest_files(self):
+        self.assertEqual(_classify("show largest files"), "large_files")
+
+
+class TestFIXGIT001BranchUncommitted(unittest.TestCase):
+    """FIX-GIT-001: 'what branch am I on', 'uncommitted changes', 'show git changes'."""
+
+    def test_what_branch_am_i_on(self):
+        self.assertEqual(_classify("what branch am I on"), "git_status")
+
+    def test_uncommitted_changes(self):
+        self.assertEqual(_classify("uncommitted changes"), "git_status")
+
+    def test_show_git_changes(self):
+        self.assertEqual(_classify("show git changes"), "git_status")
+
+    def test_what_branch_are_we_on(self):
+        self.assertEqual(_classify("what branch are we on"), "git_status")
+
+
+class TestFIXST002HealthCheck(unittest.TestCase):
+    """FIX-ST-002: 'health check', 'how is adwi doing', 'is adwi healthy' → status."""
+
+    def test_health_check(self):
+        self.assertEqual(_classify("health check"), "status")
+
+    def test_how_is_adwi_doing(self):
+        self.assertEqual(_classify("how is adwi doing"), "status")
+
+    def test_is_adwi_healthy(self):
+        self.assertEqual(_classify("is adwi healthy"), "status")
+
+    def test_is_the_system_ok(self):
+        self.assertEqual(_classify("is the system ok"), "status")
+
+    def test_no_false_positive_health_wellness(self):
+        self.assertNotEqual(_classify("health and wellness tips"), "status")
+
+
+class TestFIXVO001ReadBackToMe(unittest.TestCase):
+    """FIX-VO-001: 'read back to me', 'read it back' → voice_out."""
+
+    def test_read_back_to_me(self):
+        self.assertEqual(_classify("read back to me"), "voice_out")
+
+    def test_read_it_back(self):
+        self.assertEqual(_classify("read it back"), "voice_out")
+
+
+class TestFIXVI002BeginTranscription(unittest.TestCase):
+    """FIX-VI-002: 'begin transcription/dictation/recording' → voice_in."""
+
+    def test_begin_transcription(self):
+        self.assertEqual(_classify("begin transcription"), "voice_in")
+
+    def test_begin_dictation(self):
+        self.assertEqual(_classify("begin dictation"), "voice_in")
+
+    def test_begin_recording(self):
+        self.assertEqual(_classify("begin recording"), "voice_in")
+
+
+class TestFIXRAG001NotesKnowledgeBaseQueries(unittest.TestCase):
+    """FIX-RAG-001: 'what do my notes say about X' → obsidian_search; knowledge base queries → rag_search."""
+
+    def test_what_notes_say_about(self):
+        self.assertEqual(_classify("what do my notes say about python"), "obsidian_search")
+
+    def test_knowledge_base_say_about(self):
+        self.assertEqual(_classify("what does my knowledge base say about X"), "rag_search")
+
+    def test_whats_in_knowledge_base(self):
+        self.assertEqual(_classify("what's in my knowledge base"), "rag_search")
+
+
+class TestFIXIMPL001BuildFeatureNoPronoun(unittest.TestCase):
+    """FIX-IMPL-001: build/implement/develop + feature/function/module without 'this/that' pronoun."""
+
+    def test_build_new_feature(self):
+        self.assertEqual(_classify("build a new feature for adwi"), "implement_idea")
+
+    def test_implement_search_function(self):
+        self.assertEqual(_classify("implement the search function"), "implement_idea")
+
+    def test_code_up_a_solution(self):
+        self.assertEqual(_classify("code up a solution"), "implement_idea")
+
+    def test_develop_new_component(self):
+        self.assertEqual(_classify("develop a new component"), "implement_idea")
+
+    def test_no_false_positive_build_house(self):
+        self.assertNotEqual(_classify("build a house"), "implement_idea")
+
+
+class TestFIXGCC001AddPersonCC(unittest.TestCase):
+    """FIX-GCC-001: 'add [person] to CC/BCC' → gmail_add_cc / gmail_add_bcc."""
+
+    def test_add_person_to_cc(self):
+        self.assertEqual(_classify("add Alex to CC"), "gmail_add_cc")
+
+    def test_add_person_to_cc_the(self):
+        self.assertEqual(_classify("add Sarah to the CC"), "gmail_add_cc")
+
+    def test_add_person_to_bcc(self):
+        self.assertEqual(_classify("add Bob to BCC"), "gmail_add_bcc")
+
+    def test_add_person_as_bcc(self):
+        self.assertEqual(_classify("add her as BCC"), "gmail_add_bcc")
+
+
+class TestFIXGCANCEL001ContextualCancel(unittest.TestCase):
+    """FIX-GCANCEL-001: 'cancel this email', 'discard this reply', 'cancel sending' → gmail_cancel."""
+
+    def test_cancel_this_email(self):
+        self.assertEqual(_classify("cancel this email"), "gmail_cancel")
+
+    def test_cancel_sending(self):
+        self.assertEqual(_classify("cancel sending"), "gmail_cancel")
+
+    def test_discard_this_reply(self):
+        self.assertEqual(_classify("discard this reply"), "gmail_cancel")
+
+    def test_abort_it(self):
+        self.assertEqual(_classify("abort it"), "gmail_cancel")
+
+    def test_cancel_scheduled_not_confused(self):
+        self.assertEqual(_classify("cancel the scheduled email"), "gmail_cancel_scheduled_send")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
