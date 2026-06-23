@@ -1439,7 +1439,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bcreate\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b.{0,25}\b(?:for|to|that|when)\b", re.I), "gmail_filter_build"),
     (re.compile(r"\b(?:make|build|set\s+up)\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b", re.I), "gmail_filter_build"),
     (re.compile(r"\b(?:create|make)\b.{0,10}\b(?:a\s+)?gmail\s+(?:rule|filter)\b", re.I), "gmail_filter_build"),
-    (re.compile(r"\b(?:show\s+me|what\s+rule|what\s+filter)\b.{0,30}\b(?:for|would|you\s+make)\b", re.I), "gmail_filter_build"),
+    # "show me the rule/filter for X" — require rule/filter keyword so "show me the code for X" doesn't match
+    (re.compile(r"\bshow\s+me\b.{0,30}\b(?:rule|filter)\b.{0,20}\b(?:for|to|that)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:what\s+rule|what\s+filter)\b.{0,30}\b(?:for|would|you\s+make)\b", re.I), "gmail_filter_build"),
 
     # ── Gmail Phase 15: thread intel + forward — MUST precede Phase 3 (gmail_draft_reply / gmail_compose) ──
     # FIX-GTI-001: "check email then search for action items" is a general inbox op, not thread intel

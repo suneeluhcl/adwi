@@ -3525,5 +3525,24 @@ class TestFIXFE004TracebackContext(unittest.TestCase):
         self.assertEqual(_classify("look at this exception"), "fix_error")
 
 
+class TestFIXGFB001ShowMeCodeFalsePositive(unittest.TestCase):
+    """FIX-GFB-001: 'show me the code for X' was routing to gmail_filter_build."""
+
+    def test_show_me_code_for_not_filter(self):
+        self.assertNotEqual(_classify("show me the code for parsing"), "gmail_filter_build")
+
+    def test_show_me_function_for_not_filter(self):
+        self.assertNotEqual(_classify("show me the function for authentication"), "gmail_filter_build")
+
+    def test_show_me_rule_still_works(self):
+        self.assertEqual(_classify("show me the rule for newsletters"), "gmail_filter_build")
+
+    def test_show_me_filter_still_works(self):
+        self.assertEqual(_classify("show me the filter for promotions"), "gmail_filter_build")
+
+    def test_what_rule_still_works(self):
+        self.assertEqual(_classify("what rule would you make for spam"), "gmail_filter_build")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
