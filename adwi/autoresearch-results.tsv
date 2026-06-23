@@ -52,3 +52,4 @@ ae017e7	866	866	25	25	17	17	keep	FIX-GMAILCOMPOSE-001/FIX-FE-004: draft-email→
 ca4e62d	871	871	25	25	17	17	keep	FIX-GFB-001: tighten gmail_filter_build show-me pattern (false positive fix) (871 tests)
 a00eb85	879	879	25	25	17	17	keep	FIX-DU-007: almost-out-of-space, low-on-disk, not-much-space forms → disk_usage (879 tests)
 ec8a4e1	892	892	25	25	17	17	keep	FIX-LF-002/GIT-001/ST-002: largest files, what branch am I on, health check (892 tests)
+8c8d854	905	905	25	25	17	17	keep	FIX-RAG-001/IMPL-001/VO-001/VI-002: notes-say, build-feature, read-back, begin-transcription (905 tests)
