@@ -2727,5 +2727,81 @@ class TestFIXBU001PushMyChanges(unittest.TestCase):
         self.assertEqual(_classify("push my work"), "backup_now")
 
 
+class TestFIXLFE001LearnFromError(unittest.TestCase):
+    """FIX-LFE-001: 'learn from this error/exception', 'extract lessons from failure' → learn_from_error."""
+
+    def test_learn_from_this_error(self):
+        self.assertEqual(_classify("learn from this error"), "learn_from_error")
+
+    def test_learn_from_that_exception(self):
+        self.assertEqual(_classify("learn from that exception"), "learn_from_error")
+
+    def test_learn_from_this_failure(self):
+        self.assertEqual(_classify("learn from this failure"), "learn_from_error")
+
+    def test_extract_lessons_from_error(self):
+        self.assertEqual(_classify("extract lessons from this error"), "learn_from_error")
+
+    def test_take_learnings_from_failure(self):
+        self.assertEqual(_classify("take learnings from this failure"), "learn_from_error")
+
+
+class TestFIXBST001BackupStatusState(unittest.TestCase):
+    """FIX-BST-001: 'is/did/has backup run/complete/fail' → backup_status."""
+
+    def test_is_backup_running(self):
+        self.assertEqual(_classify("is backup running"), "backup_status")
+
+    def test_did_backup_run(self):
+        self.assertEqual(_classify("did backup run"), "backup_status")
+
+    def test_has_backup_completed(self):
+        self.assertEqual(_classify("has backup completed"), "backup_status")
+
+    def test_was_backup_successful(self):
+        self.assertEqual(_classify("was backup successful"), "backup_status")
+
+    def test_did_backup_fail(self):
+        self.assertEqual(_classify("did backup fail"), "backup_status")
+
+    def test_is_backup_done(self):
+        self.assertEqual(_classify("is backup done"), "backup_status")
+
+
+class TestFIXGENIMG001ShowMePicture(unittest.TestCase):
+    """FIX-GENIMG-001: 'show me a picture/image of X' → generate_image."""
+
+    def test_show_me_a_picture_of(self):
+        self.assertEqual(_classify("show me a picture of a sunset"), "generate_image")
+
+    def test_show_me_an_image_of(self):
+        self.assertEqual(_classify("show me an image of a robot"), "generate_image")
+
+    def test_show_me_photo_of(self):
+        self.assertEqual(_classify("show me a photo of a mountain"), "generate_image")
+
+    def test_illustrate_for_me(self):
+        self.assertEqual(_classify("illustrate this concept for me"), "generate_image")
+
+
+class TestFIXTR003ToolRoadmapPlanned(unittest.TestCase):
+    """FIX-TR-003: 'what tools are planned', 'upcoming tools' → tool_roadmap."""
+
+    def test_what_tools_are_planned(self):
+        self.assertEqual(_classify("what tools are planned"), "tool_roadmap")
+
+    def test_which_tools_are_upcoming(self):
+        self.assertEqual(_classify("which tools are upcoming"), "tool_roadmap")
+
+    def test_upcoming_tools(self):
+        self.assertEqual(_classify("show me the upcoming tools"), "tool_roadmap")
+
+    def test_planned_tools(self):
+        self.assertEqual(_classify("what are the planned tools"), "tool_roadmap")
+
+    def test_future_tools(self):
+        self.assertEqual(_classify("future tools for adwi"), "tool_roadmap")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1023,6 +1023,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bpush\b.{0,15}\bmy\b.{0,10}\b(changes|code|work|commits?|updates?)\b", re.I), "backup_now"),
     (re.compile(r"\bsave\b.{0,20}\b(my\s+)?(work|changes|code)\b.{0,20}\b(to\s+)?github\b", re.I), "backup_now"),
     (re.compile(r"\b(backup.{0,10}(status|health|check|recent|current)|last.{0,10}backup|when.{0,15}(was.{0,5})?backup)\b", re.I), "backup_status"),
+    # FIX-BST-001: "is/did/has backup run/complete/fail/succeed" → backup_status
+    (re.compile(r"\b(?:is|was|has|did)\b.{0,15}\b(?:the\s+)?backup\b.{0,20}\b(?:run|running|complete|completed|finish|finished|succeed|succeeded|fail|failed|done|successful)\b", re.I), "backup_status"),
     (re.compile(r"\bbackup.{0,15}(log|history|logs)\b", re.I), "backup_log"),
 
     # ── Patch adwi — NHR-003: code changes via aider ─────────────────────────────
@@ -1051,6 +1053,9 @@ _REGEX_INTENTS = [
     # NOTE: export_training is intentionally NOT regex-anchored here — "export training data" is
     # blocked by the security __none__ guard at line ~545 (export training data → __none__).
     (re.compile(r"\blearn\s+from\s+(?:my\s+)?(?:last\s+)?(?:recent\s+)?error\b", re.I), "learn_from_error"),
+    # FIX-LFE-001: "learn from this/that error/exception", "extract lessons/learnings from failure"
+    (re.compile(r"\blearn\s+from\s+(?:this|that)\b.{0,20}\b(?:error|exception|traceback|failure|bug)\b", re.I), "learn_from_error"),
+    (re.compile(r"\b(?:extract|take)\b.{0,15}\b(?:lessons?|learnings?)\b.{0,20}\b(?:from|this|the)\b.{0,20}\b(?:error|exception|failure)\b", re.I), "learn_from_error"),
 
     # ── Fix error / exception — catches pasted tracebacks and HTTP error codes ────
     (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError|UnicodeDecodeError|UnicodeEncodeError|OverflowError|LookupError|ArithmeticError)\b\s*:", re.I), "fix_error"),
@@ -1119,6 +1124,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\btrusted\s+roots?\b.{0,20}\b(?:list|show|what|paths?|directories?)\b", re.I), "trusted_roots"),
     (re.compile(r"\b(?:show|list|view|display)\b.{0,20}\b(?:the\s+)?tool\s+(?:plan|roadmap|list|map|overview)\b", re.I), "tool_roadmap"),
     (re.compile(r"\btool\s+(?:plan|roadmap|map|overview)\b", re.I), "tool_roadmap"),
+    # FIX-TR-003: "what tools are planned", "upcoming tools", "planned tools" → tool_roadmap
+    (re.compile(r"\b(?:what|which)\b.{0,20}\btools?\b.{0,20}\b(?:are\s+)?(?:planned|upcoming|coming|scheduled|in\s+development)\b", re.I), "tool_roadmap"),
+    (re.compile(r"\b(?:upcoming|planned|future)\b.{0,15}\btools?\b", re.I), "tool_roadmap"),
 
     # ── Git status (Bug 7: broadened patterns) ────────────────────────────────────
     (re.compile(r"git\s+(status|diff|log|show|repos?)\b", re.I), "git_status"),
@@ -1144,6 +1152,9 @@ _REGEX_INTENTS = [
     # CYCLE-5: bare "image" command
     (re.compile(r"^image\s*$", re.I), "generate_image"),
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
+    # FIX-GENIMG-001: "show me a picture/image of X" → generate_image
+    (re.compile(r"\bshow\s+me\s+(?:an?\s+)?(?:picture|image|photo|illustration)\s+of\b", re.I), "generate_image"),
+    (re.compile(r"\b(?:render|illustrate)\b.{0,30}\bfor\s+me\b", re.I), "generate_image"),
 
     # ── Code execution ───────────────────────────────────────────────────────────
     # FIX-PATCH-002: "run code improvement" / "self-improve adwi" → patch_adwi BEFORE run_code steals them
