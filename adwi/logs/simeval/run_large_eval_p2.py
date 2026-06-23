@@ -302,6 +302,15 @@ REGEX_INTENTS = [
     # FIX-REL-008: "disk capacity check", "how packed is my disk"
     (re.compile(r"\bdisk\b.{0,20}\b(capacity|utiliz|occupi|packed)", re.I), "disk_usage"),
     (re.compile(r"\b(how\s+)?(packed|full)\b.{0,20}\b(disk|drive|storage)\b", re.I), "disk_usage"),
+    # FIX-DU-001: "running out of space/room/storage", "running low on space"
+    (re.compile(r"\brunning\s+(out|low)\s+(of|on)\s+(space|room|storage|disk)\b", re.I), "disk_usage"),
+    # FIX-DU-002: typos "disk uzage", "dsk usage"
+    (re.compile(r"\bdisk\s+uz?[ae]?ge\b|\bdsk\s+usage\b", re.I), "disk_usage"),
+    # FIX-DU-003: "storeage", "stoarge" typos
+    (re.compile(r"\bhow\s+much\b.{0,30}\bsto(?:re|ar)age\b", re.I), "disk_usage"),
+    # FIX-DU-004: "am i running out", "disk/ssd is almost full"
+    (re.compile(r"\bam\s+i\s+running\s+out\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:my\s+)?(?:disk|drive|ssd|hdd)\s+(?:is\s+)?(?:almost|nearly|getting)\s+full\b", re.I), "disk_usage"),
     (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
 
     # FIX-SPRINT-004: "purge old X", "remove leftover X" → cleanup BEFORE old_files steals them
