@@ -586,6 +586,8 @@ REGEX_INTENTS = [
     (re.compile(r"\b(run nightly|trigger nightly|nightly maintenance|run.{0,10}daily maintenance)\b", re.I), "nightly_run"),
     # CYCLE-5: bare "nightly run" anchor
     (re.compile(r"^nightly\s+run\s*$", re.I), "nightly_run"),
+    # FIX-NR-001: "rn nightly" — casual abbreviation of "run nightly"
+    (re.compile(r"^\s*rn\s+nightly\s*$", re.I), "nightly_run"),
 
     # ── Model status / switching ─────────────────────────────────────────────────
     (re.compile(r"\b(what|which)\b.{0,15}\bmodel\b.{0,20}\b(am i|are you|is active|running|using|current|loaded)\b", re.I), "model_status"),
