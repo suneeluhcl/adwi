@@ -2192,6 +2192,90 @@ class TestComparisonQuestionsChat(unittest.TestCase):
         self.assertEqual(_classify("what is the difference between llama2 and llama3"), "chat")
 
 
+class TestCleanupIntent(unittest.TestCase):
+    """Cleanup intent regex coverage."""
+
+    def test_cleanup_suggestions(self):
+        self.assertEqual(_classify("cleanup suggestions"), "cleanup")
+
+    def test_clean_up_bare(self):
+        self.assertEqual(_classify("clean up"), "cleanup")
+
+    def test_free_up_space(self):
+        self.assertEqual(_classify("free up disk space"), "cleanup")
+
+
+class TestDuplicatesIntent(unittest.TestCase):
+    """Duplicates intent regex coverage."""
+
+    def test_find_duplicate_files(self):
+        self.assertEqual(_classify("find duplicate files"), "duplicates")
+
+    def test_dedupe(self):
+        self.assertEqual(_classify("dedupe my workspace"), "duplicates")
+
+    def test_identical_files(self):
+        self.assertEqual(_classify("which files are identical"), "duplicates")
+
+
+class TestDailyImprove(unittest.TestCase):
+    """daily_improve intent regex coverage."""
+
+    def test_daily_routine(self):
+        # `daily.?routine\b` — "daily routine" ends at word boundary
+        self.assertEqual(_classify("daily routine"), "daily_improve")
+
+    def test_run_daily_improve(self):
+        # `run.{0,10}daily.{0,10}improve\b` — bare "improve" ends at word boundary
+        self.assertEqual(_classify("run daily improve"), "daily_improve")
+
+
+class TestWhatNext(unittest.TestCase):
+    """what_next intent regex coverage."""
+
+    def test_adwi_improvement_ideas(self):
+        self.assertEqual(_classify("adwi improvement ideas"), "what_next")
+
+    def test_next_feature_for_adwi(self):
+        self.assertEqual(_classify("next feature for adwi"), "what_next")
+
+
+class TestYoutubeIntent(unittest.TestCase):
+    """youtube intent regex coverage."""
+
+    def test_summarize_youtube_video(self):
+        self.assertEqual(_classify("summarize this youtube video"), "youtube")
+
+    def test_transcribe_youtube(self):
+        self.assertEqual(_classify("transcribe youtube tutorial"), "youtube")
+
+
+class TestMemoryScan(unittest.TestCase):
+    """memory_scan intent regex coverage."""
+
+    def test_memory_scan(self):
+        self.assertEqual(_classify("memory scan"), "memory_scan")
+
+    def test_scan_my_memory(self):
+        self.assertEqual(_classify("scan my memory"), "memory_scan")
+
+    def test_rebuild_memory(self):
+        self.assertEqual(_classify("rebuild memory"), "memory_scan")
+
+
+class TestMemoryStats(unittest.TestCase):
+    """memory_stats intent regex coverage."""
+
+    def test_memory_stats(self):
+        self.assertEqual(_classify("memory stats"), "memory_stats")
+
+    def test_memory_statistics(self):
+        self.assertEqual(_classify("memory statistics"), "memory_stats")
+
+    def test_how_many_entries_in_memory(self):
+        self.assertEqual(_classify("how many entries in memory"), "memory_stats")
+
+
 class TestDailyBrief(unittest.TestCase):
     """CYCLE-7: daily_brief intent regex coverage."""
 
