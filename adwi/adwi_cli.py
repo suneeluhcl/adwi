@@ -670,6 +670,14 @@ _REGEX_INTENTS = [
     # FIX-DU-005: "free space remaining", "storage remaining", "capacity left"
     (re.compile(r"\bfree\s+space\s+remaining\b", re.I), "disk_usage"),
     (re.compile(r"\b(?:storage|disk|space)\s+remaining\b", re.I), "disk_usage"),
+    # FIX-DU-006: "not enough space/storage", "need more space", "filling up" → disk_usage
+    # These fall through to LLM which sometimes returns __none__; regex captures them first
+    (re.compile(r"\bnot\s+enough\b.{0,20}\b(?:space|storage|disk\s+space|room)\b", re.I), "disk_usage"),
+    (re.compile(r"\bdo\s+i\s+have\s+enough\b.{0,20}\b(?:space|storage|room)\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:need|want)\b.{0,15}\bmore\b.{0,15}\b(?:space|storage|disk\s+space|room)\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:disk|drive|ssd|hdd|storage)\b.{0,20}\b(?:filling|fill\s+up|nearly\s+full|getting\s+full)\b", re.I), "disk_usage"),
+    (re.compile(r"\bfilling\s+up\b.{0,20}\b(?:disk|drive|ssd|storage)\b", re.I), "disk_usage"),
+    (re.compile(r"\bhow\s+many\b.{0,20}\b(?:GB|TB|MB|gigabytes?|terabytes?)\b.{0,30}\b(?:left|remaining|available|free)\b", re.I), "disk_usage"),
     (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
 
     # FIX-SPRINT-004: "purge old X", "remove leftover X" → cleanup BEFORE old_files steals them

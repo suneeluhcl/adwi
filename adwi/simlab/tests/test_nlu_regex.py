@@ -2984,5 +2984,52 @@ class TestFIXBD001BrowseTo(unittest.TestCase):
         self.assertNotEqual(_classify("fetch this page and summarize it"), "browser_delegate")
 
 
+class TestFIXDU006DiskUsageFallthroughs(unittest.TestCase):
+    """FIX-DU-006: 'not enough space', 'filling up', 'need more storage', GB queries → disk_usage.
+    These were falling through to LLM which sometimes routes to __none__."""
+
+    def test_not_enough_space(self):
+        self.assertEqual(_classify("not enough space"), "disk_usage")
+
+    def test_not_enough_storage(self):
+        self.assertEqual(_classify("not enough storage"), "disk_usage")
+
+    def test_not_enough_disk_space(self):
+        self.assertEqual(_classify("not enough disk space"), "disk_usage")
+
+    def test_do_i_have_enough_space(self):
+        self.assertEqual(_classify("do i have enough space"), "disk_usage")
+
+    def test_do_i_have_enough_storage(self):
+        self.assertEqual(_classify("do i have enough storage"), "disk_usage")
+
+    def test_need_more_space(self):
+        self.assertEqual(_classify("i need more space"), "disk_usage")
+
+    def test_need_more_storage(self):
+        self.assertEqual(_classify("need more storage"), "disk_usage")
+
+    def test_ssd_filling_up(self):
+        self.assertEqual(_classify("ssd filling up"), "disk_usage")
+
+    def test_disk_filling_up(self):
+        self.assertEqual(_classify("disk is filling up"), "disk_usage")
+
+    def test_storage_getting_full(self):
+        self.assertEqual(_classify("storage getting full"), "disk_usage")
+
+    def test_drive_nearly_full(self):
+        self.assertEqual(_classify("drive nearly full"), "disk_usage")
+
+    def test_how_many_gb_left(self):
+        self.assertEqual(_classify("how many GB do I have left"), "disk_usage")
+
+    def test_how_many_tb_remaining(self):
+        self.assertEqual(_classify("how many TB remaining"), "disk_usage")
+
+    def test_how_many_gigabytes_available(self):
+        self.assertEqual(_classify("how many gigabytes available"), "disk_usage")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
