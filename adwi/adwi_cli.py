@@ -866,6 +866,8 @@ _REGEX_INTENTS = [
     # FIX-SPRINT-006: "implement the suggested improvement" → implement_idea BEFORE what_next's
     # (suggest|recommend).{0,20}(improvement) pattern fires on "suggested improvement"
     (re.compile(r"\b(?:implement|build|code\s+up|develop)\b.{0,20}\b(?:the\s+)?(?:suggested|recommended|proposed)\b", re.I), "implement_idea"),
+    # FIX-II-001: "add this feature/functionality", "create this feature" → implement_idea
+    (re.compile(r"\b(?:add|create)\b.{0,15}\b(?:this|that|the)\b.{0,15}\b(?:feature|functionality|capability)\b", re.I), "implement_idea"),
     # CYCLE-6: "adwi feature list" → capabilities (must beat what_next's "feature" match below)
     (re.compile(r"\badwi\b.{0,20}\bfeature\s+list\b", re.I), "capabilities"),
     (re.compile(r"\blist\s+(?:all\s+)?(?:your|adwi.?s?)\s+commands?\b", re.I), "capabilities"),
@@ -891,6 +893,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # FIX-DAILY-001: "what do i need to know today", "what should i focus on today"
     (re.compile(r"\bwhat\b.{0,20}\b(?:need|should)\b.{0,15}\b(?:know|focus)\b.{0,10}\btoday\b", re.I), "daily_brief"),
+    # FIX-DB-002: "today's summary/overview", "brief me for today", "what do I have today"
+    (re.compile(r"\btoday.{0,5}\b(?:summary|overview|rundown|digest|briefing)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(?:brief|walk)\s+me\b.{0,20}\b(?:through\s+)?(?:my\s+)?(?:day|today)\b", re.I), "daily_brief"),
+    (re.compile(r"\bwhat\b.{0,15}\bdo\s+i\s+have\b.{0,20}\btoday\b", re.I), "daily_brief"),
+    (re.compile(r"\bwhat.{0,5}(?:on|in)\s+my\s+(?:plate|calendar|schedule|agenda)\b.{0,15}\btoday\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     # FIX-DI-001: extend stem patterns to match full words (improve → improvement, improving, etc.)
     (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
@@ -1037,6 +1044,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(voice input|voice mode|voice.{0,10}recording|start.{0,10}voice|listen.{0,10}voice)\b", re.I), "voice_in"),
     (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
     (re.compile(r"\b(text.to.speech|tts\b|speak.{0,15}this|say.{0,20}(aloud|out loud)|read.{0,10}aloud|read.{0,10}this.{0,10}out)\b", re.I), "voice_out"),
+    # FIX-VOC-001: "narrate this", "vocalize this" → voice_out
+    (re.compile(r"\b(?:narrate|vocalize)\b.{0,20}\b(?:this|that|it|the\s+response|the\s+answer|the\s+text)\b", re.I), "voice_out"),
 
     # ── Backup now / status / log ─────────────────────────────────────────────────
     # FIX-REL-007: "backup now", "commit and push", "save work to github" — no regex existed

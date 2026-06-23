@@ -3031,5 +3031,71 @@ class TestFIXDU006DiskUsageFallthroughs(unittest.TestCase):
         self.assertEqual(_classify("how many gigabytes available"), "disk_usage")
 
 
+class TestFIXVOC001NarrateVocalize(unittest.TestCase):
+    """FIX-VOC-001: 'narrate this', 'vocalize this' → voice_out."""
+
+    def test_narrate_this(self):
+        self.assertEqual(_classify("narrate this"), "voice_out")
+
+    def test_narrate_the_response(self):
+        self.assertEqual(_classify("narrate the response"), "voice_out")
+
+    def test_vocalize_this(self):
+        self.assertEqual(_classify("vocalize this"), "voice_out")
+
+    def test_vocalize_the_answer(self):
+        self.assertEqual(_classify("vocalize the answer"), "voice_out")
+
+
+class TestFIXDB002DailyBriefVariants(unittest.TestCase):
+    """FIX-DB-002: 'today's summary/overview', 'brief me for today', 'what do I have today' → daily_brief."""
+
+    def test_todays_summary(self):
+        self.assertEqual(_classify("today's summary"), "daily_brief")
+
+    def test_todays_overview(self):
+        self.assertEqual(_classify("today's overview"), "daily_brief")
+
+    def test_todays_rundown(self):
+        self.assertEqual(_classify("today's rundown"), "daily_brief")
+
+    def test_brief_me_for_today(self):
+        self.assertEqual(_classify("brief me for today"), "daily_brief")
+
+    def test_walk_me_through_my_day(self):
+        self.assertEqual(_classify("walk me through my day"), "daily_brief")
+
+    def test_what_do_i_have_today(self):
+        self.assertEqual(_classify("what do i have today"), "daily_brief")
+
+    def test_whats_on_my_plate_today(self):
+        self.assertEqual(_classify("what's on my plate today"), "daily_brief")
+
+    def test_whats_on_my_schedule_today(self):
+        self.assertEqual(_classify("what's on my schedule today"), "daily_brief")
+
+    def test_whats_on_my_agenda_today(self):
+        self.assertEqual(_classify("what's on my agenda today"), "daily_brief")
+
+
+class TestFIXII001AddThisFeature(unittest.TestCase):
+    """FIX-II-001: 'add this feature/functionality', 'create this feature' → implement_idea."""
+
+    def test_add_this_feature(self):
+        self.assertEqual(_classify("add this feature"), "implement_idea")
+
+    def test_create_this_feature(self):
+        self.assertEqual(_classify("create this feature"), "implement_idea")
+
+    def test_add_this_functionality(self):
+        self.assertEqual(_classify("add this functionality"), "implement_idea")
+
+    def test_add_the_feature(self):
+        self.assertEqual(_classify("add the feature"), "implement_idea")
+
+    def test_create_this_capability(self):
+        self.assertEqual(_classify("create this capability"), "implement_idea")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
