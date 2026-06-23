@@ -2141,5 +2141,27 @@ class TestInspectCodeAdditional(unittest.TestCase):
         self.assertEqual(_classify("look at the nightly routine code"), "inspect_code")
 
 
+class TestChatConversationalContinuation(unittest.TestCase):
+    """FIX-CHAT-003: anchored conversational continuation → chat."""
+
+    def test_and_then_what(self):
+        self.assertEqual(_classify("and then what?"), "chat")
+
+    def test_what_then(self):
+        self.assertEqual(_classify("what then"), "chat")
+
+    def test_can_you_elaborate(self):
+        self.assertEqual(_classify("can you elaborate"), "chat")
+
+    def test_tell_me_more(self):
+        self.assertEqual(_classify("tell me more"), "chat")
+
+    def test_what_do_you_mean(self):
+        self.assertEqual(_classify("what do you mean?"), "chat")
+
+    def test_what_does_that_mean(self):
+        self.assertEqual(_classify("what does that mean"), "chat")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

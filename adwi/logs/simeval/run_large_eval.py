@@ -283,6 +283,10 @@ REGEX_INTENTS = [
     (re.compile(r"^(?:what\s+time\s+is\s+it|what.s\s+the\s+time)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^(?:what.s\s+today.s\s+date|what\s+is\s+today.s\s+date|what.s\s+the\s+date)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^what.s\s+new\s*[?]?\s*$", re.I), "chat"),
+    # FIX-CHAT-003: conversational continuation utterances (anchored — prevent false positives)
+    (re.compile(r"^(?:and\s+then\s+what|what\s+then)\s*[?]?\s*$", re.I), "chat"),
+    (re.compile(r"^(?:can\s+you\s+elaborate|elaborate\s+on\s+that|tell\s+me\s+more)\s*[.!?]?\s*$", re.I), "chat"),
+    (re.compile(r"^(?:what\s+do\s+you\s+mean|what\s+does\s+that\s+mean)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^(?:how\s+have\s+you\s+been|how\s+are\s+you)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^what\s+are\s+you\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^what\s+else\s*[?]?\s*$", re.I), "chat"),
