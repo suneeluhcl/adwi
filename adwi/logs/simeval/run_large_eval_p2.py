@@ -528,8 +528,9 @@ REGEX_INTENTS = [
     (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
-    (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
-    (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
+    # FIX-DI-001: extend stem patterns to match full words (improve → improvement, improving, etc.)
+    (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
+    (re.compile(r"\brun.{0,10}daily.{0,10}(improve\w*|maintenance|self.?improve\w*)\b", re.I), "daily_improve"),
 
     # ── Gmail Phase 15 early guards — MUST precede web_search and git_status ────
     # "what changed in the last reply/thread" must beat git_status "what changed"

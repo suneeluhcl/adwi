@@ -2322,15 +2322,21 @@ class TestDuplicatesIntent(unittest.TestCase):
 
 
 class TestDailyImprove(unittest.TestCase):
-    """daily_improve intent regex coverage."""
+    """daily_improve intent regex coverage (FIX-DI-001: full-word stem matching)."""
 
     def test_daily_routine(self):
-        # `daily.?routine\b` — "daily routine" ends at word boundary
         self.assertEqual(_classify("daily routine"), "daily_improve")
 
-    def test_run_daily_improve(self):
-        # `run.{0,10}daily.{0,10}improve\b` — bare "improve" ends at word boundary
-        self.assertEqual(_classify("run daily improve"), "daily_improve")
+    def test_daily_improvement(self):
+        # FIX-DI-001 — previously failed due to \b after "improv" stem
+        self.assertEqual(_classify("daily improvement"), "daily_improve")
+
+    def test_run_daily_improvement(self):
+        # FIX-DI-001 — previously failed due to \b after "improve" stem
+        self.assertEqual(_classify("run daily improvement"), "daily_improve")
+
+    def test_daily_improve_adwi(self):
+        self.assertEqual(_classify("daily improve adwi"), "daily_improve")
 
 
 class TestWhatNext(unittest.TestCase):
