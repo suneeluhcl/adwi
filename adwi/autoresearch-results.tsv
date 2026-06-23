@@ -17,3 +17,4 @@ dd6dc1e	515	515	25	25	17	17	keep	FIX-BENCH-002: benchmark patterns for 'test spe
 f485b43	522	522	25	25	17	17	keep	FIX-PATCH-003/INSPECT-001: patch_adwi 'apply patches to adwi'/'adwi improve itself', inspect_code module/source patterns
 ff10395	528	528	25	25	17	17	keep	FIX-CHAT-003: anchored conversational continuation guards → chat (and then what, tell me more, elaborate, what do you mean)
 87cfa4d	531	531	25	25	17	17	keep	FIX-DU-005: free space remaining + storage remaining → disk_usage
+fbae2bc	535	535	25	25	17	17	keep	FIX-CHAT-004: comparison question guards → chat (difference between, compare vs, which is better)
