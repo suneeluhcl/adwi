@@ -1,0 +1,177 @@
+#!/bin/sh
+# route-execute — classify a task, pick the right agent, and launch it.
+#
+# Usage:
+#   route-execute "task description"         # interactive: shows routing, asks confirmation
+#   route-execute --auto "task description"  # auto: routes and launches without asking
+#   route-execute --dry-run "task"           # shows routing only, does NOT launch agent
+#   route-execute --json "task"              # print routing decision as JSON, do NOT launch
+#
+# Exit codes:
+#   0 — agent launched and exited 0
+#   1 — routing error or user cancelled
+#   2 — flagged task (manual review required)
+#   N — agent exit code if launched
+
+set -eu
+
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+ORCH="$ROOT/orchestrator"
+ROUTE_TASK="$ORCH/scripts/route-task"
+
+AUTO=0
+DRY_RUN=0
+JSON_OUT=0
+TASK=""
+
+# Parse flags
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --auto)      AUTO=1; shift ;;
+        --dry-run)   DRY_RUN=1; shift ;;
+        --json)      JSON_OUT=1; shift ;;
+        --help|-h)
+            echo "Usage: route-execute [--auto|--dry-run|--json] \"task description\""
+            exit 0
+            ;;
+        *)
+            TASK="${TASK}${TASK:+ }$1"
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$TASK" ]; then
+    echo "Error: provide a task description." >&2
+    exit 1
+fi
+
+# Build route-task flags
+RT_FLAGS=""
+[ "$DRY_RUN" -eq 1 ] && RT_FLAGS="$RT_FLAGS --dry-run"
+
+# Run the router
+DECISION="$(python3 "$ROUTE_TASK" --json $RT_FLAGS "$TASK" 2>/dev/null)"
+STATUS="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","ok"))' 2>/dev/null || echo error)"
+
+if [ "$STATUS" = "flagged" ]; then
+    echo "⚠️  MANUAL REVIEW REQUIRED — task flagged as potentially destructive."
+    echo "   Task: $TASK"
+    echo "   Run this task manually after reviewing safety boundaries."
+    exit 2
+fi
+
+if [ "$STATUS" = "error" ] || [ -z "$DECISION" ]; then
+    echo "Error: route-task failed to produce a decision." >&2
+    exit 1
+fi
+
+# Extract fields
+AGENT="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin)["agent"])' 2>/dev/null)"
+TASK_TYPE="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin)["task_type"])' 2>/dev/null)"
+CONFIDENCE="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin)["confidence_label"])' 2>/dev/null)"
+CONF_NUM="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin)["confidence"])' 2>/dev/null)"
+HYBRID="$(echo "$DECISION" | python3 -c 'import json,sys; v=json.load(sys.stdin).get("hybrid_suggestion"); print(v or "")' 2>/dev/null)"
+REASONING="$(echo "$DECISION" | python3 -c 'import json,sys; print(json.load(sys.stdin)["reasoning"])' 2>/dev/null)"
+WRAPPER="$ROOT/bin/use-$AGENT"
+
+# JSON output: print decision only, no launch
+if [ "$JSON_OUT" -eq 1 ]; then
+    echo "$DECISION"
+    exit 0
+fi
+
+# Human-readable routing decision
+echo ""
+echo "═══════════════════════════════════════════════"
+echo "  WORKSPACE ORCHESTRATOR — ROUTING DECISION"
+echo "═══════════════════════════════════════════════"
+echo "  Task:       $TASK"
+echo "  Agent:      $(echo "$AGENT" | tr '[:lower:]' '[:upper:]')"
+echo "  Task type:  $TASK_TYPE"
+echo "  Confidence: $CONF_NUM ($CONFIDENCE)"
+[ -n "$HYBRID" ] && echo "  Hybrid:     $HYBRID"
+echo "  Reason:     $REASONING"
+echo "  Wrapper:    $WRAPPER"
+echo "═══════════════════════════════════════════════"
+echo ""
+
+# Dry run: stop here
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "[DRY RUN] Would launch: $WRAPPER"
+    exit 0
+fi
+
+# Check wrapper exists
+if [ ! -x "$WRAPPER" ]; then
+    echo "Error: wrapper not found or not executable: $WRAPPER" >&2
+    exit 1
+fi
+
+# Confirmation (unless --auto)
+if [ "$AUTO" -eq 0 ]; then
+    printf "Launch %s? [Y/n] " "$(echo "$AGENT" | tr '[:lower:]' '[:upper:]')"
+    read -r CONFIRM < /dev/tty
+    case "$CONFIRM" in
+        [Nn]*) echo "Cancelled."; exit 1 ;;
+        *) ;;
+    esac
+fi
+
+# Log the launch
+LAUNCH_LOG="$ROOT/orchestrator/router/routing_logs.md"
+STAMP="$(date '+%Y-%m-%dT%H:%M:%S')"
+echo "$STAMP | LAUNCH  | $AGENT | $TASK_TYPE | $TASK" >> "$LAUNCH_LOG" 2>/dev/null || true
+
+# Launch the agent
+echo "Launching $AGENT..."
+set +e
+"$WRAPPER"
+EXIT_CODE=$?
+set -e
+
+# Log the outcome
+if [ "$EXIT_CODE" -eq 0 ]; then
+    OUTCOME="success"
+else
+    OUTCOME="exit-$EXIT_CODE"
+fi
+STAMP2="$(date '+%Y-%m-%dT%H:%M:%S')"
+echo "$STAMP2 | DONE    | $AGENT | $TASK_TYPE | outcome=$OUTCOME | $TASK" >> "$LAUNCH_LOG" 2>/dev/null || true
+
+# Record outcome in history.json for learning
+python3 - "$ROOT/orchestrator/router/history.json" "$AGENT" "$TASK_TYPE" "$EXIT_CODE" "$TASK" <<'PY'
+import json, pathlib, sys
+from datetime import datetime, timezone
+path = pathlib.Path(sys.argv[1])
+agent = sys.argv[2]; task_type = sys.argv[3]
+exit_code = int(sys.argv[4]); task = sys.argv[5]
+try:
+    data = json.loads(path.read_text())
+except Exception:
+    data = {"_meta": {"entry_count": 0}, "entries": []}
+# Find last entry for this task and update its outcome
+entries = data.get("entries", [])
+updated = False
+for e in reversed(entries):
+    if e.get("task") == task and e.get("agent") == agent and "outcome" not in e:
+        e["outcome"] = "success" if exit_code == 0 else "failure"
+        e["exit_code"] = exit_code
+        e["completed_at"] = datetime.now(timezone.utc).astimezone().isoformat()
+        updated = True
+        break
+if not updated:
+    entries.append({
+        "task": task, "agent": agent, "task_type": task_type,
+        "outcome": "success" if exit_code == 0 else "failure",
+        "exit_code": exit_code,
+        "completed_at": datetime.now(timezone.utc).astimezone().isoformat(),
+    })
+data["entries"] = entries
+data["_meta"]["entry_count"] = len(entries)
+path.write_text(json.dumps(data, indent=2) + "\n")
+PY
+
+echo ""
+echo "Agent finished (exit $EXIT_CODE)."
+exit "$EXIT_CODE"

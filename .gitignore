@@ -5,3 +5,9 @@
 secrets/
 .serena/
 .claude/
+.agent-backups/
+*.tmp
+autolab/sandboxes/
+autolab/snapshots/
+autolab/quarantine/
+mcp/server/storage/

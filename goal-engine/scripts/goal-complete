@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""
+goal-complete — Mark a goal as successfully completed.
+
+Usage:
+  goal-complete GOAL_ID
+  goal-complete GOAL_ID --result "what was actually achieved"
+
+Exit codes:
+  0  success
+  1  error
+"""
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+ACTIVE_MD = GE / "goals" / "active_goals.md"
+COMPLETED_MD = GE / "goals" / "completed_goals.md"
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _move_to_completed(goal_id, goal, result):
+    # Remove from active_goals.md
+    text = ACTIVE_MD.read_text()
+    # Remove the goal's block (from ## [GOAL_ID] through the next ## or end)
+    pattern = rf"## \[{re.escape(goal_id)}\].*?(?=\n## \[|$)"
+    text = re.sub(pattern, "", text, flags=re.DOTALL).strip()
+    if not any(f"[G" in line for line in text.split("\n") if line.startswith("## [")):
+        text += "\n\n_No active goals yet. Run `goal-create \"description\"` to add one._"
+    ACTIVE_MD.write_text(text)
+
+    # Add to completed_goals.md
+    ts = _now()
+    entry = f"""
+## [{goal_id}] {goal['description'][:60]}
+- **completed_at**: {ts}
+- **result**: {result}
+- **tasks**: {goal.get('task_count', 0)} total
+- **original_description**: {goal['description']}
+- **success_criteria**: {goal['success_criteria']}
+"""
+    comp_text = COMPLETED_MD.read_text()
+    if "_None yet._" in comp_text:
+        comp_text = comp_text.replace("_None yet._", entry.strip())
+    else:
+        comp_text = comp_text.rstrip() + "\n" + entry
+    COMPLETED_MD.write_text(comp_text)
+
+def main():
+    parser = argparse.ArgumentParser(description="Mark goal as complete")
+    parser.add_argument("goal_id", help="Goal ID")
+    parser.add_argument("--result", default=None, help="What was achieved")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    if args.goal_id not in graph.get("goals", {}):
+        print(f"ERROR: Goal {args.goal_id} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    goal = graph["goals"][args.goal_id]
+    result = args.result or goal.get("success_criteria", "Completed successfully.")
+
+    # Check if all tasks done
+    task_ids = goal.get("tasks", [])
+    not_done = [t for t in task_ids if graph["tasks"].get(t, {}).get("status") not in ("succeeded", "skipped", "aborted")]
+    if not_done:
+        print(f"WARNING: {len(not_done)} tasks not yet complete: {', '.join(not_done)}")
+        try:
+            ans = input("Force complete anyway? [y/N]: ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            ans = "n"
+        if ans not in ("y", "yes"):
+            print("Aborted.")
+            sys.exit(0)
+
+    goal["status"] = "completed"
+    goal["completed_at"] = _now()
+    goal["final_result"] = result
+    graph["_meta"]["last_updated"] = _now()
+    _save(GRAPH_PATH, graph)
+
+    _move_to_completed(args.goal_id, goal, result)
+
+    state = _load(STATE_PATH)
+    state["active_goal_count"] = max(0, state.get("active_goal_count", 1) - 1)
+    state["completed_goal_count"] = state.get("completed_goal_count", 0) + 1
+    state["last_goal_completed"] = _now()
+    _save(STATE_PATH, state)
+
+    # Clear current_goal if it was this goal
+    current = _load(CURRENT_GOAL_PATH)
+    if current.get("goal_id") == args.goal_id:
+        current["goal_id"] = None
+        current["goal_description"] = None
+        current["goal_status"] = "completed"
+        current["updated_at"] = _now()
+        _save(CURRENT_GOAL_PATH, current)
+
+    print(f"Goal {args.goal_id} marked COMPLETED.")
+    print(f"  Result: {result}")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,61 @@
+{
+  "policy_version": "1.0",
+  "description": "Defines which files each MCP tool is allowed to read or mutate",
+
+  "mutable_areas": [
+    "/Users/MAC/SuneelWorkSpace/agent-system/memory/MEMORY.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/memory/DECISIONS.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/memory/NOTES.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/memory/SESSION_HANDOFF.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/tasks/ACTIVE_TASKS.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/tasks/TASK_QUEUE.md",
+    "/Users/MAC/SuneelWorkSpace/agent-system/logs/SESSION_LOG.md",
+    "/Users/MAC/SuneelWorkSpace/mcp/server/state/mcp_state.json",
+    "/Users/MAC/SuneelWorkSpace/mcp/server/logs/"
+  ],
+
+  "protected_areas": [
+    "/Users/MAC/SuneelWorkSpace/agent-system/shared/",
+    "/Users/MAC/SuneelWorkSpace/agent-system/state/CURRENT_STATE.json",
+    "/Users/MAC/SuneelWorkSpace/agent-system/state/WORKSPACE_HEALTH.json",
+    "/Users/MAC/SuneelWorkSpace/autolab/",
+    "/Users/MAC/SuneelWorkSpace/bin/",
+    "/Users/MAC/SuneelWorkSpace/automation/",
+    "/Users/MAC/.claude/",
+    "/Users/MAC/.codex/"
+  ],
+
+  "tool_permissions": {
+    "query_workspace_context":   { "read": true,  "write": false, "exec": false },
+    "get_current_state":         { "read": true,  "write": false, "exec": false },
+    "get_recent_handoff":        { "read": true,  "write": false, "exec": false },
+    "search_memory":             { "read": true,  "write": false, "exec": false },
+    "search_decisions":          { "read": true,  "write": false, "exec": false },
+    "search_tasks":              { "read": true,  "write": false, "exec": false },
+    "search_autolab_results":    { "read": true,  "write": false, "exec": false },
+    "list_active_hypotheses":    { "read": true,  "write": false, "exec": false },
+    "get_workspace_health":      { "read": true,  "write": false, "exec": false },
+    "get_recent_changes":        { "read": true,  "write": false, "exec": false },
+    "add_memory_note":           { "read": true,  "write": true,  "exec": false },
+    "add_decision":              { "read": true,  "write": true,  "exec": false },
+    "add_task":                  { "read": true,  "write": true,  "exec": false },
+    "update_task_status":        { "read": true,  "write": true,  "exec": false },
+    "append_session_note":       { "read": true,  "write": true,  "exec": false },
+    "create_handoff_draft":      { "read": true,  "write": true,  "exec": false },
+    "trigger_reindex":           { "read": true,  "write": true,  "exec": true  },
+    "run_workspace_doctor":      { "read": true,  "write": false, "exec": true  },
+    "run_workspace_repair_safe": { "read": true,  "write": true,  "exec": true  },
+    "generate_workspace_report": { "read": true,  "write": false, "exec": true  },
+    "route_task":                { "read": true,  "write": true,  "exec": true  },
+    "get_agent_recommendation":  { "read": true,  "write": false, "exec": true  },
+    "get_agent_performance":     { "read": true,  "write": false, "exec": false },
+    "get_routing_history":       { "read": true,  "write": false, "exec": false },
+    "run_routing_learn":         { "read": true,  "write": true,  "exec": true  },
+    "create_goal":               { "read": true,  "write": true,  "exec": true  },
+    "plan_goal":                 { "read": true,  "write": true,  "exec": true  },
+    "get_goal_status":           { "read": true,  "write": false, "exec": true  },
+    "get_active_goals":          { "read": true,  "write": false, "exec": false },
+    "execute_goal":              { "read": true,  "write": true,  "exec": true  },
+    "get_execution_log":         { "read": true,  "write": false, "exec": false }
+  }
+}

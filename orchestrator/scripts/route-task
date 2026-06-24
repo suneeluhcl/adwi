@@ -1,0 +1,291 @@
+#!/usr/bin/env python3
+"""
+route-task — workspace orchestrator task classifier and agent recommender.
+
+Usage:
+  route-task "task description"
+  route-task --json "task description"     # machine-readable output
+  route-task --dry-run "task description"  # no logging
+  route-task --help
+
+Exit codes:
+  0  — recommendation made (check stdout)
+  1  — error
+  2  — flagged for manual review (dangerous task)
+"""
+
+import json
+import math
+import pathlib
+import re
+import sys
+from datetime import datetime, timezone
+
+ORCH = pathlib.Path("/Users/MAC/SuneelWorkSpace/orchestrator")
+ROUTER = ORCH / "router"
+MODELS = ORCH / "models"
+STATE = ORCH / "state"
+
+TASK_TYPES_PATH   = ROUTER / "task_types.json"
+PROFILES_PATH     = ROUTER / "agent_profiles.json"
+PATTERNS_PATH     = MODELS / "routing_patterns.json"
+SCORING_PATH      = MODELS / "scoring.json"
+HISTORY_PATH      = ROUTER / "history.json"
+LOGS_PATH         = ROUTER / "routing_logs.md"
+LAST_DECISION     = STATE / "last_routing_decision.json"
+CURRENT_STATE     = STATE / "current_routing_state.json"
+
+
+def _load(path: pathlib.Path) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+
+def _tokenize(text: str) -> list[str]:
+    return re.findall(r"\b\w+\b", text.lower())
+
+
+def _check_safety(task: str, scoring: dict) -> bool:
+    """Return True if task should be flagged for manual review."""
+    task_lower = task.lower()
+    for danger in scoring.get("safety_penalty_keywords", []):
+        if danger in task_lower:
+            return True
+    return False
+
+
+def _classify(task: str, task_types: dict) -> list[tuple[str, int, float]]:
+    """
+    Returns list of (task_type_id, hit_count, confidence_weight) sorted by score descending.
+    """
+    tokens = set(_tokenize(task))
+    scores = []
+    for tid, tdef in task_types.items():
+        if tid.startswith("_"):
+            continue
+        keywords = set(tdef.get("keywords", []))
+        # Multi-word keywords: check substring in task
+        multi_hits = sum(1 for kw in keywords if " " in kw and kw in task.lower())
+        # Single-word keyword hits
+        single_hits = sum(1 for kw in keywords if " " not in kw and kw in tokens)
+        hits = single_hits + multi_hits
+        if hits > 0:
+            scores.append((tid, hits, tdef.get("confidence_weight", 0.70)))
+    scores.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return scores
+
+
+def _apply_history(task_type: str, agent: str, base_confidence: float,
+                   patterns: dict, scoring: dict) -> float:
+    """Adjust confidence using learned routing patterns."""
+    key = f"{task_type}:{agent}"
+    pattern = patterns.get("patterns", {}).get(key, {})
+    success = pattern.get("success_count", 0)
+    failure = pattern.get("failure_count", 0)
+    net = success - failure
+    if net == 0:
+        return base_confidence
+    factor = scoring.get("history_boost_factor", 0.10)
+    adjusted = base_confidence * (1 + factor * math.log1p(abs(net)) * (1 if net > 0 else -1))
+    return max(0.10, min(0.99, adjusted))
+
+
+def _log_decision(decision: dict, dry_run: bool) -> None:
+    if dry_run:
+        return
+    # Append to routing_logs.md
+    ts = decision["timestamp"]
+    agent = decision["agent"]
+    tt = decision["task_type"]
+    conf = decision["confidence"]
+    preview = decision["task"][:60].replace("\n", " ")
+    line = f"{ts} | {agent.upper():8} | {tt:<22} | {conf:.2f} | {preview}\n"
+    try:
+        with open(LOGS_PATH, "a") as f:
+            f.write(line)
+    except Exception:
+        pass
+    # Append to history.json
+    try:
+        h = _load(HISTORY_PATH)
+        h.setdefault("entries", []).append(decision)
+        h["_meta"]["entry_count"] = len(h["entries"])
+        HISTORY_PATH.write_text(json.dumps(h, indent=2) + "\n")
+    except Exception:
+        pass
+    # Write last_routing_decision.json
+    try:
+        STATE.mkdir(parents=True, exist_ok=True)
+        LAST_DECISION.write_text(json.dumps(decision, indent=2) + "\n")
+    except Exception:
+        pass
+
+
+def route(task: str, dry_run: bool = False, json_output: bool = False) -> dict:
+    task_types = _load(TASK_TYPES_PATH)
+    profiles   = _load(PROFILES_PATH)
+    patterns   = _load(PATTERNS_PATH)
+    scoring    = _load(SCORING_PATH)
+
+    fallback_agent = scoring.get("fallback_agent", "claude")
+    default_type   = scoring.get("default_task_type", "reasoning")
+
+    # Safety check
+    if _check_safety(task, scoring):
+        decision = {
+            "timestamp": _now(),
+            "task": task,
+            "task_type": "MANUAL_REVIEW",
+            "agent": "MANUAL_REVIEW",
+            "confidence": 0.0,
+            "secondary_agent": None,
+            "hybrid_suggestion": None,
+            "reasoning": "Task flagged as potentially destructive. Manual review required.",
+            "status": "flagged",
+        }
+        _log_decision(decision, dry_run)
+        return decision
+
+    # Classify
+    scores = _classify(task, task_types)
+
+    if not scores:
+        # No keyword match: fall back to default
+        task_type_id = default_type
+        base_conf    = scoring.get("low_confidence_threshold", 0.70)
+        preferred    = fallback_agent
+        secondary    = "codex" if preferred == "claude" else "claude"
+        reasoning    = f"No keyword match. Using default task type '{task_type_id}' and fallback agent '{preferred}'."
+    else:
+        task_type_id, hit_count, base_conf = scores[0]
+        tdef         = task_types[task_type_id]
+        preferred    = tdef.get("preferred_agent", fallback_agent)
+        secondary    = tdef.get("secondary_agent", "codex" if preferred == "claude" else "claude")
+        matched_kw   = [kw for kw in tdef.get("keywords", []) if kw in task.lower() or kw in set(_tokenize(task))][:5]
+        reasoning    = f"Matched task_type='{task_type_id}' ({hit_count} keywords: {matched_kw}). Preferred agent: {preferred}."
+
+    # History adjustment
+    adjusted_conf = _apply_history(task_type_id, preferred, base_conf, patterns, scoring)
+    secondary_conf = _apply_history(task_type_id, secondary, base_conf * 0.75, patterns, scoring)
+
+    # Swap if history strongly prefers secondary
+    if secondary_conf > adjusted_conf and (secondary_conf - adjusted_conf) > 0.15:
+        preferred, secondary = secondary, preferred
+        adjusted_conf = secondary_conf
+        reasoning += f" History adjustment swapped to {preferred} (stronger track record)."
+
+    # Hybrid suggestion
+    hybrid = None
+    hybrid_thresh = scoring.get("hybrid_suggestion_threshold", 0.80)
+    if task_type_id in ("system_design", "planning", "orchestration", "debugging"):
+        code_keywords = {"edit", "code", "implement", "write", "create", "build", "script"}
+        if code_keywords & set(_tokenize(task)):
+            hybrid = f"Suggest: Claude plans/designs → Codex executes code changes"
+
+    # Confidence label
+    if adjusted_conf >= scoring.get("high_confidence_threshold", 0.85):
+        conf_label = "HIGH"
+    elif adjusted_conf >= scoring.get("low_confidence_threshold", 0.70):
+        conf_label = "MEDIUM"
+    elif adjusted_conf >= scoring.get("min_confidence_to_route", 0.50):
+        conf_label = "LOW"
+    else:
+        conf_label = "VERY_LOW"
+
+    # All classified types (for context)
+    all_types = [(t, s, c) for t, s, c in scores[:3]]
+
+    decision = {
+        "timestamp": _now(),
+        "task": task,
+        "task_type": task_type_id,
+        "task_type_label": task_types.get(task_type_id, {}).get("label", task_type_id),
+        "agent": preferred,
+        "secondary_agent": secondary,
+        "confidence": round(adjusted_conf, 3),
+        "confidence_label": conf_label,
+        "hybrid_suggestion": hybrid,
+        "reasoning": reasoning,
+        "all_matched_types": [{"type": t, "hits": s, "base_conf": c} for t, s, c in all_types],
+        "status": "ok",
+    }
+
+    _log_decision(decision, dry_run)
+
+    # Update current routing state
+    if not dry_run:
+        try:
+            STATE.mkdir(parents=True, exist_ok=True)
+            CURRENT_STATE.write_text(json.dumps({
+                "last_task_type": task_type_id,
+                "last_agent": preferred,
+                "last_confidence": round(adjusted_conf, 3),
+                "updated_at": decision["timestamp"],
+            }, indent=2) + "\n")
+        except Exception:
+            pass
+
+    return decision
+
+
+def _print_human(d: dict) -> None:
+    status = d.get("status", "ok")
+    if status == "flagged":
+        print(f"⚠️  MANUAL REVIEW REQUIRED")
+        print(f"   Reason: {d['reasoning']}")
+        return
+
+    print(f"ROUTING DECISION")
+    print(f"  Agent:        {d['agent'].upper()}")
+    print(f"  Task type:    {d['task_type']} ({d.get('task_type_label','')})")
+    print(f"  Confidence:   {d['confidence']:.0%} [{d['confidence_label']}]")
+    print(f"  Secondary:    {d.get('secondary_agent','')}")
+    if d.get("hybrid_suggestion"):
+        print(f"  Hybrid hint:  {d['hybrid_suggestion']}")
+    print(f"  Reasoning:    {d['reasoning']}")
+    if len(d.get("all_matched_types", [])) > 1:
+        others = ", ".join(f"{x['type']}({x['hits']})" for x in d["all_matched_types"][1:])
+        print(f"  Also matched: {others}")
+
+
+def main():
+    args = sys.argv[1:]
+    json_output = False
+    dry_run = False
+
+    if "--help" in args or "-h" in args:
+        print(__doc__)
+        sys.exit(0)
+
+    if "--json" in args:
+        json_output = True
+        args = [a for a in args if a != "--json"]
+
+    if "--dry-run" in args:
+        dry_run = True
+        args = [a for a in args if a != "--dry-run"]
+
+    if not args:
+        print("Usage: route-task [--json] [--dry-run] \"task description\"", file=sys.stderr)
+        sys.exit(1)
+
+    task = " ".join(args)
+    decision = route(task, dry_run=dry_run, json_output=json_output)
+
+    if json_output:
+        print(json.dumps(decision, indent=2))
+    else:
+        _print_human(decision)
+
+    if decision.get("status") == "flagged":
+        sys.exit(2)
+
+
+if __name__ == "__main__":
+    main()

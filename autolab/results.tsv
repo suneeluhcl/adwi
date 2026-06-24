@@ -1,0 +1,4 @@
+timestamp	experiment_id	mutation_type	target_area	hypothesis	risk_level	score_before	score_after	score_delta	result	failure_reason	pattern_tag	agent_type	notes
+2026-06-24T15:28:37-0500	exp-20260624-152836	docs	docs	Improve operator guide startup instructions.	low	100.0	100.0	0.0	revert	no_score_improvement	no_score_improvement	unknown	score did not improve or safety gate failed; snapshot restored
+2026-06-24T15:40:56-0500	exp-20260624-154055	docs	docs	Improve operator guide startup instructions.	low	100.0	100.0	0.0	revert	safety_gate_failed	safety_gate_failed	codex	selection=queued; score did not improve or safety gate failed; snapshot restored
+2026-06-24T15:41:08-0500	strategy-20260624-154108	strategy	program	Add learned strategy note without weakening safety.	medium	100.0	100.0	0.0	keep		strategy-evolution	codex	strategy version saved at /Users/MAC/SuneelWorkSpace/autolab/meta/strategy_versions/program-20260624-154108.md

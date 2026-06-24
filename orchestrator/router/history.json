@@ -1,0 +1,230 @@
+{
+  "_meta": {
+    "description": "Routing decision history. Each entry records a task, its classification, the agent chosen, and outcome.",
+    "created_at": null,
+    "entry_count": 9
+  },
+  "entries": [
+    {
+      "timestamp": "2026-06-24T16:08:41.451708-05:00",
+      "task": "Why is the autolab score not improving? Analyze the failure patterns and explain the root cause.",
+      "task_type": "reasoning",
+      "task_type_label": "Reasoning / Problem-solving",
+      "agent": "claude",
+      "secondary_agent": "codex",
+      "confidence": 0.85,
+      "confidence_label": "HIGH",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='reasoning' (3 keywords: ['why', 'explain', 'analyze']). Preferred agent: claude.",
+      "all_matched_types": [
+        {
+          "type": "reasoning",
+          "hits": 3,
+          "base_conf": 0.85
+        },
+        {
+          "type": "autolab_experiment",
+          "hits": 2,
+          "base_conf": 0.8
+        },
+        {
+          "type": "documentation",
+          "hits": 1,
+          "base_conf": 0.88
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:08:41.479929-05:00",
+      "task": "Edit the agent-maintain script to add a timeout check",
+      "task_type": "analysis",
+      "task_type_label": "Analysis / Review",
+      "agent": "claude",
+      "secondary_agent": "codex",
+      "confidence": 0.85,
+      "confidence_label": "HIGH",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='analysis' (1 keywords: ['check']). Preferred agent: claude.",
+      "all_matched_types": [
+        {
+          "type": "analysis",
+          "hits": 1,
+          "base_conf": 0.85
+        },
+        {
+          "type": "scripting",
+          "hits": 1,
+          "base_conf": 0.82
+        },
+        {
+          "type": "code_edit",
+          "hits": 1,
+          "base_conf": 0.8
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:08:41.502668-05:00",
+      "task": "Write a bash script to bulk rename all log files with a timestamp prefix",
+      "task_type": "scripting",
+      "task_type_label": "Shell / Python Scripting",
+      "agent": "codex",
+      "secondary_agent": "claude",
+      "confidence": 0.82,
+      "confidence_label": "MEDIUM",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='scripting' (2 keywords: ['script', 'bash']). Preferred agent: codex.",
+      "all_matched_types": [
+        {
+          "type": "scripting",
+          "hits": 2,
+          "base_conf": 0.82
+        },
+        {
+          "type": "file_manipulation",
+          "hits": 2,
+          "base_conf": 0.78
+        },
+        {
+          "type": "documentation",
+          "hits": 1,
+          "base_conf": 0.88
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:08:41.524413-05:00",
+      "task": "Design a plan for improving the NLU routing accuracy in the adwi project",
+      "task_type": "planning",
+      "task_type_label": "Planning / Architecture",
+      "agent": "claude",
+      "secondary_agent": "codex",
+      "confidence": 0.9,
+      "confidence_label": "HIGH",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='planning' (2 keywords: ['plan', 'design']). Preferred agent: claude.",
+      "all_matched_types": [
+        {
+          "type": "planning",
+          "hits": 2,
+          "base_conf": 0.9
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:08:41.546367-05:00",
+      "task": "delete all the workspace files rm -rf everything",
+      "task_type": "MANUAL_REVIEW",
+      "agent": "MANUAL_REVIEW",
+      "confidence": 0.0,
+      "secondary_agent": null,
+      "hybrid_suggestion": null,
+      "reasoning": "Task flagged as potentially destructive. Manual review required.",
+      "status": "flagged"
+    },
+    {
+      "timestamp": "2026-06-24T16:12:49.274068-05:00",
+      "task": "analyze the autolab failure patterns and write a report",
+      "task_type": "analysis",
+      "task_type_label": "Analysis / Review",
+      "agent": "claude",
+      "secondary_agent": "codex",
+      "confidence": 0.85,
+      "confidence_label": "HIGH",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='analysis' (2 keywords: ['analyze', 'report']). Preferred agent: claude.",
+      "all_matched_types": [
+        {
+          "type": "analysis",
+          "hits": 2,
+          "base_conf": 0.85
+        },
+        {
+          "type": "documentation",
+          "hits": 1,
+          "base_conf": 0.88
+        },
+        {
+          "type": "reasoning",
+          "hits": 1,
+          "base_conf": 0.85
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:12:49.295256-05:00",
+      "task": "edit the main.py file to add a new tool",
+      "task_type": "code_edit",
+      "task_type_label": "Code Editing / Implementation",
+      "agent": "codex",
+      "secondary_agent": "claude",
+      "confidence": 0.8,
+      "confidence_label": "MEDIUM",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='code_edit' (2 keywords: ['edit', 'add a']). Preferred agent: codex.",
+      "all_matched_types": [
+        {
+          "type": "code_edit",
+          "hits": 2,
+          "base_conf": 0.8
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:12:49.316176-05:00",
+      "task": "write a shell script to monitor disk usage hourly",
+      "task_type": "scripting",
+      "task_type_label": "Shell / Python Scripting",
+      "agent": "codex",
+      "secondary_agent": "claude",
+      "confidence": 0.82,
+      "confidence_label": "MEDIUM",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='scripting' (2 keywords: ['script', 'shell']). Preferred agent: codex.",
+      "all_matched_types": [
+        {
+          "type": "scripting",
+          "hits": 2,
+          "base_conf": 0.82
+        },
+        {
+          "type": "documentation",
+          "hits": 1,
+          "base_conf": 0.88
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "timestamp": "2026-06-24T16:12:49.337355-05:00",
+      "task": "design the architecture for a multi-agent orchestration system",
+      "task_type": "planning",
+      "task_type_label": "Planning / Architecture",
+      "agent": "claude",
+      "secondary_agent": "codex",
+      "confidence": 0.9,
+      "confidence_label": "HIGH",
+      "hybrid_suggestion": null,
+      "reasoning": "Matched task_type='planning' (1 keywords: ['design', 'architect']). Preferred agent: claude.",
+      "all_matched_types": [
+        {
+          "type": "planning",
+          "hits": 1,
+          "base_conf": 0.9
+        },
+        {
+          "type": "system_design",
+          "hits": 1,
+          "base_conf": 0.9
+        }
+      ],
+      "status": "ok"
+    }
+  ]
+}

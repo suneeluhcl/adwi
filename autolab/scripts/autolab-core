@@ -1,0 +1,869 @@
+#!/usr/bin/env python3
+import argparse
+import csv
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from collections import Counter, defaultdict
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(os.environ.get("SUNEEL_WORKSPACE", str(Path.home() / "SuneelWorkSpace"))).resolve()
+AUTO = ROOT / "autolab"
+STATE = AUTO / "state"
+REPORTS = AUTO / "reports"
+SNAPSHOTS = AUTO / "snapshots"
+PATCHES = AUTO / "patches"
+QUARANTINE = AUTO / "quarantine"
+META = AUTO / "meta"
+RESULTS = AUTO / "results.tsv"
+CANON = ROOT / "agent-system/shared/AGENT_SYSTEM.md"
+
+RESULT_FIELDS = [
+    "timestamp", "experiment_id", "mutation_type", "target_area", "hypothesis",
+    "risk_level", "score_before", "score_after", "score_delta", "result",
+    "failure_reason", "pattern_tag", "agent_type", "notes",
+]
+
+ENTRYPOINTS = [
+    ROOT / "AGENTS.md",
+    ROOT / "CLAUDE.md",
+    Path.home() / ".codex/AGENTS.md",
+    Path.home() / ".claude/CLAUDE.md",
+]
+
+REQUIRED_FILES = [
+    "agent-system/shared/AGENT_SYSTEM.md",
+    "agent-system/shared/IDENTITY.md",
+    "agent-system/shared/WORKFLOW_RULES.md",
+    "agent-system/shared/SAFETY_BOUNDARIES.md",
+    "agent-system/memory/MEMORY.md",
+    "agent-system/memory/SESSION_HANDOFF.md",
+    "agent-system/tasks/ACTIVE_TASKS.md",
+    "agent-system/state/CURRENT_STATE.json",
+    "agent-system/state/WORKSPACE_HEALTH.json",
+    "agent-system/state/INDEX.json",
+    "bin/agent-start",
+    "bin/agent-autoclose",
+    "bin/agent-doctor",
+    "bin/agent-repair",
+    "bin/agent-maintain",
+    "autolab/program.md",
+    "autolab/evaluator.md",
+    "autolab/mutation_policy.md",
+    "autolab/safeguards.md",
+    "autolab/meta/insights.md",
+    "autolab/meta/patterns.json",
+    "autolab/meta/failure_patterns.json",
+]
+
+JSON_FILES = [
+    "agent-system/state/CURRENT_STATE.json",
+    "agent-system/state/WORKSPACE_HEALTH.json",
+    "agent-system/state/INDEX.json",
+    "agent-system/state/ACTIVE_SESSION.json",
+    "autolab/state/frontier.json",
+    "autolab/state/latest_eval.json",
+    "autolab/state/loop_status.json",
+    "autolab/meta/patterns.json",
+    "autolab/meta/failure_patterns.json",
+    "autolab/meta/experiment_embeddings.json",
+]
+
+SCRIPTS = [
+    "autolab-run", "autolab-once", "autolab-eval", "autolab-commit",
+    "autolab-revert", "autolab-report", "autolab-frontier",
+    "autolab-enqueue", "autolab-watch", "autolab-analyze",
+    "autolab-evolve-strategy", "autolab-core",
+]
+
+SNAPSHOT_PATHS = [
+    "autolab/program.md",
+    "autolab/evaluator.md",
+    "autolab/current_frontier.md",
+    "autolab/experiment_queue.md",
+    "autolab/reports",
+    "autolab/state",
+    "autolab/templates",
+    "autolab/scripts",
+    "autolab/meta",
+    "agent-system/docs",
+    "agent-system/shared",
+    "automation/maintenance",
+    "automation/hooks",
+    "bin",
+]
+
+LOW_RISK_TYPES = {"docs", "report", "analysis", "template", "canary", "state-index"}
+
+
+def stamp():
+    return datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
+
+
+def short_stamp():
+    return datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+def ensure_dirs():
+    for path in [
+        REPORTS, STATE, SNAPSHOTS, PATCHES, QUARANTINE,
+        AUTO / "sandboxes", AUTO / "templates", AUTO / "scripts",
+        META, META / "strategy_versions",
+    ]:
+        path.mkdir(parents=True, exist_ok=True)
+
+
+def read_json(path, default=None):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {} if default is None else default
+
+
+def write_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+    tmp.replace(path)
+
+
+def run(cmd, timeout=15):
+    try:
+        return subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=timeout)
+    except Exception as exc:
+        return subprocess.CompletedProcess(cmd, 99, "", str(exc))
+
+
+def rel(path):
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def detect_agent_type():
+    raw = " ".join([
+        os.environ.get("SUNEEL_ACTIVE_AGENT", ""),
+        os.environ.get("CODEX_SANDBOX", ""),
+        os.environ.get("CLAUDECODE", ""),
+        os.environ.get("CLAUDE_CODE", ""),
+        str(read_json(ROOT / "agent-system/state/CURRENT_STATE.json").get("active_agent", "")),
+    ]).lower()
+    if "codex" in raw:
+        return "codex"
+    if "claude" in raw:
+        return "claude"
+    return "unknown"
+
+
+def ensure_results_schema():
+    ensure_dirs()
+    if not RESULTS.exists():
+        RESULTS.write_text("\t".join(RESULT_FIELDS) + "\n")
+        return
+    lines = RESULTS.read_text().splitlines()
+    if not lines:
+        RESULTS.write_text("\t".join(RESULT_FIELDS) + "\n")
+        return
+    header = lines[0].split("\t")
+    if header == RESULT_FIELDS:
+        return
+    migrated = []
+    for line in lines[1:]:
+        if not line.strip():
+            continue
+        parts = line.split("\t")
+        old = {header[i]: parts[i] if i < len(parts) else "" for i in range(len(header))}
+        try:
+            before = float(old.get("score_before", "0") or 0)
+            after = float(old.get("score_after", "0") or 0)
+            delta = round(after - before, 2)
+        except Exception:
+            delta = 0.0
+        target = old.get("target_area") or "general"
+        mutation = old.get("mutation_type") or target
+        result = old.get("result", "")
+        notes = old.get("notes", "")
+        failure = old.get("failure_reason") or ("" if result == "keep" else classify_failure(result, notes, delta))
+        migrated.append({
+            "timestamp": old.get("timestamp", ""),
+            "experiment_id": old.get("experiment_id", ""),
+            "mutation_type": mutation,
+            "target_area": target,
+            "hypothesis": old.get("hypothesis", ""),
+            "risk_level": old.get("risk_level") or ("low" if mutation in LOW_RISK_TYPES else "medium"),
+            "score_before": old.get("score_before", ""),
+            "score_after": old.get("score_after", ""),
+            "score_delta": str(delta),
+            "result": result,
+            "failure_reason": failure,
+            "pattern_tag": old.get("pattern_tag") or ("success" if result == "keep" and delta > 0 else "no-result"),
+            "agent_type": old.get("agent_type") or "unknown",
+            "notes": notes,
+        })
+    with RESULTS.open("w") as f:
+        f.write("\t".join(RESULT_FIELDS) + "\n")
+        for row in migrated:
+            f.write("\t".join(row.get(field, "") for field in RESULT_FIELDS) + "\n")
+
+
+def read_results():
+    ensure_results_schema()
+    with RESULTS.open(newline="") as f:
+        return list(csv.DictReader(f, delimiter="\t"))
+
+
+def classify_failure(result, notes, delta):
+    text = f"{result} {notes}".lower()
+    if result == "keep":
+        return ""
+    if "json" in text:
+        return "json_invalid"
+    if "safety" in text or "gate" in text:
+        return "safety_gate_failed"
+    if "symlink" in text or "link" in text:
+        return "link_drift"
+    if "executable" in text or "permission" in text:
+        return "script_not_executable"
+    if "large" in text or "overbroad" in text:
+        return "overbroad_change"
+    try:
+        if float(delta) <= 0:
+            return "no_score_improvement"
+    except Exception:
+        pass
+    return "unknown"
+
+
+def check_eval():
+    ensure_dirs()
+    ensure_results_schema()
+    checks = {}
+    gates = []
+
+    def add(name, points, earned, gate=False, detail=""):
+        checks[name] = {"points": points, "earned": earned, "passed": earned == points, "detail": detail}
+        if gate:
+            gates.append((name, earned == points, detail))
+
+    canonical_ok = CANON.exists()
+    links_ok = canonical_ok and all(p.is_symlink() and Path(os.readlink(p)) == CANON for p in ENTRYPOINTS)
+    add("canonical_links", 12, 12 if links_ok else 0, True, "workspace/global entrypoints point to canonical instructions")
+
+    missing = [p for p in REQUIRED_FILES if not (ROOT / p).exists()]
+    add("required_files", 12, 12 if not missing else max(0, 12 - min(12, len(missing) * 2)), True, ", ".join(missing[:6]))
+
+    bad_json = []
+    for item in JSON_FILES:
+        try:
+            json.loads((ROOT / item).read_text())
+        except Exception as exc:
+            bad_json.append(f"{item}: {exc}")
+    add("json_validity", 12, 12 if not bad_json else 0, True, "; ".join(bad_json[:4]))
+
+    missing_exec = []
+    for script in SCRIPTS:
+        p = AUTO / "scripts" / script
+        if not p.exists() or not os.access(p, os.X_OK):
+            missing_exec.append(script)
+    add("script_executability", 10, 10 if not missing_exec else max(0, 10 - min(10, len(missing_exec) * 2)), False, ", ".join(missing_exec))
+
+    doctor = run([str(ROOT / "bin/agent-doctor")], timeout=20)
+    doctor_ok = doctor.returncode == 0 and "healthy" in (doctor.stdout + doctor.stderr).lower()
+    add("doctor_health", 12, 12 if doctor_ok else 0, True, (doctor.stdout + doctor.stderr).strip()[:300])
+
+    startup_ready = (ROOT / "bin/agent-start").exists() and (ROOT / "bin/agent-autoclose").exists()
+    state = read_json(ROOT / "agent-system/state/CURRENT_STATE.json")
+    closeout_seen = bool(state.get("last_auto_closeout_timestamp") or state.get("last_summary"))
+    add("startup_closeout_readiness", 10, 10 if startup_ready and closeout_seen else 5 if startup_ready else 0, False, "agent-start and agent-autoclose available")
+
+    label = "com.suneelworkspace.maintenance"
+    loaded = run(["launchctl", "print", f"gui/{os.getuid()}/{label}"], timeout=5).returncode == 0
+    add("launchd_maintenance", 8, 8 if loaded else 4, False, "loaded" if loaded else "not loaded")
+
+    dupes = []
+    for p in ROOT.rglob("*"):
+        if ".agent-backups" in p.parts or ".git" in p.parts:
+            continue
+        if p.name in {"AGENTS.md", "CLAUDE.md"} and p not in {ROOT / "AGENTS.md", ROOT / "CLAUDE.md"}:
+            dupes.append(rel(p))
+    add("duplicate_instruction_drift", 8, 8 if not dupes else 0, False, ", ".join(dupes[:8]))
+
+    docs = [
+        "README.md",
+        "agent-system/docs/HOW_IT_WORKS.md",
+        "agent-system/docs/AUTOMATION.md",
+        "agent-system/docs/OPERATOR_GUIDE.md",
+        "autolab/README.md",
+        "autolab/evaluator.md",
+        "autolab/safeguards.md",
+    ]
+    present_docs = [d for d in docs if (ROOT / d).exists() and (ROOT / d).stat().st_size > 80]
+    add("documentation_coverage", 8, round(8 * len(present_docs) / len(docs), 2), False, f"{len(present_docs)}/{len(docs)} docs present")
+
+    rollback_ready = SNAPSHOTS.exists() and (AUTO / "mutation_policy.md").exists() and (AUTO / "safeguards.md").exists()
+    add("rollback_readiness", 5, 5 if rollback_ready else 0, True, "snapshots and policies ready")
+
+    git_inside = run(["git", "rev-parse", "--is-inside-work-tree"], timeout=5).returncode == 0
+    dirty = bool(run(["git", "status", "--short"], timeout=5).stdout.strip()) if git_inside else False
+    add("git_awareness", 3, 3 if git_inside else 1, False, "dirty worktree; using snapshots" if dirty else "git available" if git_inside else "no git")
+
+    score = round(sum(v["earned"] for v in checks.values()), 2)
+    gates_passed = all(passed for _, passed, _ in gates)
+    failed_gates = [{"name": name, "detail": detail} for name, passed, detail in gates if not passed]
+    data = {
+        "created_at": stamp(),
+        "score": score,
+        "max_score": 100,
+        "gates_passed": gates_passed,
+        "failed_gates": failed_gates,
+        "checks": checks,
+        "notes": "Experiments are accepted only when gates pass and score improves.",
+    }
+    write_json(STATE / "latest_eval.json", data)
+    write_report(data)
+    append_score_history(data)
+    return data
+
+
+def write_report(data):
+    lines = [
+        "# Autolab Latest Report",
+        "",
+        f"Generated: {data['created_at']}",
+        f"Score: {data['score']} / {data['max_score']}",
+        f"Safety gates: {'passed' if data['gates_passed'] else 'failed'}",
+        "",
+        "## Breakdown",
+        "",
+    ]
+    for name, item in data["checks"].items():
+        lines.append(f"- {name}: {item['earned']} / {item['points']} - {item.get('detail','')}")
+    if data["failed_gates"]:
+        lines += ["", "## Failed Gates", ""]
+        for gate in data["failed_gates"]:
+            lines.append(f"- {gate['name']}: {gate['detail']}")
+    lines += ["", "## Top Opportunities", ""]
+    for name, item in data["checks"].items():
+        if item["earned"] < item["points"]:
+            lines.append(f"- Improve `{name}` ({item['earned']} / {item['points']}).")
+    (REPORTS / "latest_report.md").write_text("\n".join(lines) + "\n")
+
+
+def append_score_history(data):
+    history = REPORTS / "score_history.md"
+    if not history.exists() or "Score History" not in history.read_text(errors="ignore")[:80]:
+        history.write_text("# Score History\n\n| Time | Score | Gates |\n| --- | ---: | --- |\n")
+    with history.open("a") as f:
+        f.write(f"| {data['created_at']} | {data['score']} | {'pass' if data['gates_passed'] else 'fail'} |\n")
+
+
+def snapshot(name=None):
+    ensure_dirs()
+    snap = SNAPSHOTS / (name or f"snapshot-{short_stamp()}")
+    if snap.exists():
+        shutil.rmtree(snap)
+    snap.mkdir(parents=True)
+    manifest = {"created_at": stamp(), "paths": []}
+    for item in SNAPSHOT_PATHS:
+        src = ROOT / item
+        if not src.exists() and not src.is_symlink():
+            continue
+        dst = snap / item
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_symlink():
+            os.symlink(os.readlink(src), dst)
+        elif src.is_dir():
+            shutil.copytree(src, dst, symlinks=True)
+        else:
+            shutil.copy2(src, dst)
+        manifest["paths"].append(item)
+    write_json(snap / "manifest.json", manifest)
+    return snap
+
+
+def restore(snap):
+    snap = Path(snap)
+    manifest = read_json(snap / "manifest.json", {"paths": []})
+    current_backup = QUARANTINE / f"pre-restore-{short_stamp()}"
+    current_backup.mkdir(parents=True, exist_ok=True)
+    for item in manifest.get("paths", []):
+        src = snap / item
+        dst = ROOT / item
+        if dst.exists() or dst.is_symlink():
+            backup_dst = current_backup / item
+            backup_dst.parent.mkdir(parents=True, exist_ok=True)
+            if dst.is_dir() and not dst.is_symlink():
+                shutil.copytree(dst, backup_dst, symlinks=True)
+                shutil.rmtree(dst)
+            else:
+                if dst.is_symlink():
+                    os.symlink(os.readlink(dst), backup_dst)
+                else:
+                    shutil.copy2(dst, backup_dst)
+                dst.unlink()
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_symlink():
+            os.symlink(os.readlink(src), dst)
+        elif src.is_dir():
+            shutil.copytree(src, dst, symlinks=True)
+        else:
+            shutil.copy2(src, dst)
+    return current_backup
+
+
+def append_result(row):
+    ensure_results_schema()
+    with RESULTS.open("a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=RESULT_FIELDS, delimiter="\t", extrasaction="ignore")
+        writer.writerow(row)
+
+
+def frontier_update(eval_data, experiment_id=None, snapshot_path=None):
+    patterns = read_json(META / "patterns.json")
+    data = {
+        "updated_at": stamp(),
+        "frontier_score": eval_data["score"],
+        "gates_passed": eval_data["gates_passed"],
+        "last_accepted_experiment": experiment_id,
+        "snapshot": str(snapshot_path) if snapshot_path else None,
+        "status": "frontier-recorded",
+        "selection_bias": patterns.get("recommendations", [])[:5],
+    }
+    write_json(STATE / "frontier.json", data)
+    lines = [
+        "# Current Frontier",
+        "",
+        f"Updated: {data['updated_at']}",
+        f"Score: {data['frontier_score']} / 100",
+        f"Safety gates: {'passed' if data['gates_passed'] else 'failed'}",
+        f"Last accepted experiment: {experiment_id or 'none'}",
+        f"Snapshot: {data['snapshot'] or 'none'}",
+        "",
+        "## Current Strategy",
+        "",
+        "- Evaluate often.",
+        "- Mutate rarely.",
+        "- Keep only measurable, safe improvements.",
+        "- Prefer mutation types with successful history and avoid repeated failure patterns.",
+        "- Use snapshots for rollback in this dirty git worktree.",
+    ]
+    (AUTO / "current_frontier.md").write_text("\n".join(lines) + "\n")
+
+
+def analyze_results():
+    rows = read_results()
+    for row in rows:
+        if row.get("result") != "keep":
+            reason = row.get("failure_reason", "")
+            if not reason or "score did not improve" in reason:
+                row["failure_reason"] = classify_failure(row.get("result", ""), row.get("notes", ""), row.get("score_delta", 0))
+    successes = [r for r in rows if r.get("result") == "keep"]
+    failures = [r for r in rows if r.get("result") != "keep"]
+
+    def summarize(group, key):
+        out = {}
+        bucket = defaultdict(list)
+        for row in group:
+            bucket[row.get(key) or "unknown"].append(row)
+        for name, items in bucket.items():
+            deltas = []
+            for item in items:
+                try:
+                    deltas.append(float(item.get("score_delta") or 0))
+                except Exception:
+                    deltas.append(0.0)
+            out[name] = {
+                "count": len(items),
+                "avg_score_delta": round(sum(deltas) / len(deltas), 3) if deltas else 0,
+                "last_seen": items[-1].get("timestamp", ""),
+            }
+        return out
+
+    mutation_total = Counter(r.get("mutation_type") or "unknown" for r in rows)
+    mutation_success = Counter(r.get("mutation_type") or "unknown" for r in successes)
+    mutation_patterns = summarize(rows, "mutation_type")
+    for name, item in mutation_patterns.items():
+        total = mutation_total.get(name, 0)
+        item["success_count"] = mutation_success.get(name, 0)
+        item["success_rate"] = round(item["success_count"] / total, 3) if total else 0
+
+    recommendations = []
+    for name, item in sorted(mutation_patterns.items(), key=lambda kv: (kv[1]["success_rate"], kv[1]["avg_score_delta"]), reverse=True):
+        if item["success_count"]:
+            recommendations.append(f"Prefer `{name}` when it targets a real score gap.")
+    if not recommendations:
+        recommendations.append("No successful mutation type yet; prefer low-risk docs, report, analysis, or canary experiments.")
+
+    failure_types = summarize(failures, "failure_reason")
+    risk_levels = summarize(rows, "risk_level")
+    avoid = []
+    for name, item in failure_types.items():
+        if item["count"] >= 1:
+            avoid.append(f"Avoid repeating `{name}` without a specific mitigation.")
+
+    agent_types = summarize(rows, "agent_type")
+    patterns = {
+        "generated_at": stamp(),
+        "mutation_types": mutation_patterns,
+        "target_areas": summarize(rows, "target_area"),
+        "agent_types": agent_types,
+        "recommendations": recommendations,
+        "confidence_score": compute_confidence(rows),
+    }
+    failure_patterns = {
+        "generated_at": stamp(),
+        "failure_types": failure_types,
+        "risk_levels": risk_levels,
+        "avoid": avoid,
+    }
+    embeddings = {
+        "generated_at": stamp(),
+        "description": "Simple structured experiment features for analysis. This is not a vector database.",
+        "experiments": [
+            {
+                "experiment_id": r.get("experiment_id"),
+                "features": {
+                    "mutation_type": r.get("mutation_type"),
+                    "target_area": r.get("target_area"),
+                    "risk_level": r.get("risk_level"),
+                    "result": r.get("result"),
+                    "score_delta": r.get("score_delta"),
+                    "failure_reason": r.get("failure_reason"),
+                    "agent_type": r.get("agent_type"),
+                },
+            }
+            for r in rows
+        ],
+    }
+    write_json(META / "patterns.json", patterns)
+    write_json(META / "failure_patterns.json", failure_patterns)
+    write_json(META / "experiment_embeddings.json", embeddings)
+    append_insights(patterns, failure_patterns)
+    write_advanced_reports(rows, patterns, failure_patterns)
+    return patterns, failure_patterns
+
+
+def compute_confidence(rows):
+    if not rows:
+        return 0.25
+    keeps = sum(1 for r in rows if r.get("result") == "keep")
+    low_risk = sum(1 for r in rows if r.get("risk_level") == "low")
+    confidence = 0.3 + (keeps / len(rows)) * 0.5 + (low_risk / len(rows)) * 0.2
+    return round(min(1.0, confidence), 3)
+
+
+def append_insights(patterns, failures):
+    lines = [
+        "",
+        f"## {stamp()}",
+        "",
+        f"- Confidence score: {patterns.get('confidence_score', 0)}.",
+    ]
+    for rec in patterns.get("recommendations", [])[:3]:
+        lines.append(f"- Recommendation: {rec}")
+    for avoid in failures.get("avoid", [])[:3]:
+        lines.append(f"- Failure lesson: {avoid}")
+    with (META / "insights.md").open("a") as f:
+        f.write("\n".join(lines) + "\n")
+    with (META / "learning_log.md").open("a") as f:
+        f.write("\n".join(lines) + "\n")
+
+
+def write_advanced_reports(rows, patterns, failures):
+    best = sorted(rows, key=lambda r: float(r.get("score_delta") or 0), reverse=True)[:5]
+    risky = [r for r in rows if r.get("risk_level") in {"medium", "high"} or r.get("result") != "keep"]
+    category_lines = ["# Experiment Categories", "", "| Category | Count | Success Rate | Avg Delta |", "| --- | ---: | ---: | ---: |"]
+    for name, item in patterns.get("mutation_types", {}).items():
+        category_lines.append(f"| {name} | {item['count']} | {item.get('success_rate', 0)} | {item.get('avg_score_delta', 0)} |")
+    (REPORTS / "experiment_categories.md").write_text("\n".join(category_lines) + "\n")
+    best_lines = ["# Top 5 Best Improvements", ""]
+    for row in best:
+        best_lines.append(f"- {row.get('experiment_id')}: {row.get('mutation_type')} delta {row.get('score_delta')} result {row.get('result')}")
+    (REPORTS / "top_improvements.md").write_text("\n".join(best_lines) + "\n")
+    risk_lines = ["# Most Risky Changes", ""]
+    for row in risky[-10:]:
+        risk_lines.append(f"- {row.get('experiment_id')}: {row.get('failure_reason') or row.get('result')} ({row.get('risk_level')})")
+    (REPORTS / "risky_changes.md").write_text("\n".join(risk_lines) + "\n")
+    recent = ["# What Improved Recently", ""]
+    for row in rows[-10:]:
+        recent.append(f"- {row.get('timestamp')}: {row.get('experiment_id')} {row.get('result')} delta {row.get('score_delta')}")
+    (REPORTS / "what_improved_recently.md").write_text("\n".join(recent) + "\n")
+
+
+def select_experiment():
+    rows = read_results()
+    patterns = read_json(META / "patterns.json", {})
+    failures = read_json(META / "failure_patterns.json", {})
+    queue = AUTO / "experiment_queue.md"
+    if queue.exists():
+        for line in queue.read_text().splitlines():
+            if not line.strip() or line.lstrip().startswith("#") or "<TAB>" in line or line.startswith("```"):
+                continue
+            if "\t" in line:
+                category, hypothesis = line.split("\t", 1)
+                mutation = category.strip() or "general"
+                return mutation, category.strip() or "general", hypothesis.strip(), "low" if mutation in LOW_RISK_TYPES else "medium", "queued"
+    successful = [
+        (name, item) for name, item in patterns.get("mutation_types", {}).items()
+        if item.get("success_count", 0) and name not in failures.get("failure_types", {})
+    ]
+    if successful:
+        mutation = sorted(successful, key=lambda kv: (kv[1].get("success_rate", 0), kv[1].get("avg_score_delta", 0)), reverse=True)[0][0]
+        return mutation, mutation, f"Exploit historically successful `{mutation}` mutation type on a small measurable gap.", "low" if mutation in LOW_RISK_TYPES else "medium", "exploit"
+    tried = {r.get("mutation_type") for r in rows}
+    for mutation in ["analysis", "docs", "report", "template", "canary"]:
+        if mutation not in tried:
+            return mutation, mutation, f"Explore low-risk `{mutation}` improvement pattern.", "low", "explore"
+    return "analysis", "analysis", "Refresh analysis reports and verify learning loop.", "low", "fallback"
+
+
+def apply_bounded_experiment(experiment_id, mutation_type, target, hypothesis):
+    if mutation_type == "analysis":
+        path = REPORTS / "candidate_analysis.md"
+        path.write_text(
+            "# Candidate Analysis\n\n"
+            f"Experiment: {experiment_id}\n\n"
+            f"Hypothesis: {hypothesis}\n\n"
+            "This low-risk candidate checks whether reporting changes improve the score.\n"
+        )
+        return [path]
+    if mutation_type == "docs":
+        path = REPORTS / "candidate_doc_note.md"
+        path.write_text(
+            "# Candidate Documentation Note\n\n"
+            f"Experiment: {experiment_id}\n\n"
+            f"Hypothesis: {hypothesis}\n\n"
+            "A future accepted doc experiment should target a missing documented behavior.\n"
+        )
+        return [path]
+    path = REPORTS / "candidate_improvement.md"
+    path.write_text(
+        "# Candidate Improvement\n\n"
+        f"Experiment: {experiment_id}\n\n"
+        f"Mutation type: {mutation_type}\n\n"
+        f"Target: {target}\n\n"
+        f"Hypothesis: {hypothesis}\n\n"
+        "This candidate file is intentionally low risk. It proves the keep/revert loop without touching core infrastructure.\n"
+    )
+    return [path]
+
+
+def validate_program_safety(text):
+    required = ["safety", "revert", "measurable", "bounded", "mutation"]
+    lowered = text.lower()
+    return all(word in lowered for word in required)
+
+
+def evolve_strategy(args):
+    before = check_eval()
+    program = AUTO / "program.md"
+    old_text = program.read_text()
+    version = META / "strategy_versions" / f"program-{short_stamp()}.md"
+    version.write_text(old_text)
+    addition = (
+        "\n## Learned Strategy Note\n\n"
+        f"- Added {stamp()} after analysis. Prefer experiments tied to observed score gaps; avoid repeating failure classes listed in `meta/failure_patterns.json`.\n"
+    )
+    if addition.strip() in old_text:
+        print("Strategy already contains current learned note.")
+        return
+    new_text = old_text + addition
+    if not validate_program_safety(new_text):
+        print("Rejected strategy change; safety terms missing.")
+        return
+    program.write_text(new_text)
+    after = check_eval()
+    if not after["gates_passed"] or after["score"] < before["score"]:
+        program.write_text(old_text)
+        check_eval()
+        result = "revert"
+        notes = "strategy evolution reduced score or failed gates"
+    else:
+        result = "keep"
+        notes = f"strategy version saved at {version}"
+    append_result({
+        "timestamp": stamp(),
+        "experiment_id": f"strategy-{short_stamp()}",
+        "mutation_type": "strategy",
+        "target_area": "program",
+        "hypothesis": "Add learned strategy note without weakening safety.",
+        "risk_level": "medium",
+        "score_before": str(before["score"]),
+        "score_after": str(after["score"]),
+        "score_delta": str(round(after["score"] - before["score"], 2)),
+        "result": result,
+        "failure_reason": "" if result == "keep" else "safety_gate_failed",
+        "pattern_tag": "strategy-evolution",
+        "agent_type": detect_agent_type(),
+        "notes": notes,
+    })
+    analyze_results()
+    print(f"Strategy evolution {result}.")
+
+
+def once(args):
+    before = check_eval()
+    analyze_results()
+    experiment_id = f"exp-{short_stamp()}"
+    mutation_type, target, hypothesis, risk_level, selection_reason = select_experiment()
+    snap = snapshot(f"{experiment_id}-before")
+    apply_bounded_experiment(experiment_id, mutation_type, target, hypothesis)
+    after = check_eval()
+    delta = round(after["score"] - before["score"], 2)
+    keep = after["gates_passed"] and after["score"] > before["score"]
+    result = "keep" if keep else "revert"
+    failure_reason = "" if keep else classify_failure(result, "score did not improve or safety gate failed", delta)
+    notes = f"selection={selection_reason}; " + ("score improved" if keep else "score did not improve or safety gate failed; snapshot restored")
+    if keep:
+        frontier_update(after, experiment_id, snap)
+    else:
+        restore(snap)
+        after = check_eval()
+        rollback = PATCHES / f"{experiment_id}-rollback.md"
+        rollback.write_text(f"# Rollback\n\nExperiment: {experiment_id}\n\nReason: {failure_reason}\n\nSnapshot: {snap}\n")
+    append_result({
+        "timestamp": stamp(),
+        "experiment_id": experiment_id,
+        "mutation_type": mutation_type,
+        "target_area": target,
+        "hypothesis": hypothesis,
+        "risk_level": risk_level,
+        "score_before": str(before["score"]),
+        "score_after": str(after["score"]),
+        "score_delta": str(delta),
+        "result": result,
+        "failure_reason": failure_reason,
+        "pattern_tag": "success" if keep else failure_reason,
+        "agent_type": detect_agent_type(),
+        "notes": notes,
+    })
+    patterns, failures = analyze_results()
+    status = read_json(STATE / "loop_status.json")
+    status.update({
+        "status": "idle",
+        "last_run_at": stamp(),
+        "last_experiment": experiment_id,
+        "last_result": result,
+        "last_selection_reason": selection_reason,
+        "confidence_score": patterns.get("confidence_score", 0),
+    })
+    if keep:
+        status["last_successful_improvement"] = experiment_id
+    write_json(STATE / "loop_status.json", status)
+    print(f"{experiment_id}: {result} ({before['score']} -> {after['score']})")
+
+
+def report():
+    eval_data = check_eval()
+    patterns, failures = analyze_results()
+    rows = read_results()
+    lines = [
+        "# Autolab Summary",
+        "",
+        f"Generated: {stamp()}",
+        f"Current score: {eval_data['score']} / 100",
+        f"Safety gates: {'passed' if eval_data['gates_passed'] else 'failed'}",
+        f"Confidence score: {patterns.get('confidence_score', 0)}",
+        "",
+        "## Recent Results",
+        "",
+    ]
+    for row in rows[-10:]:
+        lines.append(f"- `{row.get('timestamp')} {row.get('experiment_id')} {row.get('mutation_type')} {row.get('result')} delta={row.get('score_delta')}`")
+    lines += ["", "## Recommendations", ""]
+    for rec in patterns.get("recommendations", [])[:5]:
+        lines.append(f"- {rec}")
+    lines += ["", "## Failure Lessons", ""]
+    for avoid in failures.get("avoid", [])[:5]:
+        lines.append(f"- {avoid}")
+    text = "\n".join(lines) + "\n"
+    (REPORTS / "summary.md").write_text(text)
+    print(text)
+
+
+def enqueue(args):
+    with (AUTO / "experiment_queue.md").open("a") as f:
+        f.write(f"\n{args.category}\t{args.hypothesis}\n")
+    print("Queued experiment.")
+
+
+def run_loop(args):
+    count = max(1, min(args.iterations, 5))
+    for i in range(count):
+        once(args)
+        if i != count - 1:
+            time.sleep(max(0, min(args.cooldown, 300)))
+
+
+def watch(args):
+    eval_data = check_eval()
+    analyze_results()
+    if args.mutate:
+        once(args)
+    else:
+        print(f"Autolab watch evaluation complete: {eval_data['score']} / 100")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("eval")
+    sub.add_parser("analyze")
+    sub.add_parser("once")
+    run_p = sub.add_parser("run")
+    run_p.add_argument("--iterations", type=int, default=1)
+    run_p.add_argument("--cooldown", type=int, default=10)
+    sub.add_parser("commit")
+    rev_p = sub.add_parser("revert")
+    rev_p.add_argument("snapshot", nargs="?")
+    sub.add_parser("report")
+    sub.add_parser("frontier")
+    enq = sub.add_parser("enqueue")
+    enq.add_argument("category")
+    enq.add_argument("hypothesis")
+    watch_p = sub.add_parser("watch")
+    watch_p.add_argument("--mutate", action="store_true")
+    sub.add_parser("evolve-strategy")
+    args = parser.parse_args()
+    ensure_dirs()
+    ensure_results_schema()
+    if args.cmd == "eval":
+        data = check_eval()
+        print(json.dumps({"score": data["score"], "gates_passed": data["gates_passed"]}, indent=2))
+    elif args.cmd == "analyze":
+        patterns, failures = analyze_results()
+        print(json.dumps({"confidence_score": patterns.get("confidence_score", 0), "failure_types": failures.get("failure_types", {})}, indent=2))
+    elif args.cmd == "once":
+        once(args)
+    elif args.cmd == "run":
+        run_loop(args)
+    elif args.cmd == "commit":
+        data = check_eval()
+        snap = snapshot(f"frontier-{short_stamp()}")
+        frontier_update(data, "manual-frontier-commit", snap)
+        print(f"Frontier committed at {snap}")
+    elif args.cmd == "revert":
+        snap = args.snapshot or read_json(STATE / "frontier.json").get("snapshot")
+        if not snap:
+            raise SystemExit("No snapshot provided or recorded.")
+        restored_backup = restore(Path(snap))
+        print(f"Restored {snap}; previous current files saved to {restored_backup}")
+    elif args.cmd == "report":
+        report()
+    elif args.cmd == "frontier":
+        print((AUTO / "current_frontier.md").read_text())
+    elif args.cmd == "enqueue":
+        enqueue(args)
+    elif args.cmd == "watch":
+        watch(args)
+    elif args.cmd == "evolve-strategy":
+        evolve_strategy(args)
+
+
+if __name__ == "__main__":
+    main()

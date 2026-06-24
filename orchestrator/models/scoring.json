@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "description": "Scoring weights for routing confidence calculation.",
+    "version": "1.0"
+  },
+  "history_boost_factor": 0.10,
+  "min_confidence_to_route": 0.50,
+  "low_confidence_threshold": 0.70,
+  "high_confidence_threshold": 0.85,
+  "hybrid_suggestion_threshold": 0.80,
+  "safety_penalty_keywords": ["delete all", "rm -rf", "force push", "drop table", "truncate", "wipe"],
+  "fallback_agent": "claude",
+  "default_task_type": "reasoning"
+}

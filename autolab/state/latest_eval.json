@@ -1,0 +1,76 @@
+{
+  "checks": {
+    "canonical_links": {
+      "detail": "workspace/global entrypoints point to canonical instructions",
+      "earned": 12,
+      "passed": true,
+      "points": 12
+    },
+    "doctor_health": {
+      "detail": "Workspace health: healthy (2 issues)\n- info: codex CLI is not on PATH\n- info: claude CLI is not on PATH",
+      "earned": 12,
+      "passed": true,
+      "points": 12
+    },
+    "documentation_coverage": {
+      "detail": "7/7 docs present",
+      "earned": 8.0,
+      "passed": true,
+      "points": 8
+    },
+    "duplicate_instruction_drift": {
+      "detail": "",
+      "earned": 8,
+      "passed": true,
+      "points": 8
+    },
+    "git_awareness": {
+      "detail": "dirty worktree; using snapshots",
+      "earned": 3,
+      "passed": true,
+      "points": 3
+    },
+    "json_validity": {
+      "detail": "",
+      "earned": 12,
+      "passed": true,
+      "points": 12
+    },
+    "launchd_maintenance": {
+      "detail": "loaded",
+      "earned": 8,
+      "passed": true,
+      "points": 8
+    },
+    "required_files": {
+      "detail": "",
+      "earned": 12,
+      "passed": true,
+      "points": 12
+    },
+    "rollback_readiness": {
+      "detail": "snapshots and policies ready",
+      "earned": 5,
+      "passed": true,
+      "points": 5
+    },
+    "script_executability": {
+      "detail": "",
+      "earned": 10,
+      "passed": true,
+      "points": 10
+    },
+    "startup_closeout_readiness": {
+      "detail": "agent-start and agent-autoclose available",
+      "earned": 10,
+      "passed": true,
+      "points": 10
+    }
+  },
+  "created_at": "2026-06-24T17:09:01-0500",
+  "failed_gates": [],
+  "gates_passed": true,
+  "max_score": 100,
+  "notes": "Experiments are accepted only when gates pass and score improves.",
+  "score": 100.0
+}

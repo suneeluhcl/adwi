@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "description": "The currently focused goal and its next ready tasks. Updated by goal-plan and goal-execute."
+  },
+  "goal_id": null,
+  "goal_description": "Improve workspace documentation for new users",
+  "goal_status": "failed",
+  "ready_tasks": [
+    "T001_00"
+  ],
+  "pending_tasks": [
+    "T001_00",
+    "T001_01",
+    "T001_02",
+    "T001_03"
+  ],
+  "completed_tasks": [],
+  "failed_tasks": [],
+  "updated_at": "2026-06-24T16:27:47.184011-05:00"
+}

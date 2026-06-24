@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""
+goal-plan — Break a goal into tasks with a dependency graph.
+
+Usage:
+  goal-plan GOAL_ID
+  goal-plan GOAL_ID --show    # print plan without saving
+  goal-plan GOAL_ID --json    # machine-readable output
+
+The planner reads heuristics and decomposition policy, then generates a
+task list appropriate for the goal's complexity and description.
+
+Exit codes:
+  0  plan created
+  1  error
+  2  goal not found
+"""
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+DEP_MAP_PATH = GE / "graph" / "dependency_map.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+ACTIVE_GOALS_MD = GE / "goals" / "active_goals.md"
+HEURISTICS_PATH = GE / "planner" / "heuristics.md"
+
+# Task type → preferred agent mapping (mirrors orchestrator)
+AGENT_FOR_TYPE = {
+    "planning": "claude", "reasoning": "claude", "system_design": "claude",
+    "analysis": "claude", "debugging": "claude", "documentation": "claude",
+    "memory_update": "claude", "orchestration": "claude", "logging": "claude",
+    "code_edit": "codex", "scripting": "codex", "file_manipulation": "codex",
+    "workspace_repair": "codex", "autolab_experiment": "codex",
+}
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _gen_task_id(goal_id, n):
+    return f"T{goal_id[1:]}_{n:02d}"
+
+def _decompose(goal):
+    """Generate task list from goal heuristics."""
+    desc = goal["description"].lower()
+    complexity = goal["complexity"]
+    tasks = []
+
+    # Task 0: always plan first
+    tasks.append({
+        "seq": 0,
+        "description": f"Understand context and create detailed plan for: {goal['description'][:60]}",
+        "task_type": "planning",
+        "estimated_difficulty": "low",
+        "requires_confirmation": False,
+    })
+
+    # Detect goal pattern
+    if any(w in desc for w in ["fix", "bug", "error", "broken", "fail"]):
+        pattern = "fix_bug"
+    elif any(w in desc for w in ["add", "implement", "create", "build", "write code", "new feature"]):
+        pattern = "add_feature"
+    elif any(w in desc for w in ["analyze", "analysis", "review", "audit", "investigate", "understand"]):
+        pattern = "analyze"
+    elif any(w in desc for w in ["document", "docs", "readme", "write up", "explain"]):
+        pattern = "write_docs"
+    elif any(w in desc for w in ["repair", "health", "workspace", "clean", "maintenance"]):
+        pattern = "workspace_repair"
+    elif any(w in desc for w in ["experiment", "autolab", "test idea", "try"]):
+        pattern = "autolab"
+    elif any(w in desc for w in ["improve", "optimize", "enhance", "upgrade", "refactor"]):
+        pattern = "improve"
+    else:
+        pattern = "general"
+
+    # Build task list by pattern + complexity
+    if pattern == "fix_bug":
+        tasks.append({"seq": 1, "description": "Diagnose root cause of the bug", "task_type": "debugging", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Apply fix", "task_type": "code_edit", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 3, "description": "Verify fix and check for regressions", "task_type": "analysis", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Update memory and log result", "task_type": "memory_update", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "add_feature":
+        tasks.append({"seq": 1, "description": "Design the feature and its interface", "task_type": "system_design", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Implement the feature", "task_type": "code_edit", "estimated_difficulty": "high" if complexity == "high" else "medium", "requires_confirmation": False})
+        if complexity in ("medium", "high"):
+            tasks.append({"seq": 3, "description": "Write tests or verification steps", "task_type": "scripting", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 4 if complexity in ("medium", "high") else 3, "description": "Document the new feature", "task_type": "documentation", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 5 if complexity in ("medium", "high") else 4, "description": "Update memory and decisions log", "task_type": "memory_update", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "analyze":
+        tasks.append({"seq": 1, "description": "Gather relevant data and context", "task_type": "analysis", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Perform detailed analysis and draw conclusions", "task_type": "reasoning", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 3, "description": "Write analysis report", "task_type": "documentation", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Store findings in memory", "task_type": "memory_update", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "write_docs":
+        tasks.append({"seq": 1, "description": "Outline the documentation structure", "task_type": "planning", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Draft documentation content", "task_type": "documentation", "estimated_difficulty": "medium", "requires_confirmation": False})
+        if complexity == "high":
+            tasks.append({"seq": 3, "description": "Review and refine documentation", "task_type": "reasoning", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 4 if complexity == "high" else 3, "description": "Save documentation to correct location", "task_type": "file_manipulation", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "workspace_repair":
+        tasks.append({"seq": 1, "description": "Diagnose workspace health issues", "task_type": "analysis", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Apply repairs", "task_type": "workspace_repair", "estimated_difficulty": "medium", "requires_confirmation": True})
+        tasks.append({"seq": 3, "description": "Verify workspace health after repair", "task_type": "analysis", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Log repair results", "task_type": "logging", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "autolab":
+        tasks.append({"seq": 1, "description": "Design the autolab experiment", "task_type": "system_design", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Run the autolab experiment", "task_type": "autolab_experiment", "estimated_difficulty": "high", "requires_confirmation": False})
+        tasks.append({"seq": 3, "description": "Evaluate experiment results", "task_type": "analysis", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Update learning from results", "task_type": "memory_update", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    elif pattern == "improve":
+        tasks.append({"seq": 1, "description": "Analyze current state and identify improvement opportunities", "task_type": "analysis", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Design the improvement", "task_type": "system_design", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 3, "description": "Implement the improvement", "task_type": "code_edit", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Verify improvement is working", "task_type": "analysis", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 5, "description": "Update memory and log result", "task_type": "memory_update", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    else:  # general
+        tasks.append({"seq": 1, "description": "Gather context and understand requirements", "task_type": "reasoning", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 2, "description": "Execute the goal", "task_type": "orchestration", "estimated_difficulty": "medium", "requires_confirmation": False})
+        tasks.append({"seq": 3, "description": "Verify completion", "task_type": "analysis", "estimated_difficulty": "low", "requires_confirmation": False})
+        tasks.append({"seq": 4, "description": "Log outcome", "task_type": "logging", "estimated_difficulty": "low", "requires_confirmation": False})
+
+    return tasks, pattern
+
+def _build_dependencies(task_ids, task_seq_list):
+    """Build simple linear dependency chain: each task depends on the previous."""
+    deps = {}
+    for i, tid in enumerate(task_ids):
+        if i == 0:
+            deps[tid] = []
+        else:
+            deps[tid] = [task_ids[i - 1]]
+    return deps
+
+def main():
+    parser = argparse.ArgumentParser(description="Plan a goal into tasks")
+    parser.add_argument("goal_id", help="Goal ID (e.g. G001)")
+    parser.add_argument("--show", action="store_true", help="Print plan without saving")
+    parser.add_argument("--json", dest="json_out", action="store_true")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    if args.goal_id not in graph.get("goals", {}):
+        print(f"ERROR: Goal {args.goal_id} not found.", file=sys.stderr)
+        print(f"Run `goal-create` to create a goal first.", file=sys.stderr)
+        sys.exit(2)
+
+    goal = graph["goals"][args.goal_id]
+
+    # Generate task list
+    task_specs, pattern = _decompose(goal)
+    task_ids = []
+    task_objects = {}
+
+    for i, spec in enumerate(task_specs):
+        tid = _gen_task_id(args.goal_id, i)
+        task_ids.append(tid)
+        task_objects[tid] = {
+            "id": tid,
+            "goal_id": args.goal_id,
+            "description": spec["description"],
+            "task_type": spec["task_type"],
+            "preferred_agent": AGENT_FOR_TYPE.get(spec["task_type"], "claude"),
+            "estimated_difficulty": spec["estimated_difficulty"],
+            "requires_confirmation": spec.get("requires_confirmation", False),
+            "dependencies": [],
+            "status": "pending",
+            "attempts": 0,
+            "max_attempts": 3,
+            "created_at": _now(),
+            "started_at": None,
+            "completed_at": None,
+            "result": None,
+            "notes": "",
+        }
+
+    # Build dependencies
+    deps = _build_dependencies(task_ids, task_specs)
+    for tid in task_ids:
+        task_objects[tid]["dependencies"] = deps.get(tid, [])
+
+    if args.show:
+        print(f"\nPlan for {args.goal_id}: {goal['description']}")
+        print(f"Pattern: {pattern}")
+        print(f"Tasks ({len(task_ids)}):")
+        for tid in task_ids:
+            t = task_objects[tid]
+            dep_str = " → ".join(t["dependencies"]) if t["dependencies"] else "(none)"
+            conf = " [CONFIRM REQUIRED]" if t["requires_confirmation"] else ""
+            print(f"  {tid}  [{t['task_type']:20s}]  agent:{t['preferred_agent']:6s}  deps:{dep_str}{conf}")
+            print(f"        {t['description']}")
+        return
+
+    if args.json_out:
+        print(json.dumps({"goal_id": args.goal_id, "pattern": pattern, "tasks": task_objects}, indent=2))
+        if args.show:
+            return
+
+    # Save to task_graph.json
+    if not args.show:
+        graph["tasks"].update(task_objects)
+        goal["tasks"] = task_ids
+        goal["task_count"] = len(task_ids)
+        goal["plan_pattern"] = pattern
+        goal["planned_at"] = _now()
+        graph["_meta"]["last_updated"] = _now()
+        _save(GRAPH_PATH, graph)
+
+        # Save dependency map
+        dep_map = _load(DEP_MAP_PATH)
+        if "dependencies" not in dep_map:
+            dep_map["dependencies"] = {}
+        dep_map["dependencies"].update(deps)
+        dep_map["_meta"]["last_updated"] = _now()
+        _save(DEP_MAP_PATH, dep_map)
+
+        # Find ready tasks (those with no dependencies)
+        ready = [tid for tid in task_ids if not deps.get(tid)]
+        pending = [tid for tid in task_ids if deps.get(tid)]
+
+        # Update current_goal.json
+        current = _load(CURRENT_GOAL_PATH)
+        current["goal_id"] = args.goal_id
+        current["goal_description"] = goal["description"]
+        current["goal_status"] = "active"
+        current["ready_tasks"] = ready
+        current["pending_tasks"] = pending
+        current["completed_tasks"] = []
+        current["failed_tasks"] = []
+        current["updated_at"] = _now()
+        _save(CURRENT_GOAL_PATH, current)
+
+        # Update active_goals.md task count
+        md = ACTIVE_GOALS_MD.read_text()
+        import re as _re
+        md = _re.sub(
+            rf"(## \[{args.goal_id}\].*?\n- \*\*task_count\*\*: )\d+",
+            rf"\g<1>{len(task_ids)}",
+            md
+        )
+        ACTIVE_GOALS_MD.write_text(md)
+
+        if not args.json_out:
+            print(f"Plan created for {args.goal_id}")
+            print(f"  Pattern : {pattern}")
+            print(f"  Tasks   : {len(task_ids)}")
+            print(f"  Ready   : {', '.join(ready)}")
+            print(f"")
+            for tid in task_ids:
+                t = task_objects[tid]
+                dep_str = " (after " + ", ".join(t["dependencies"]) + ")" if t["dependencies"] else ""
+                conf = " [CONFIRM REQUIRED]" if t["requires_confirmation"] else ""
+                print(f"  {tid}  {t['task_type']:20s}  {t['preferred_agent']:6s}{dep_str}{conf}")
+                print(f"        {t['description']}")
+            print(f"")
+            print(f"Next step: goal-execute {args.goal_id}")
+
+if __name__ == "__main__":
+    main()

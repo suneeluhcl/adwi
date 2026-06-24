@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TaskEntry",
+  "description": "A task added or retrieved via the workspace-brain MCP server",
+  "type": "object",
+  "required": ["task", "queue"],
+  "properties": {
+    "task":      { "type": "string", "description": "Task description" },
+    "queue":     { "type": "string", "enum": ["active", "queue", "completed"] },
+    "status":    { "type": "string", "description": "DONE | IN-PROGRESS | BLOCKED | CANCELLED" },
+    "added_at":  { "type": "string", "format": "date-time" },
+    "source":    { "type": "string", "description": "Who or what added this task" }
+  }
+}

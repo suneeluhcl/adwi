@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MemoryEntry",
+  "description": "An entry in the workspace knowledge index from memory/decisions files",
+  "type": "object",
+  "required": ["source", "category", "content", "indexed_at"],
+  "properties": {
+    "id":         { "type": "integer" },
+    "source":     { "type": "string", "description": "Label identifying the source file (e.g. 'memory', 'decisions')" },
+    "section":    { "type": "string", "description": "Section heading from the source file" },
+    "category":   { "type": "string", "enum": ["memory", "instructions", "tasks", "state", "autolab", "logs"] },
+    "tags":       { "type": "string", "description": "Comma-separated tags extracted from content" },
+    "content":    { "type": "string", "maxLength": 4096 },
+    "indexed_at": { "type": "string", "format": "date-time" }
+  }
+}

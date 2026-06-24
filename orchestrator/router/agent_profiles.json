@@ -1,0 +1,63 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Agent capability profiles. Updated by route-learn.",
+    "last_updated": "2026-06-24T16:07:07.051775-05:00"
+  },
+  "claude": {
+    "id": "claude",
+    "display_name": "Claude (Claude Code)",
+    "invoke_wrapper": "use-claude",
+    "strengths": [
+      "reasoning",
+      "planning",
+      "writing",
+      "system_design",
+      "analysis",
+      "documentation",
+      "debugging",
+      "orchestration",
+      "memory_update",
+      "careful_operations",
+      "architecture",
+      "code_review",
+      "safety_sensitive"
+    ],
+    "weaknesses": [
+      "rapid_iteration",
+      "bulk_file_operations",
+      "terminal_session_continuity"
+    ],
+    "observed_success_rate": null,
+    "task_type_scores": {},
+    "notes": "Strong at careful, multi-step reasoning. Prefers to reason before acting."
+  },
+  "codex": {
+    "id": "codex",
+    "display_name": "Codex CLI",
+    "invoke_wrapper": "use-codex",
+    "strengths": [
+      "code_edit",
+      "scripting",
+      "file_manipulation",
+      "terminal_tasks",
+      "autolab_experiment",
+      "workspace_repair",
+      "iteration",
+      "fast_execution",
+      "batch_changes"
+    ],
+    "weaknesses": [
+      "complex_reasoning",
+      "multi-step_planning",
+      "safety_sensitive_decisions"
+    ],
+    "observed_success_rate": 0.5,
+    "task_type_scores": {
+      "autolab_experiment": 0.5
+    },
+    "notes": "Fast executor. Strong for code edits, scripting, and mechanical workspace tasks.",
+    "autolab_avg_score_delta": 0.0,
+    "autolab_experiments": 2
+  }
+}

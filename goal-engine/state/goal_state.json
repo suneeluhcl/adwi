@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2026-06-24T16:25:45.820273-05:00"
+  },
+  "active_goal_count": 0,
+  "completed_goal_count": 0,
+  "failed_goal_count": 1,
+  "last_goal_created": "2026-06-24T16:25:45.820268-05:00",
+  "last_goal_completed": null,
+  "last_execution_at": null,
+  "last_monitor_at": "2026-06-24T16:26:09.241669-05:00",
+  "last_adapt_at": null,
+  "total_tasks_executed": 0,
+  "total_tasks_succeeded": 0,
+  "total_tasks_failed": 0
+}

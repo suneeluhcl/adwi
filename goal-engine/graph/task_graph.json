@@ -1,0 +1,111 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Task graph for all active and historical goals. Managed by goal-plan, goal-execute, goal-adapt.",
+    "last_updated": "2026-06-24T16:27:47.183465-05:00"
+  },
+  "goals": {
+    "G001": {
+      "id": "G001",
+      "description": "Improve workspace documentation for new users",
+      "success_criteria": "Goal 'Improve workspace documentation for new ' is fully completed and verified.",
+      "priority": "medium",
+      "complexity": "low",
+      "constraints": null,
+      "created_at": "2026-06-24T16:25:45.819881-05:00",
+      "status": "failed",
+      "task_count": 4,
+      "tasks": [
+        "T001_00",
+        "T001_01",
+        "T001_02",
+        "T001_03"
+      ],
+      "notes": "",
+      "plan_pattern": "write_docs",
+      "planned_at": "2026-06-24T16:25:52.914837-05:00",
+      "failed_at": "2026-06-24T16:27:47.183343-05:00",
+      "failure_reason": "Test goal created during validation \u2014 cleaned up"
+    }
+  },
+  "tasks": {
+    "T001_00": {
+      "id": "T001_00",
+      "goal_id": "G001",
+      "description": "Understand context and create detailed plan for: Improve workspace documentation for new users",
+      "task_type": "planning",
+      "preferred_agent": "claude",
+      "estimated_difficulty": "low",
+      "requires_confirmation": false,
+      "dependencies": [],
+      "status": "pending",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-06-24T16:25:52.914667-05:00",
+      "started_at": null,
+      "completed_at": null,
+      "result": null,
+      "notes": ""
+    },
+    "T001_01": {
+      "id": "T001_01",
+      "goal_id": "G001",
+      "description": "Outline the documentation structure",
+      "task_type": "planning",
+      "preferred_agent": "claude",
+      "estimated_difficulty": "low",
+      "requires_confirmation": false,
+      "dependencies": [
+        "T001_00"
+      ],
+      "status": "pending",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-06-24T16:25:52.914822-05:00",
+      "started_at": null,
+      "completed_at": null,
+      "result": null,
+      "notes": ""
+    },
+    "T001_02": {
+      "id": "T001_02",
+      "goal_id": "G001",
+      "description": "Draft documentation content",
+      "task_type": "documentation",
+      "preferred_agent": "claude",
+      "estimated_difficulty": "medium",
+      "requires_confirmation": false,
+      "dependencies": [
+        "T001_01"
+      ],
+      "status": "pending",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-06-24T16:25:52.914827-05:00",
+      "started_at": null,
+      "completed_at": null,
+      "result": null,
+      "notes": ""
+    },
+    "T001_03": {
+      "id": "T001_03",
+      "goal_id": "G001",
+      "description": "Save documentation to correct location",
+      "task_type": "file_manipulation",
+      "preferred_agent": "codex",
+      "estimated_difficulty": "low",
+      "requires_confirmation": false,
+      "dependencies": [
+        "T001_02"
+      ],
+      "status": "pending",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-06-24T16:25:52.914830-05:00",
+      "started_at": null,
+      "completed_at": null,
+      "result": null,
+      "notes": ""
+    }
+  }
+}

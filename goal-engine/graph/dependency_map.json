@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "description": "Task dependency map. Key = task_id, value = list of task_ids that must complete first.",
+    "last_updated": "2026-06-24T16:25:52.915108-05:00"
+  },
+  "dependencies": {
+    "T001_00": [],
+    "T001_01": [
+      "T001_00"
+    ],
+    "T001_02": [
+      "T001_01"
+    ],
+    "T001_03": [
+      "T001_02"
+    ]
+  }
+}

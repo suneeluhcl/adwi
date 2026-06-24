@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "description": "Learned routing patterns per (task_type, agent).",
+    "last_updated": "2026-06-24T16:12:52.881956-05:00",
+    "total_decisions_learned": 0
+  },
+  "patterns": {}
+}

@@ -1,0 +1,13 @@
+{
+  "_meta": {
+    "description": "State of the currently running (or last completed) goal-execute invocation."
+  },
+  "run_id": null,
+  "goal_id": null,
+  "started_at": null,
+  "completed_at": null,
+  "tasks_attempted": [],
+  "tasks_succeeded": [],
+  "tasks_failed": [],
+  "status": "idle"
+}

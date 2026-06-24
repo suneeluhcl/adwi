@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-06-24T16:12:49.337355-05:00",
+  "task": "design the architecture for a multi-agent orchestration system",
+  "task_type": "planning",
+  "task_type_label": "Planning / Architecture",
+  "agent": "claude",
+  "secondary_agent": "codex",
+  "confidence": 0.9,
+  "confidence_label": "HIGH",
+  "hybrid_suggestion": null,
+  "reasoning": "Matched task_type='planning' (1 keywords: ['design', 'architect']). Preferred agent: claude.",
+  "all_matched_types": [
+    {
+      "type": "planning",
+      "hits": 1,
+      "base_conf": 0.9
+    },
+    {
+      "type": "system_design",
+      "hits": 1,
+      "base_conf": 0.9
+    }
+  ],
+  "status": "ok"
+}

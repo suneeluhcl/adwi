@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+. "$ROOT/automation/maintenance/common.sh"
+
+QUIET=0
+if [ "${1:-}" = "--quiet" ]; then
+  QUIET=1
+fi
+
+ensure_core_dirs
+
+if [ "$QUIET" -eq 0 ]; then
+  echo "Loading workspace context"
+fi
+
+# Fail-safe: if a prior session was left open, checkpoint it before starting a new one.
+python3 - "$STATE_JSON" <<'PY' >/tmp/suneel_agent_start_state.$$ 2>/dev/null || true
+import json, pathlib, sys
+p = pathlib.Path(sys.argv[1])
+try:
+    data = json.loads(p.read_text())
+except Exception:
+    data = {}
+print("open" if data.get("active_session_detected") else "closed")
+PY
+if [ "$(cat /tmp/suneel_agent_start_state.$$ 2>/dev/null || echo closed)" = "open" ]; then
+  "$ROOT/bin/agent-autoclose" --startup-recovery --quiet >/dev/null 2>&1 || true
+fi
+rm -f /tmp/suneel_agent_start_state.$$
+
+"$ROOT/bin/agent-repair" --quiet >/dev/null 2>&1 || true
+"$ROOT/bin/agent-doctor" --quiet >/dev/null 2>&1 || true
+"$ROOT/bin/workspace-index" --quiet >/dev/null 2>&1 || true
+
+STAMP="$(now_stamp)"
+SESSION_ID="$(date '+%Y%m%d-%H%M%S')-$$"
+python3 - "$STATE_JSON" "$ROOT/agent-system/state/ACTIVE_SESSION.json" "$STAMP" "$SESSION_ID" <<'PY'
+import json, pathlib, sys
+state_path = pathlib.Path(sys.argv[1])
+active_path = pathlib.Path(sys.argv[2])
+stamp = sys.argv[3]
+session_id = sys.argv[4]
+try:
+    state = json.loads(state_path.read_text())
+except Exception:
+    state = {}
+state.update({
+    "active_session_detected": True,
+    "active_session_id": session_id,
+    "session_started_at": stamp,
+    "last_activity_timestamp": stamp,
+    "state_updated_at": stamp,
+    "status": "active",
+})
+tmp = state_path.with_suffix(state_path.suffix + ".tmp")
+tmp.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+tmp.replace(state_path)
+active = {"active": True, "session_id": session_id, "started_at": stamp}
+tmp = active_path.with_suffix(active_path.suffix + ".tmp")
+tmp.write_text(json.dumps(active, indent=2, sort_keys=True) + "\n")
+tmp.replace(active_path)
+PY
+
+log_session "Agent startup preflight ran and active session was marked."
+
+if [ "$QUIET" -eq 0 ]; then
+  "$ROOT/bin/workspace-context"
+fi

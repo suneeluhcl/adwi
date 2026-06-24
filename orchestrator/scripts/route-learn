@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""
+route-learn — run analysis and update routing patterns + agent profiles from history.
+
+Usage:
+  route-learn                   # analyze + update patterns + profiles
+  route-learn --dry-run         # analyze only, print what would change
+  route-learn --summary         # print brief summary only
+
+This is called automatically by agent-maintain on a maintenance cycle.
+You can also run it manually after completing a session.
+"""
+
+import json
+import math
+import pathlib
+import sys
+from datetime import datetime, timezone
+from collections import defaultdict
+
+ORCH    = pathlib.Path("/Users/MAC/SuneelWorkSpace/orchestrator")
+WS      = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+HISTORY = ORCH / "router" / "history.json"
+PROFILES= ORCH / "router" / "agent_profiles.json"
+PATTERNS= ORCH / "models" / "routing_patterns.json"
+AUTOLAB_RESULTS = WS / "autolab" / "results.tsv"
+STATE   = ORCH / "state" / "current_routing_state.json"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+
+def _load(path: pathlib.Path) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def _learn_from_history(entries: list) -> dict[str, dict]:
+    """Build per-(agent,task_type) stats from history entries."""
+    stats: dict = defaultdict(lambda: {"success": 0, "failure": 0, "total": 0})
+    for e in entries:
+        agent = e.get("agent")
+        task_type = e.get("task_type")
+        outcome = e.get("outcome")
+        if not agent or not task_type or outcome is None:
+            continue
+        if agent in ("MANUAL_REVIEW",):
+            continue
+        key = f"{task_type}:{agent}"
+        stats[key]["total"] += 1
+        if outcome == "success":
+            stats[key]["success"] += 1
+        else:
+            stats[key]["failure"] += 1
+    return dict(stats)
+
+
+def _learn_from_autolab(tsv_path: pathlib.Path) -> dict[str, dict]:
+    """Extract per-agent performance from autolab results.tsv."""
+    agent_data: dict = defaultdict(lambda: {"keep": 0, "revert": 0, "total": 0, "deltas": []})
+    if not tsv_path.exists():
+        return {}
+    lines = tsv_path.read_text().strip().splitlines()
+    if len(lines) < 2:
+        return {}
+    headers = lines[0].split("\t")
+    try:
+        ai = headers.index("agent_type")
+        di = headers.index("score_delta")
+        ri = headers.index("result")
+    except ValueError:
+        return {}
+    for line in lines[1:]:
+        parts = line.split("\t")
+        if len(parts) <= max(ai, di, ri):
+            continue
+        agent = parts[ai].strip()
+        if not agent or agent == "unknown":
+            continue
+        try:
+            delta = float(parts[di])
+        except ValueError:
+            continue
+        result = parts[ri].strip()
+        agent_data[agent]["total"] += 1
+        agent_data[agent]["deltas"].append(delta)
+        if result == "keep":
+            agent_data[agent]["keep"] += 1
+        else:
+            agent_data[agent]["revert"] += 1
+    return dict(agent_data)
+
+
+def _update_patterns(stats: dict[str, dict], patterns_data: dict, dry_run: bool) -> dict:
+    """Merge new stats into routing_patterns.json."""
+    patterns = dict(patterns_data.get("patterns", {}))
+    total_prev = patterns_data.get("_meta", {}).get("total_decisions_learned", 0)
+    new_decisions = 0
+
+    for key, counts in stats.items():
+        existing = patterns.get(key, {"success_count": 0, "failure_count": 0, "total_count": 0})
+        # Only add net-new decisions (idempotent by not double-counting)
+        # Simple approach: overwrite with latest from full history rescan
+        patterns[key] = {
+            "success_count": counts["success"],
+            "failure_count": counts["failure"],
+            "total_count": counts["total"],
+            "last_updated": _now(),
+        }
+        new_decisions += counts["total"]
+
+    updated = {
+        "_meta": {
+            "description": "Learned routing patterns per (task_type:agent).",
+            "last_updated": _now(),
+            "total_decisions_learned": new_decisions,
+        },
+        "patterns": patterns,
+    }
+    if not dry_run:
+        PATTERNS.write_text(json.dumps(updated, indent=2) + "\n")
+    return updated
+
+
+def _update_profiles(autolab_data: dict[str, dict], profiles_data: dict, dry_run: bool) -> dict:
+    """Update agent_profiles.json with observed autolab success rates."""
+    agents = dict(profiles_data)
+    for agent_id, adata in autolab_data.items():
+        if agent_id not in agents:
+            continue
+        total = adata["total"]
+        if total == 0:
+            continue
+        keep_rate = adata["keep"] / total
+        avg_delta = sum(adata["deltas"]) / len(adata["deltas"]) if adata["deltas"] else 0
+        agents[agent_id]["observed_success_rate"] = round(keep_rate, 3)
+        agents[agent_id]["autolab_avg_score_delta"] = round(avg_delta, 4)
+        agents[agent_id]["autolab_experiments"] = total
+        # Update task_type_scores for autolab_experiment type
+        scores = dict(agents[agent_id].get("task_type_scores", {}))
+        scores["autolab_experiment"] = round(keep_rate, 3)
+        agents[agent_id]["task_type_scores"] = scores
+
+    agents["_meta"] = {
+        "version": "1.0",
+        "description": "Agent capability profiles. Updated by route-learn.",
+        "last_updated": _now(),
+    }
+    if not dry_run:
+        PROFILES.write_text(json.dumps(agents, indent=2) + "\n")
+    return agents
+
+
+def _update_routing_state(patterns_data: dict, dry_run: bool) -> None:
+    if dry_run:
+        return
+    try:
+        existing = _load(STATE)
+        existing["last_learn_at"] = _now()
+        existing["total_patterns"] = len(patterns_data.get("patterns", {}))
+        existing["total_decisions_learned"] = patterns_data.get("_meta", {}).get("total_decisions_learned", 0)
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        STATE.write_text(json.dumps(existing, indent=2) + "\n")
+    except Exception as e:
+        print(f"Warning: could not update routing state: {e}")
+
+
+def main():
+    args = sys.argv[1:]
+    dry_run = "--dry-run" in args
+    summary_only = "--summary" in args
+
+    history = _load(HISTORY)
+    entries = history.get("entries", [])
+    patterns_data = _load(PATTERNS)
+    profiles_data = _load(PROFILES)
+
+    # Learn from history
+    history_stats = _learn_from_history(entries)
+
+    # Learn from autolab
+    autolab_data = _learn_from_autolab(AUTOLAB_RESULTS)
+
+    if summary_only:
+        print(f"History entries: {len(entries)}")
+        print(f"Patterns to learn: {len(history_stats)}")
+        for agent, adata in autolab_data.items():
+            kr = adata['keep'] / adata['total'] if adata['total'] else 0
+            print(f"Autolab {agent}: {adata['total']} experiments, {kr:.0%} keep rate")
+        return
+
+    # Update patterns
+    updated_patterns = _update_patterns(history_stats, patterns_data, dry_run)
+    if dry_run:
+        print("[DRY RUN] Would update routing_patterns.json:")
+        print(json.dumps(updated_patterns, indent=2)[:1000])
+    else:
+        print(f"Updated routing_patterns.json ({len(updated_patterns['patterns'])} patterns)")
+
+    # Update profiles
+    updated_profiles = _update_profiles(autolab_data, profiles_data, dry_run)
+    if dry_run:
+        print("[DRY RUN] Would update agent_profiles.json")
+    else:
+        print(f"Updated agent_profiles.json")
+
+    # Update routing state
+    _update_routing_state(updated_patterns, dry_run)
+
+    # Run full analysis to refresh reports
+    if not dry_run:
+        try:
+            import subprocess
+            subprocess.run(
+                ["python3", str(ORCH / "scripts" / "route-analyze")],
+                capture_output=True, timeout=30
+            )
+            print("Refreshed routing_report.md and agent_performance.md")
+        except Exception as e:
+            print(f"Note: route-analyze skipped: {e}")
+
+    print("\nLearning complete.")
+    print(f"  History entries: {len(entries)}")
+    print(f"  Patterns: {len(updated_patterns['patterns'])}")
+    for agent, adata in autolab_data.items():
+        kr = adata['keep'] / adata['total'] if adata['total'] else 0
+        print(f"  Autolab {agent}: {adata['total']} experiments, {kr:.0%} keep rate")
+
+
+if __name__ == "__main__":
+    main()
