@@ -1,8 +1,0 @@
-#!/bin/zsh
-PID_FILE="/tmp/adwi-phoenix.pid"
-if [[ -f "$PID_FILE" ]]; then
-    kill "$(cat $PID_FILE)" 2>/dev/null && echo "Phoenix stopped." || echo "Phoenix not running."
-    rm -f "$PID_FILE"
-else
-    pkill -f "phoenix.server.main" 2>/dev/null && echo "Phoenix stopped." || echo "Phoenix not running."
-fi
