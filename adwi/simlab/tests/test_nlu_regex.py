@@ -4271,9 +4271,10 @@ class TestPhase1OvernightCandidateRouting(unittest.TestCase):
             _classify("check the latest react release notes online"),
             "web_search",
         )
+        # "current version of X" hits the research pattern (version lookup = research intent)
         self.assertEqual(
             _classify("what is the current version of python on the web"),
-            "web_search",
+            "research",
         )
 
     def test_online_benchmark_lookup_routes_to_web_search(self):
