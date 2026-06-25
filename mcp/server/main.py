@@ -1245,6 +1245,14 @@ def get_gstack_version() -> str:
         return "[gstack_version.json not found — run bin/gstack-verify to initialise]"
     try:
         cfg = json.loads(GSTACK_VERSION_CONFIG.read_text())
+        verify_status_file = WORKSPACE / "mcp" / "server" / "state" / "gstack_verify_status.json"
+        if verify_status_file.exists():
+            try:
+                vcfg = json.loads(verify_status_file.read_text())
+                cfg["last_verified"] = vcfg.get("last_verified")
+                cfg["last_verified_status"] = vcfg.get("last_verified_status")
+            except Exception:
+                pass
         return (
             f"gstack Supply Chain Pin\n"
             f"  Version:        {cfg.get('pinned_version', 'unknown')}\n"

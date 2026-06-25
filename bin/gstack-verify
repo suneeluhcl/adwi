@@ -113,12 +113,26 @@ def main(json_out: bool = False) -> int:
 
 
 def _update_verified(cfg: dict, now: str, status: str):
-    cfg["last_verified"] = now
-    cfg["last_verified_status"] = status
+    status_file = WORKSPACE / "mcp" / "server" / "state" / "gstack_verify_status.json"
+    status_file.parent.mkdir(parents=True, exist_ok=True)
+    status_data = {
+        "last_verified": now,
+        "last_verified_status": status,
+        "pinned_commit": cfg.get("pinned_commit"),
+        "pinned_version": cfg.get("pinned_version")
+    }
     try:
-        CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+        status_file.write_text(json.dumps(status_data, indent=2) + "\n")
     except Exception:
         pass  # non-fatal
+        
+    if "last_verified" in cfg or "last_verified_status" in cfg:
+        cfg.pop("last_verified", None)
+        cfg.pop("last_verified_status", None)
+        try:
+            CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

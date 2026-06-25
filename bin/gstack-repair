@@ -65,7 +65,24 @@ def _load_config() -> dict:
 
 
 def _save_config(cfg: dict):
+    cfg.pop("last_verified", None)
+    cfg.pop("last_verified_status", None)
     CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+
+
+def _save_status(now: str, status: str, commit: str, version: str):
+    status_file = WORKSPACE / "mcp" / "server" / "state" / "gstack_verify_status.json"
+    status_file.parent.mkdir(parents=True, exist_ok=True)
+    status_data = {
+        "last_verified": now,
+        "last_verified_status": status,
+        "pinned_commit": commit,
+        "pinned_version": version
+    }
+    try:
+        status_file.write_text(json.dumps(status_data, indent=2) + "\n")
+    except Exception:
+        pass
 
 
 def restore_to_pinned(dry_run: bool, json_out: bool) -> int:
@@ -98,9 +115,8 @@ def restore_to_pinned(dry_run: bool, json_out: bool) -> int:
             print(f"[gstack-repair] ERROR: git checkout failed: {err}")
             return 1
         print(f"[gstack-repair] Restored to pinned commit {pinned[:12]}")
-        cfg["last_verified"] = _now()
-        cfg["last_verified_status"] = "repaired"
         _save_config(cfg)
+        _save_status(_now(), "repaired", pinned, cfg.get("pinned_version"))
         _log(f"Restored gstack to pinned commit {pinned[:12]}. Snapshot: {snap.name}")
     else:
         print(f"[dry-run] Would: git checkout {pinned[:12]}")
@@ -161,9 +177,8 @@ def upgrade(dry_run: bool, json_out: bool) -> int:
         _, final_commit, _ = _git(["rev-parse", "HEAD"])
         cfg["pinned_commit"] = final_commit
         cfg["pinned_version"] = new_version
-        cfg["last_verified"] = _now()
-        cfg["last_verified_status"] = "upgraded"
         _save_config(cfg)
+        _save_status(_now(), "upgraded", final_commit, new_version)
         _log(f"Upgraded gstack v{old_version}→v{new_version} ({old_pinned[:12]}→{final_commit[:12]}). Snapshot: {snap.name}")
         print(f"[gstack-repair] Upgraded to v{new_version} ({final_commit[:12]})")
     else:

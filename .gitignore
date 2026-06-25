@@ -14,17 +14,15 @@ mcp/server/storage/
 snapshots/gstack/*.tar.gz
 **/__pycache__/
 **/*.pyc
-automation/reports/*.log
-automation/reports/*.out.log
+automation/reports/
 mcp/server/logs/
 .rtk/
 
-# Auto-generated autolab state & logs (regenerated automatically)
-autolab/reports/*.log
-autolab/reports/*.out.log
-autolab/reports/*.err.log
+# Auto-generated autolab reports, state, patches & logs (regenerated automatically)
+autolab/reports/
 autolab/state/
 autolab/meta/
+autolab/patches/
 
 # Auto-generated MCP server state (regenerated automatically)
 mcp/server/state/
