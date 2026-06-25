@@ -1047,6 +1047,7 @@ def routing_context() -> str:
 
 GSTACK_PATH = pathlib.Path.home() / ".claude" / "skills" / "gstack"
 GSTACK_POLICY = WORKSPACE / "orchestrator" / "router" / "gstack_policy.json"
+GSTACK_VERSION_CONFIG = WORKSPACE / "mcp" / "config" / "gstack_version.json"
 
 def _gstack_skill_list() -> list[dict]:
     """Return list of available gstack skills with descriptions."""
@@ -1191,6 +1192,122 @@ def suggest_cognitive_mode(task: str) -> str:
     else:
         lines.append("  Mode: Standard reasoning — no specific gstack skill needed")
     return "\n".join(lines)
+
+# gstack supply chain security — version pin + integrity tools
+
+def _gstack_integrity_status() -> dict:
+    """Run gstack-verify and return parsed result dict."""
+    verify_script = WORKSPACE / "bin" / "gstack-verify"
+    if not verify_script.exists():
+        return {"status": "error", "reason": "gstack-verify script not found"}
+    try:
+        result = subprocess.run(
+            ["python3", str(verify_script), "--json"],
+            capture_output=True, text=True, timeout=15
+        )
+        return json.loads(result.stdout)
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+@mcp.resource("workspace://gstack/version")
+def res_gstack_version() -> str:
+    """Pinned gstack version info — commit hash, version, and last verified timestamp."""
+    if not GSTACK_VERSION_CONFIG.exists():
+        return "[gstack version config not found — run: bin/gstack-verify]"
+    return GSTACK_VERSION_CONFIG.read_text(errors="replace")
+
+@mcp.resource("workspace://gstack/integrity")
+def res_gstack_integrity() -> str:
+    """Live gstack integrity check — compares installed commit to pinned commit."""
+    data = _gstack_integrity_status()
+    lines = [f"# gstack Integrity Status\n"]
+    lines.append(f"Status: **{data.get('status', 'unknown').upper()}**")
+    if data.get("pinned_commit"):
+        lines.append(f"Pinned:  {data['pinned_commit'][:16]}  (v{data.get('pinned_version', '?')})")
+    if data.get("issues"):
+        lines.append("\nIssues:")
+        for i in data["issues"]:
+            lines.append(f"  - {i}")
+        lines.append("\nRun `bin/gstack-repair` to restore the pinned version.")
+    if data.get("checked_at"):
+        lines.append(f"\nChecked: {data['checked_at']}")
+    return "\n".join(lines)
+
+@mcp.tool()
+def get_gstack_version() -> str:
+    """Return the pinned gstack version and install metadata.
+
+    Shows: pinned commit hash, version tag, install path, last verified time,
+    and the upgrade policy. Use verify_gstack_integrity() to check live status.
+    """
+    _access("get_gstack_version")
+    if not GSTACK_VERSION_CONFIG.exists():
+        return "[gstack_version.json not found — run bin/gstack-verify to initialise]"
+    try:
+        cfg = json.loads(GSTACK_VERSION_CONFIG.read_text())
+        return (
+            f"gstack Supply Chain Pin\n"
+            f"  Version:        {cfg.get('pinned_version', 'unknown')}\n"
+            f"  Commit:         {cfg.get('pinned_commit', 'unknown')[:16]}\n"
+            f"  Install path:   {cfg.get('installed_path', '~/.claude/skills/gstack')}\n"
+            f"  Mode:           {cfg.get('mode', 'pinned')}\n"
+            f"  Last verified:  {cfg.get('last_verified', 'never')}\n"
+            f"  Last status:    {cfg.get('last_verified_status', 'unknown')}\n"
+            f"  Upgrade policy: {cfg.get('upgrade_policy', 'manual')}"
+        )
+    except Exception as e:
+        return f"[Error reading version config: {e}]"
+
+@mcp.tool()
+def verify_gstack_integrity() -> str:
+    """Run a live integrity check on the gstack install.
+
+    Compares the installed commit to the pinned commit in mcp/config/gstack_version.json.
+    Also checks for dirty working tree and broken skill symlinks.
+    Returns OK, DRIFT, or ERROR.
+    """
+    _access("verify_gstack_integrity")
+    data = _gstack_integrity_status()
+    status = data.get("status", "error")
+    if status == "ok":
+        return (
+            f"[gstack-verify] OK\n"
+            f"  Version: {data.get('pinned_version', '?')}\n"
+            f"  Commit:  {data.get('pinned_commit', '?')[:16]}\n"
+            f"  Checked: {data.get('checked_at', 'now')}"
+        )
+    elif status == "drift":
+        issues = "\n".join(f"  - {i}" for i in data.get("issues", []))
+        return (
+            f"[gstack-verify] DRIFT DETECTED\n"
+            f"  Pinned:  {data.get('pinned_commit', '?')[:16]}\n"
+            f"  Issues:\n{issues}\n"
+            f"  Fix: run bin/gstack-repair"
+        )
+    else:
+        return f"[gstack-verify] ERROR: {data.get('reason', 'unknown')}"
+
+@mcp.tool()
+def repair_gstack_if_needed() -> str:
+    """Run gstack-repair in dry-run mode to see what would be fixed.
+
+    This tool only PREVIEWS the repair (dry-run). To actually repair,
+    run bin/gstack-repair directly in the terminal. This prevents
+    accidental automated repo manipulation.
+    """
+    _access("repair_gstack_if_needed")
+    repair_script = WORKSPACE / "bin" / "gstack-repair"
+    if not repair_script.exists():
+        return "[gstack-repair script not found]"
+    try:
+        result = subprocess.run(
+            ["python3", str(repair_script), "--dry-run"],
+            capture_output=True, text=True, timeout=15
+        )
+        out = (result.stdout + result.stderr).strip()
+        return f"[gstack-repair dry-run]\n{out}\n\nTo apply: run `bin/gstack-repair` in terminal."
+    except Exception as e:
+        return f"[Error: {e}]"
 
 # ---------------------------------------------------------------------------
 # GOAL ENGINE — resources, tools, prompts

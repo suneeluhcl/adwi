@@ -281,6 +281,20 @@ def check_eval():
     doctor_ok = doctor.returncode == 0 and "healthy" in (doctor.stdout + doctor.stderr).lower()
     add("doctor_health", 12, 12 if doctor_ok else 0, True, (doctor.stdout + doctor.stderr).strip()[:300])
 
+    # gstack supply chain integrity gate
+    skip_gstack = os.environ.get("AUTOLAB_SKIP_GSTACK_CHECK", "").lower() in ("1", "true", "yes")
+    if skip_gstack:
+        add("gstack_integrity", 0, 0, False, "skipped via AUTOLAB_SKIP_GSTACK_CHECK")
+    else:
+        gstack_verify = ROOT / "bin" / "gstack-verify"
+        if gstack_verify.exists():
+            gv = run(["python3", str(gstack_verify)], timeout=10)
+            gstack_ok = gv.returncode == 0
+            add("gstack_integrity", 0, 0, True if not gstack_ok else False,
+                (gv.stdout + gv.stderr).strip()[:200] if not gstack_ok else "ok")
+        else:
+            add("gstack_integrity", 0, 0, False, "gstack-verify not found (non-critical)")
+
     startup_ready = (ROOT / "bin/agent-start").exists() and (ROOT / "bin/agent-autoclose").exists()
     state = read_json(ROOT / "agent-system/state/CURRENT_STATE.json")
     closeout_seen = bool(state.get("last_auto_closeout_timestamp") or state.get("last_summary"))

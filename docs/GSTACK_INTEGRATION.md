@@ -115,3 +115,87 @@ done
 - `/careful` and `/ship` are the only skills with side effects (file writes, git commands)
 - All existing safety boundaries remain in force
 - Removing `~/.claude/skills/gstack/` and reverting `task_types.json` fully restores the prior state
+
+---
+
+## Supply Chain Protection
+
+gstack is an external dependency installed from `garrytan/gstack`. To prevent silent
+updates from changing skill behaviour, the workspace enforces version pinning and
+integrity checking at multiple layers.
+
+### How It Works
+
+| Layer | File | What it does |
+|-------|------|-------------|
+| Version pin | `mcp/config/gstack_version.json` | Records exact commit hash and version |
+| Integrity check | `bin/gstack-verify` | Compares live install to pinned commit; exits non-zero on drift |
+| Repair script | `bin/gstack-repair` | Resets to pinned commit or performs a controlled upgrade |
+| Snapshot | `snapshots/gstack/` | Local tarball of the pinned install (not committed to git) |
+| MCP tools | `verify_gstack_integrity()` | Live integrity check via Claude |
+| Autolab gate | `autolab/evaluator.md` | Blocks experiments when drift is detected |
+| Maintenance | `bin/agent-maintain` | Runs `gstack-verify` every cycle, logs drift as warning |
+
+### Pinned Version
+
+```
+Version: 1.58.4.0
+Commit:  9fd03fae9e74f5daa7a138366aca8f86c7367c5c
+Config:  mcp/config/gstack_version.json
+```
+
+### Checking Integrity
+
+```bash
+# Quick check
+~/SuneelWorkSpace/bin/gstack-verify
+
+# JSON output (for scripting)
+~/SuneelWorkSpace/bin/gstack-verify --json
+
+# Via MCP (from Claude)
+# call: verify_gstack_integrity()
+```
+
+Exit 0 = OK. Exit 1 = drift detected. Exit 2 = config error.
+
+### Upgrading gstack Safely
+
+Upgrades require explicit human intent. Never run `git pull` in `~/.claude/skills/gstack` directly.
+
+**Steps:**
+1. Review the garrytan/gstack changelog and recent commits
+2. Run `bin/gstack-repair --upgrade` — this will:
+   - Fetch `origin/main` (read-only, no merge yet)
+   - Show old vs new commit and a diff link
+   - Ask for typed confirmation (`y`)
+   - Snapshot the current install before merging
+   - Merge via `--ff-only` (no history rewriting)
+   - Update `mcp/config/gstack_version.json` with the new pin
+3. Run `bin/gstack-verify` to confirm the new state is clean
+4. Run `git add mcp/config/gstack_version.json && git commit` to record the new pin
+
+### Restoring from Snapshot
+
+If the install is corrupted beyond git repair:
+
+```bash
+# List available snapshots
+ls ~/SuneelWorkSpace/snapshots/gstack/
+
+# Restore manually
+rm -rf ~/.claude/skills/gstack
+tar -xzf ~/SuneelWorkSpace/snapshots/gstack/<snapshot>.tar.gz -C ~/.claude/skills/
+
+# Confirm integrity
+~/SuneelWorkSpace/bin/gstack-verify
+```
+
+### Drift Response Policy
+
+| Detected by | Action |
+|-------------|--------|
+| `bin/gstack-verify` (manual) | Review, then run `bin/gstack-repair` if unexpected |
+| `bin/agent-maintain` (scheduled) | Logs warning to `MAINTENANCE_LOG.md` — does NOT auto-repair |
+| `autolab evaluate` | Blocks experiment — set `AUTOLAB_SKIP_GSTACK_CHECK=1` only if intentional |
+| MCP `verify_gstack_integrity()` | Reports status — repair requires human-initiated terminal command |
