@@ -111,6 +111,7 @@ PY
 
 "$ROOT/bin/workspace-index" --quiet >/dev/null 2>&1 || true
 "$ROOT/bin/agent-doctor" --quiet >/dev/null 2>&1 || true
+python3 "$ROOT/scripts/auto_repair_extensions.py" >/dev/null 2>&1 || true
 python3 - "$HEALTH_JSON" <<'PY' >/dev/null 2>&1 || true
 import json, pathlib, sys
 from datetime import datetime

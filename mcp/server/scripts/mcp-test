@@ -83,6 +83,29 @@ d = json.loads(p.read_text()) if p.exists() else {}
 d['last_test_at'] = 'test'
 p.write_text(json.dumps(d, indent=2))
 \""
+# 11. Obsidian MCP Brain E2E Verification
+run_test "Obsidian Brain MCP tools & resources" "uv run --with-requirements '$MCP_ROOT/server/requirements.txt' python3 -c \"
+import sys, pathlib
+sys.path.append('$MCP_ROOT/server')
+import main
+# Test write
+res = main.brain_write_note('test_note_mcp', 'ideas', '# Hello from test\\nThis is a test of workspace mcp brain.')
+assert 'Successfully' in res, f'Write failed: {res}'
+# Test read
+content = main.brain_read_note('test_note_mcp')
+assert 'Hello from test' in content, f'Read failed: {content}'
+# Test search
+s_res = main.brain_search('test_note_mcp')
+assert 'test_note_mcp' in s_res, f'Search failed: {s_res}'
+# Test link
+link_res = main.brain_link_notes('test_note_mcp', 'another_note')
+assert 'Successfully' in link_res, f'Link failed: {link_res}'
+# Test resource
+ideas_res = main.res_brain_ideas()
+assert 'test_note_mcp' in ideas_res, f'Resource listing failed: {ideas_res}'
+# Cleanup
+pathlib.Path('$WORKSPACE/brain/ideas/test_note_mcp.md').unlink()
+\""
 
 echo ""
 echo "=============================="

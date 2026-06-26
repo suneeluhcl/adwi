@@ -903,6 +903,47 @@ To enable seamless context transitions across workspace sessions, the continuity
 - **Safety Gating Unaffected**: Context state changes never bypass or elevate the execution level constraints (SAFE, CONTROLLED, RESTRICTED).
 - **No Autonomous Execution**: Active context never triggers automatic code execution or outbound communications without user input or safety confirmation.
 
+## OBSIDIAN BRAIN
+
+The system uses Obsidian as the primary knowledge, memory, and learning vault at `~/SuneelWorkSpace/brain/`. All durable insights, workflow captures, decisions, and system improvement logs are stored directly in Markdown files, connected using double-bracket [[backlinks]].
+
+The brain folder structure is organized as:
+- `brain/inbox/` — Drafts and quick captures.
+- `brain/ideas/` — Proactive brainstorms and project options.
+- `brain/decisions/` — Durable architecture locks and choices.
+- `brain/workflows/` — Reusable execution traces and procedural patterns.
+- `brain/system/` — System intelligence files, improvements, and discoveries.
+- `brain/learning/` — Core learnings, training loops, and evaluations.
+- `brain/experiments/` — Bounded sandbox tests.
+- `brain/logs/` — Daily activity and run histories.
+
+The Obsidian vault is exposed to AI agents via the MCP bridge as resources (e.g. `workspace://brain/ideas`) and specialized tools:
+- `brain_read_note`: Read note content.
+- `brain_write_note`: Create/append markdown notes.
+- `brain_search`: Query notes case-insensitively.
+- `brain_link_notes`: Link concepts with backlink syntax.
+
+## DAILY EVOLUTION
+
+The workspace is configured to self-improve daily at 2:00 AM using an automated evolution loop. Traces are stored in `brain/system/daily_improvements.md`.
+
+The daily evolution loop:
+1. Performs `system-audit`, `system-gaps`, and `system-recommend` to map structural needs.
+2. Analyzes activity logs to detect inefficiencies, test failures, and repetitive patterns.
+3. Automatically runs safe (SAFE level) optimization actions such as database re-indexing, log rotation, and router training.
+4. Searches for new local CLI tools and MCP connectors, planning integrations in `brain/system/tool_discovery.md` (no automatic installs).
+
+## LIFE AUTOMATION
+
+The workspace includes a natural language interpretation layer that maps user requests to specific automation workflows.
+
+When a user provides triggers such as:
+- *"organize my life"* -> Runs doctor audits, checks directory structures, and suggests file cleanup.
+- *"stay on top of tasks"* -> Runs status evaluations on active goals and lists current priorities.
+- *"handle messages"* -> Traces email and message subsystem statuses.
+
+Workflows execute safe status actions and write reusable plans to `brain/workflows/` for continuous optimization.
+
 ## 10. For AI Agents
 
 

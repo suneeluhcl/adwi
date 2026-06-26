@@ -1,24 +1,10 @@
 {
-  "active_adjustments": [
-    {
-      "adjustment": "Keep the current base identity stable.",
-      "change_magnitude": 0.15,
-      "confidence": 0.95,
-      "signal": "reinforce_current_identity",
-      "support_count": 103,
-      "weighted_score": 20.6
-    }
-  ],
-  "last_updated_at": "2026-06-26T08:43:48.107460-05:00",
-  "proposed_adjustments": [
-    {
-      "adjustment": "Inspect rejected outputs for tone, length, and decision mismatch.",
-      "change_magnitude": 0.15,
-      "confidence": 0.95,
-      "signal": "review_rejected_outputs",
-      "support_count": 103,
-      "weighted_score": 103.0
-    }
-  ],
-  "version": "1.0"
+  "failures_processed": 0,
+  "last_updated": "2026-06-26T08:50:05.960140-05:00",
+  "notes": "Identity tone adjustments and command suggestion weights updated according to feedback ratings.",
+  "signals_processed": 206,
+  "updated_suggestion_weights": {
+    "implicit_workflow": 0.1,
+    "maintenance": 1.0
+  }
 }

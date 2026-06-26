@@ -1,15 +1,15 @@
 # Action Suggestions
 
-Generated: 2026-06-26T08:43:48.277190-05:00
+Generated: 2026-06-26T08:50:07.478545-05:00
 
-After: `next`
-Intent: `development`
+After: `daily-evolve`
+Intent: `system_improvement`
 
 ## Suggested Next Actions
 
-1. [HIGH | SAFE | 0.97]
-   Based on repeated workflow: run agent-status
-   → Ready to run
+1. [HIGH | CONTROLLED | 0.95]
+   Based on repeated workflow: run daily-evolve
+   → Run now? (y/n)
 
 
 Safety: suggestions are not auto-executed.

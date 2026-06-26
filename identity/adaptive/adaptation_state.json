@@ -1,8 +1,16 @@
 {
+  "accept_count": 103,
   "enabled": true,
+  "last_evolved": "2026-06-26T08:50:05.960059-05:00",
   "last_feedback_at": "2026-06-26T08:43:48.106513-05:00",
   "last_learning_run_at": "2026-06-26T08:43:48.107541-05:00",
   "loop_status": "learning_updated",
+  "reject_count": 103,
   "stability_status": "stable",
-  "version": "1.0"
+  "total_evals": 206,
+  "version": "1.0",
+  "weights": {
+    "implicit_workflow": 0.1,
+    "maintenance": 1.0
+  }
 }

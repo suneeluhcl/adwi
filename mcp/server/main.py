@@ -463,6 +463,199 @@ def res_mcp_state() -> str:
     return STATE_FILE.read_text()
 
 # ---------------------------------------------------------------------------
+# OBSIDIAN BRAIN RESOURCES
+# ---------------------------------------------------------------------------
+
+def _get_obsidian_resource_content(folder_name: str) -> str:
+    folder_path = WORKSPACE / "brain" / folder_name
+    if not folder_path.exists():
+        return f"No {folder_name} notes found."
+    files = sorted(folder_path.glob("*.md"))
+    if not files:
+        return f"No {folder_name} notes found."
+    lines = [f"# Obsidian Brain: {folder_name.capitalize()}\n"]
+    for f in files:
+        rel_path = f.relative_to(WORKSPACE)
+        try:
+            content = f.read_text(errors="replace")
+            summary = ""
+            for line in content.splitlines():
+                if line.strip() and not line.startswith("#"):
+                    summary = line.strip()[:100] + "..."
+                    break
+            lines.append(f"- **[[{f.stem}]]** ({rel_path})\n  {summary}\n")
+        except Exception as e:
+            lines.append(f"- **[[{f.stem}]]** ({rel_path}) (unreadable: {e})")
+    return "\n".join(lines)
+
+@mcp.resource("workspace://brain/ideas")
+def res_brain_ideas() -> str:
+    """List of all ideas in the Obsidian vault brain"""
+    return _get_obsidian_resource_content("ideas")
+
+@mcp.resource("workspace://brain/decisions")
+def res_brain_decisions() -> str:
+    """List of all decisions in the Obsidian vault brain"""
+    return _get_obsidian_resource_content("decisions")
+
+@mcp.resource("workspace://brain/workflows")
+def res_brain_workflows() -> str:
+    """List of all workflows in the Obsidian vault brain"""
+    return _get_obsidian_resource_content("workflows")
+
+@mcp.resource("workspace://brain/system")
+def res_brain_system() -> str:
+    """List of all system notes in the Obsidian vault brain"""
+    return _get_obsidian_resource_content("system")
+
+# ---------------------------------------------------------------------------
+# OBSIDIAN BRAIN TOOLS
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def brain_read_note(title_or_path: str) -> str:
+    """Read the content of a specific note from the Obsidian brain vault.
+    
+    Args:
+        title_or_path: The title of the note (e.g. 'daily_improvements') or path (e.g. 'system/daily_improvements.md')
+    """
+    _access("brain_read_note", {"title_or_path": title_or_path})
+    brain_dir = WORKSPACE / "brain"
+    
+    # 1. Try directly as a path relative to brain
+    p = brain_dir / title_or_path
+    if not p.suffix == ".md":
+        p = p.with_suffix(".md")
+    
+    if p.exists() and p.is_file():
+        # Prevent path escape
+        try:
+            p.resolve().relative_to(brain_dir.resolve())
+            return p.read_text(errors="replace")
+        except Exception:
+            return "[Error: Access denied (path escapes brain vault)]"
+            
+    # 2. Try searching by title in all categories
+    for cat in ["inbox", "ideas", "decisions", "workflows", "system", "learning", "experiments", "logs"]:
+        p = brain_dir / cat / title_or_path
+        if not p.suffix == ".md":
+            p = p.with_suffix(".md")
+        if p.exists() and p.is_file():
+            return p.read_text(errors="replace")
+            
+    # 3. Try recursive search
+    for p_file in brain_dir.rglob("*.md"):
+        if p_file.stem.lower() == title_or_path.lower() or p_file.name.lower() == title_or_path.lower():
+            return p_file.read_text(errors="replace")
+            
+    return f"[Error: Note '{title_or_path}' not found in Obsidian brain]"
+
+@mcp.tool()
+def brain_write_note(title: str, category: str, content: str, mode: str = "overwrite") -> str:
+    """Create a new note or append to an existing note in the Obsidian brain vault.
+    
+    Args:
+        title: Title of the note (e.g. 'Project Ideas' or 'daily_improvements')
+        category: Subfolder name (e.g. 'inbox', 'ideas', 'decisions', 'workflows', 'system', 'learning', 'experiments', 'logs')
+        content: Markdown content to write to the note
+        mode: 'overwrite' to replace file content or 'append' to append at the end
+    """
+    _access("brain_write_note", {"title": title, "category": category, "mode": mode})
+    brain_dir = WORKSPACE / "brain"
+    
+    # Validate category
+    valid_categories = ["inbox", "ideas", "decisions", "workflows", "system", "learning", "experiments", "logs"]
+    if category not in valid_categories:
+        return f"[Error: Invalid category '{category}'. Must be one of {', '.join(valid_categories)}]"
+        
+    # Standardize filename
+    clean_title = title
+    if clean_title.endswith(".md"):
+        clean_title = clean_title[:-3]
+        
+    p = brain_dir / category / clean_title
+    p = p.with_suffix(".md")
+    
+    # Path traversal check
+    try:
+        p.resolve().relative_to(brain_dir.resolve())
+    except Exception:
+        return "[Error: Access denied (path escapes brain vault)]"
+        
+    p.parent.mkdir(parents=True, exist_ok=True)
+    
+    if mode == "append":
+        if p.exists():
+            existing = p.read_text(errors="replace")
+            if not existing.endswith("\n"):
+                existing += "\n"
+            p.write_text(existing + content + "\n")
+            return f"Successfully appended to note '{clean_title}' in '{category}'"
+        else:
+            p.write_text(content + "\n")
+            return f"Successfully created and wrote note '{clean_title}' in '{category}'"
+    else:
+        p.write_text(content + "\n")
+        return f"Successfully wrote note '{clean_title}' in '{category}' (overwrote existing if any)"
+
+@mcp.tool()
+def brain_search(query: str) -> str:
+    """Search for notes in the Obsidian brain vault containing the query string (case-insensitive).
+    
+    Args:
+        query: Search term (e.g. 'triage' or 'system')
+    """
+    _access("brain_search", {"query": query})
+    brain_dir = WORKSPACE / "brain"
+    results = []
+    
+    if not brain_dir.exists():
+        return "Obsidian brain directory not found."
+        
+    query_lower = query.lower()
+    for p_file in sorted(brain_dir.rglob("*.md")):
+        try:
+            content = p_file.read_text(errors="replace")
+            if query_lower in content.lower() or query_lower in p_file.name.lower():
+                matches = content.lower().count(query_lower)
+                rel = p_file.relative_to(WORKSPACE)
+                results.append(f"- **[[{p_file.stem}]]** ({rel}) - {matches} match(es)")
+        except Exception:
+            pass
+            
+    if not results:
+        return f"No matches found for query '{query}' in Obsidian brain."
+    return f"Search results for '{query}' in Obsidian brain:\n\n" + "\n".join(results)
+
+@mcp.tool()
+def brain_link_notes(source_title: str, target_title: str) -> str:
+    """Add an Obsidian backlink from a source note to a target note.
+    
+    Args:
+        source_title: The title of the source note to modify
+        target_title: The title of the target note to link to (will be wrapped in [[backlinks]])
+    """
+    _access("brain_link_notes", {"source_title": source_title, "target_title": target_title})
+    
+    brain_dir = WORKSPACE / "brain"
+    source_path = None
+    for p_file in brain_dir.rglob("*.md"):
+        if p_file.stem.lower() == source_title.lower() or p_file.name.lower() == source_title.lower():
+            source_path = p_file
+            break
+            
+    if not source_path:
+        return f"[Error: Source note '{source_title}' not found in brain]"
+        
+    link_str = f"\n\nSee also: [[{target_title}]]\n"
+    try:
+        existing = source_path.read_text(errors="replace")
+        source_path.write_text(existing + link_str)
+        return f"Successfully added link [[{target_title}]] to note [[{source_title}]]"
+    except Exception as e:
+        return f"[Error adding link: {e}]"
+
+# ---------------------------------------------------------------------------
 # TOOLS — READ
 # ---------------------------------------------------------------------------
 

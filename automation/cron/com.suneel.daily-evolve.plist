@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.suneel.daily-evolve</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/MAC/SuneelWorkSpace/bin/daily-evolve</string>
+        <string>--routine</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>2</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/MAC/SuneelWorkSpace/mcp/server/logs/daily_evolve_stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/MAC/SuneelWorkSpace/mcp/server/logs/daily_evolve_stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>SUNEEL_WORKSPACE</key>
+        <string>/Users/MAC/SuneelWorkSpace</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
