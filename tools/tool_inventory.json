@@ -1,0 +1,824 @@
+{
+  "generated_at": "2026-06-26T01:15:43.844357-05:00",
+  "tools": [
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-autoclose",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-autoclose",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-doctor",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-doctor",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-finish",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-finish",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-maintain",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-maintain",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-repair",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-repair",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-start",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-start",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-test-loop",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "agent-test-loop",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/anticipate",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "anticipate",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/comms-doctor",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "comms-doctor",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/comms-permissions-check",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "comms-permissions-check",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/comms-report",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "comms-report",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/comms-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "comms-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/context-reset",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "context-reset",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-adapt",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-adapt",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-complete",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-complete",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-create",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-create",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-execute",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-execute",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-fail",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-fail",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-monitor",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-monitor",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-plan",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-plan",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/goal-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "goal-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/gstack-create",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "gstack-create",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/gstack-repair",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "gstack-repair",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/gstack-verify",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "gstack-verify",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/idea-run",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "idea-run",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/idea-start",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "idea-start",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/identity-accept",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "identity-accept",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/identity-adjust",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "identity-adjust",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/identity-reject",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "identity-reject",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imessage-recent",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imessage-recent",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imessage-search",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imessage-search",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imessage-send-draft",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imessage-send-draft",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imessage-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imessage-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/improve-system",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "improve-system",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imsg-draft",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imsg-draft",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imsg-recent",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imsg-recent",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imsg-search",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imsg-search",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/imsg-send-confirmed",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "imsg-send-confirmed",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/install-imessage-plugin",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "install-imessage-plugin",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mail-draft-reply",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mail-draft-reply",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mail-recent",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mail-recent",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mail-search",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mail-search",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mail-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mail-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-doctor",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-doctor",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-reindex",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-reindex",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-repair",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-repair",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-report",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-report",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-start",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-start",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-stop",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-stop",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/mcp-test",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "mcp-test",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/next",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "next",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/route-analyze",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "route-analyze",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/route-execute",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "route-execute",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/route-learn",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "route-learn",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/route-task",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "route-task",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/system-audit",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "system-audit",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/system-capabilities",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "system-capabilities",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/system-gaps",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "system-gaps",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/system-recommend",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "system-recommend",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-claude",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-claude",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-claude-imessage",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-claude-imessage",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-codex",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-codex",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-gemini",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-gemini",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-opencode",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-opencode",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-opencode-gemini",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "use-opencode-gemini",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-audit",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-audit",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workspace-backup",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workspace-backup",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workspace-changes",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workspace-changes",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workspace-context",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workspace-context",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workspace-index",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workspace-index",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workspace-report",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workspace-report",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/.local/bin/rtk",
+      "integration_potential": "Default shell output filter for agent commands.",
+      "name": "rtk",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/git",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "git",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/gh",
+      "integration_potential": "GitHub PR, issue, and CI inspection with explicit confirmation for writes.",
+      "name": "gh",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/python3",
+      "integration_potential": "Local automation scripts and structured report generation.",
+      "name": "python3",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/pip3",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "pip3",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/node",
+      "integration_potential": "Frontend/dev tooling and MCP helpers when project-local.",
+      "name": "node",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/npm",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "npm",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/uv",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "uv",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/brew",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "brew",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Users/MAC/bin/codex",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "codex",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/claude",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "claude",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/gemini",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "gemini",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/opencode",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "opencode",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/opt/homebrew/bin/rg",
+      "integration_potential": "Fast workspace search without broad private indexing.",
+      "name": "rg",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/usr/bin/jq",
+      "integration_potential": "Useful when explicitly routed by a workspace command.",
+      "name": "jq",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/usr/bin/sqlite3",
+      "integration_potential": "Inspectable local indexes for MCP and research metadata.",
+      "name": "sqlite3",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/usr/bin/osascript",
+      "integration_potential": "Bounded macOS automation for Mail, Messages, and app workflows.",
+      "name": "osascript",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/usr/bin/shortcuts",
+      "integration_potential": "User-approved local workflow automations.",
+      "name": "shortcuts",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/usr/bin/mdfind",
+      "integration_potential": "Metadata-only search for user-approved file organization tasks.",
+      "name": "mdfind",
+      "purpose": "CLI or development capability",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Claude",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Codex",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Copilot",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Dropover",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Final Cut Pro",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Final Draft 13",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Free Download Manager",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Gemini",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Google Chrome",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Microsoft 365 Copilot",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Microsoft Defender Shim",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Microsoft Excel",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Microsoft Word",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Noir",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Obsidian",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "OneDrive",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Prime Video",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Safari",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Setapp",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Visual Studio Code",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Xcode",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "iTerm",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "uBlock Origin Lite",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "wBlock",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    },
+    {
+      "install_location": "/Users/MAC/Applications",
+      "integration_potential": "Potential AppleScript/Shortcuts/manual workflow support; requires explicit approval before automation.",
+      "name": "Claude Code URL Handler",
+      "purpose": "Installed macOS application",
+      "safe_to_integrate": false
+    }
+  ]
+}

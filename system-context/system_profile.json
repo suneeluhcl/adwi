@@ -1,0 +1,441 @@
+{
+  "development_environments": [
+    {
+      "available": true,
+      "name": "rtk",
+      "path": "/Users/MAC/.local/bin/rtk",
+      "version": "rtk 0.28.2"
+    },
+    {
+      "available": true,
+      "name": "git",
+      "path": "/opt/homebrew/bin/git",
+      "version": "git version 2.54.0"
+    },
+    {
+      "available": true,
+      "name": "gh",
+      "path": "/opt/homebrew/bin/gh",
+      "version": "gh version 2.94.0 (2026-06-10)"
+    },
+    {
+      "available": true,
+      "name": "python3",
+      "path": "/opt/homebrew/bin/python3",
+      "version": "Python 3.14.5"
+    },
+    {
+      "available": true,
+      "name": "pip3",
+      "path": "/opt/homebrew/bin/pip3",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "node",
+      "path": "/opt/homebrew/bin/node",
+      "version": "v26.3.0"
+    },
+    {
+      "available": true,
+      "name": "npm",
+      "path": "/opt/homebrew/bin/npm",
+      "version": "11.16.0"
+    },
+    {
+      "available": false,
+      "name": "pnpm",
+      "path": null,
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "uv",
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.11.21 (Homebrew 2026-06-11 aarch64-apple-darwin)"
+    },
+    {
+      "available": true,
+      "name": "brew",
+      "path": "/opt/homebrew/bin/brew",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "codex",
+      "path": "/Users/MAC/bin/codex",
+      "version": "codex-cli 0.133.0-alpha.1"
+    },
+    {
+      "available": true,
+      "name": "claude",
+      "path": "/opt/homebrew/bin/claude",
+      "version": "2.1.193 (Claude Code)"
+    },
+    {
+      "available": true,
+      "name": "gemini",
+      "path": "/opt/homebrew/bin/gemini",
+      "version": "0.47.0"
+    },
+    {
+      "available": true,
+      "name": "opencode",
+      "path": "/opt/homebrew/bin/opencode",
+      "version": "1.17.10"
+    },
+    {
+      "available": true,
+      "name": "rg",
+      "path": "/opt/homebrew/bin/rg",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "jq",
+      "path": "/usr/bin/jq",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "sqlite3",
+      "path": "/usr/bin/sqlite3",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "osascript",
+      "path": "/usr/bin/osascript",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "shortcuts",
+      "path": "/usr/bin/shortcuts",
+      "version": null
+    },
+    {
+      "available": true,
+      "name": "mdfind",
+      "path": "/usr/bin/mdfind",
+      "version": null
+    }
+  ],
+  "disk": {
+    "home_free_gb": 650.0,
+    "home_total_gb": 926.4,
+    "home_used_gb": 276.4
+  },
+  "generated_at": "2026-06-26T01:15:43.844357-05:00",
+  "hardware": {
+    "cpu_count": 16,
+    "mac_model": "Mac16,5",
+    "machine": "arm64",
+    "memory_bytes": 68719476736,
+    "memory_gb": 64.0,
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm"
+  },
+  "home_top_level_directories": [
+    ".abacusai",
+    ".adwi-phoenix",
+    ".adwi-voice",
+    ".aider",
+    ".boltai",
+    ".bun",
+    ".cache",
+    ".cargo",
+    ".claude",
+    ".claude-mem",
+    ".codex",
+    ".colima",
+    ".config",
+    ".copilot",
+    ".cups",
+    ".docker",
+    ".dspy_cache",
+    ".gemini",
+    ".gstack",
+    ".headroom",
+    ".hermes",
+    ".homebrew",
+    ".ipython",
+    ".letta",
+    ".local",
+    ".logseq",
+    ".matplotlib",
+    ".mem0",
+    ".npm",
+    ".ollama",
+    ".ollama.backup.20260613100954",
+    ".openclaw",
+    ".phoenix",
+    ".promptfoo",
+    ".pyenv",
+    ".semgrep",
+    ".serena",
+    ".ssh",
+    ".vscode",
+    ".vscode-shared",
+    ".zsh_sessions",
+    "Applications",
+    "Desktop",
+    "Documents",
+    "Downloads",
+    "Movies",
+    "Music",
+    "OneDrive",
+    "Photos Library.photoslibrary",
+    "Pictures",
+    "SuneelWorkSpace",
+    "backends",
+    "bin",
+    "cache",
+    "configuration",
+    "data",
+    "go",
+    "models",
+    "server"
+  ],
+  "installed_applications": [
+    {
+      "location": "/Applications",
+      "name": "Claude"
+    },
+    {
+      "location": "/Applications",
+      "name": "Codex"
+    },
+    {
+      "location": "/Applications",
+      "name": "Copilot"
+    },
+    {
+      "location": "/Applications",
+      "name": "Dropover"
+    },
+    {
+      "location": "/Applications",
+      "name": "Final Cut Pro"
+    },
+    {
+      "location": "/Applications",
+      "name": "Final Draft 13"
+    },
+    {
+      "location": "/Applications",
+      "name": "Free Download Manager"
+    },
+    {
+      "location": "/Applications",
+      "name": "Gemini"
+    },
+    {
+      "location": "/Applications",
+      "name": "Google Chrome"
+    },
+    {
+      "location": "/Applications",
+      "name": "Microsoft 365 Copilot"
+    },
+    {
+      "location": "/Applications",
+      "name": "Microsoft Defender Shim"
+    },
+    {
+      "location": "/Applications",
+      "name": "Microsoft Excel"
+    },
+    {
+      "location": "/Applications",
+      "name": "Microsoft Word"
+    },
+    {
+      "location": "/Applications",
+      "name": "Noir"
+    },
+    {
+      "location": "/Applications",
+      "name": "Obsidian"
+    },
+    {
+      "location": "/Applications",
+      "name": "OneDrive"
+    },
+    {
+      "location": "/Applications",
+      "name": "Prime Video"
+    },
+    {
+      "location": "/Applications",
+      "name": "Safari"
+    },
+    {
+      "location": "/Applications",
+      "name": "Setapp"
+    },
+    {
+      "location": "/Applications",
+      "name": "Visual Studio Code"
+    },
+    {
+      "location": "/Applications",
+      "name": "Xcode"
+    },
+    {
+      "location": "/Applications",
+      "name": "iTerm"
+    },
+    {
+      "location": "/Applications",
+      "name": "uBlock Origin Lite"
+    },
+    {
+      "location": "/Applications",
+      "name": "wBlock"
+    },
+    {
+      "location": "/Users/MAC/Applications",
+      "name": "Claude Code URL Handler"
+    }
+  ],
+  "safety_scope": {
+    "applications": "top-level .app bundle names only",
+    "external_installs": "not performed",
+    "home_directory": "top-level directory names only",
+    "private_file_contents": "not scanned"
+  },
+  "workspace": {
+    "bin_command_count": 73,
+    "bin_commands": [
+      "agent-autoclose",
+      "agent-doctor",
+      "agent-finish",
+      "agent-maintain",
+      "agent-repair",
+      "agent-start",
+      "agent-status",
+      "agent-test-loop",
+      "anticipate",
+      "comms-doctor",
+      "comms-permissions-check",
+      "comms-report",
+      "comms-status",
+      "context-reset",
+      "goal-adapt",
+      "goal-complete",
+      "goal-create",
+      "goal-execute",
+      "goal-fail",
+      "goal-monitor",
+      "goal-plan",
+      "goal-status",
+      "gstack-create",
+      "gstack-repair",
+      "gstack-verify",
+      "idea-run",
+      "idea-start",
+      "identity-accept",
+      "identity-adjust",
+      "identity-reject",
+      "imessage-recent",
+      "imessage-search",
+      "imessage-send-draft",
+      "imessage-status",
+      "improve-system",
+      "imsg-draft",
+      "imsg-recent",
+      "imsg-search",
+      "imsg-send-confirmed",
+      "install-imessage-plugin",
+      "mail-draft-reply",
+      "mail-recent",
+      "mail-search",
+      "mail-status",
+      "mcp-doctor",
+      "mcp-reindex",
+      "mcp-repair",
+      "mcp-report",
+      "mcp-start",
+      "mcp-status",
+      "mcp-stop",
+      "mcp-test",
+      "next",
+      "route-analyze",
+      "route-execute",
+      "route-learn",
+      "route-task",
+      "system-audit",
+      "system-capabilities",
+      "system-gaps",
+      "system-recommend",
+      "use-claude",
+      "use-claude-imessage",
+      "use-codex",
+      "use-gemini",
+      "use-opencode",
+      "use-opencode-gemini",
+      "workflow-audit",
+      "workspace-backup",
+      "workspace-changes",
+      "workspace-context",
+      "workspace-index",
+      "workspace-report"
+    ],
+    "expected_subsystems_present": {
+      "agent-system": true,
+      "autolab": true,
+      "bin": true,
+      "comms": true,
+      "configs": false,
+      "docs": true,
+      "goal-engine": true,
+      "mcp": true,
+      "orchestrator": true,
+      "scripts": true
+    },
+    "files_by_subsystem": {
+      "agent-system": 37,
+      "autolab": 50,
+      "bin": 75,
+      "comms": 35,
+      "configs": 0,
+      "docs": 3,
+      "goal-engine": 27,
+      "mcp": 31,
+      "orchestrator": 20,
+      "scripts": 2
+    },
+    "non_executable_bin_files": [],
+    "root": "/Users/MAC/SuneelWorkSpace",
+    "top_level_directories": [
+      ".agent-backups",
+      ".agents",
+      ".claude",
+      ".gstack",
+      ".rtk",
+      ".serena",
+      ".vscode",
+      "agent-system",
+      "anticipation",
+      "audit",
+      "autolab",
+      "automation",
+      "bin",
+      "codex",
+      "comms",
+      "docs",
+      "goal-engine",
+      "identity",
+      "mcp",
+      "obsidian-vault",
+      "orchestrator",
+      "projects",
+      "research-engine",
+      "scripts",
+      "snapshots",
+      "system-context",
+      "tools"
+    ]
+  }
+}
