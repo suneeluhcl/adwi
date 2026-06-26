@@ -31,6 +31,7 @@ SUBSYSTEM_DIRS = {
     "scripts",
     "system-context",
     "tools",
+    "testing",
 }
 
 

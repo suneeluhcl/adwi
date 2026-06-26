@@ -207,7 +207,7 @@ subsystem_dirs = {
     "agent-system", "anticipation", "autolab", "automation", "comms",
     "codex", "docs", "goal-engine", "identity", "mcp", "obsidian-vault",
     "orchestrator", "projects", "research-engine", "scripts", "system-context",
-    "tools"
+    "tools", "testing"
 }
 
 
