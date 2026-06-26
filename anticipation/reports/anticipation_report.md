@@ -1,18 +1,19 @@
 # Anticipation Report
 
-Generated: 2026-06-26T01:31:36.943142-05:00
+Generated: 2026-06-26T04:50:31.246953-05:00
 
 ## Status
 
 - Current intent: development
 - Intent confidence: 0.65
-- Events recorded: 5
-- Sequence patterns: 1
+- Events recorded: 203
+- Sequence patterns: 2
 - Preferred workflows: 2
 
 ## Top Sequence Patterns
 
-- After `agent-status` -> `next` (2x)
+- After `agent-status` -> `next` (101x)
+- After `next` -> `agent-status` (100x)
 
 ## Ranked Suggestion Contract
 

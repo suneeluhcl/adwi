@@ -4,78 +4,126 @@
   "last_command": "next",
   "recent_actions": [
     {
-      "command": "mail-draft-reply",
-      "context": "general",
-      "intent": "email",
-      "timestamp": "2026-06-26T00:47:46.078582-05:00"
-    },
-    {
-      "command": "system-gaps",
-      "context": "general",
-      "intent": "system_improvement",
-      "timestamp": "2026-06-26T00:51:39.067046-05:00"
-    },
-    {
-      "command": "agent-status",
-      "context": "general",
-      "intent": "maintenance",
-      "timestamp": "2026-06-26T01:30:45.485773-05:00"
-    },
-    {
-      "command": "agent-status",
-      "context": "general",
-      "intent": "maintenance",
-      "timestamp": "2026-06-26T01:30:45.522382-05:00"
-    },
-    {
       "command": "agent-status",
       "context": "overnight_test",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:11.661370-05:00"
+      "timestamp": "2026-06-26T04:42:28.698089-05:00"
     },
     {
       "command": "agent-status",
       "context": "general",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:11.695195-05:00"
+      "timestamp": "2026-06-26T04:42:28.730973-05:00"
     },
     {
       "command": "agent-status",
       "context": "general",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:11.732797-05:00"
+      "timestamp": "2026-06-26T04:42:28.765843-05:00"
     },
     {
       "command": "next",
       "context": "overnight_test_loop",
       "intent": "development",
-      "timestamp": "2026-06-26T01:31:11.974399-05:00"
+      "timestamp": "2026-06-26T04:42:28.992696-05:00"
     },
     {
       "command": "agent-status",
       "context": "overnight_test",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:36.624649-05:00"
+      "timestamp": "2026-06-26T04:44:29.244994-05:00"
     },
     {
       "command": "agent-status",
       "context": "general",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:36.662105-05:00"
+      "timestamp": "2026-06-26T04:44:29.278277-05:00"
     },
     {
       "command": "agent-status",
       "context": "general",
       "intent": "maintenance",
-      "timestamp": "2026-06-26T01:31:36.699376-05:00"
+      "timestamp": "2026-06-26T04:44:29.315297-05:00"
     },
     {
       "command": "next",
       "context": "overnight_test_loop",
       "intent": "development",
-      "timestamp": "2026-06-26T01:31:36.939390-05:00"
+      "timestamp": "2026-06-26T04:44:29.547279-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:46:29.786768-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:46:29.819782-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:46:29.854758-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "intent": "development",
+      "timestamp": "2026-06-26T04:46:30.085829-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:48:30.336848-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:48:30.371714-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:48:30.409185-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "intent": "development",
+      "timestamp": "2026-06-26T04:48:30.657169-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:50:30.925765-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:50:30.961112-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T04:50:30.998568-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "intent": "development",
+      "timestamp": "2026-06-26T04:50:31.245858-05:00"
     }
   ],
-  "updated_at": "2026-06-26T01:31:36.939406-05:00",
+  "updated_at": "2026-06-26T04:50:31.245873-05:00",
   "version": "1.0"
 }

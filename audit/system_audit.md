@@ -1,6 +1,6 @@
 # System Audit
 
-Generated: 2026-06-26T01:15:43.844357-05:00
+Generated: 2026-06-26T04:48:28.015997-05:00
 
 ## Scope
 
@@ -14,10 +14,10 @@ No private home-directory file contents were ingested. Home awareness is limited
 - `mcp`: present; files observed: 31
 - `orchestrator`: present; files observed: 20
 - `goal-engine`: present; files observed: 27
-- `autolab`: present; files observed: 50
+- `autolab`: present; files observed: 163
 - `comms`: present; files observed: 35
-- `bin`: present; files observed: 75
-- `scripts`: present; files observed: 2
+- `bin`: present; files observed: 77
+- `scripts`: present; files observed: 4
 - `configs`: missing; files observed: 0
 - `docs`: present; files observed: 3
 
@@ -50,15 +50,15 @@ No private home-directory file contents were ingested. Home awareness is limited
 
 ## Command Surface
 
-- Workspace commands found: 73
+- Workspace commands found: 75
 - Non-executable bin files: 0
-- Tool inventory entries: 117
+- Tool inventory entries: 108
 
 ## System Introspection
 
 - CPU count: 16
 - Memory GB: 64.0
-- Home disk free GB: 650.0
+- Home disk free GB: 649.8
 - Installed application names captured: 25
 - Home top-level directory names captured: 59
 

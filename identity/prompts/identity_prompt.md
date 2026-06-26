@@ -21,7 +21,9 @@ Aim every improvement toward a smart assistant OS that can self-improve, self-up
 <!-- adaptive-identity:start -->
 ## Adaptive Identity Loop
 
-Base identity is active. No adaptive behavior shifts have enough repeated evidence yet.
+Apply these small, bounded adjustments without overriding the base identity:
 
-Adaptive learning is bounded by `identity/adaptive/drift_guardrails.json`.
+- Keep the current base identity stable.
+
+Guardrail: keep Suneel's original identity recognizable and never override explicit profile rules.
 <!-- adaptive-identity:end -->
