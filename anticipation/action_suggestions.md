@@ -1,22 +1,23 @@
 # Action Suggestions
 
-Generated: 2026-06-26T00:55:35.846436-05:00
+Generated: 2026-06-26T01:31:36.942936-05:00
 
-After: `system-gaps`
-Intent: `system_improvement`
+After: `next`
+Intent: `development`
 
 ## Suggested Next Actions
 
-1. [HIGH | SAFE | 0.94]
-   Open audit/improvement_plan.md
+1. [MED | SAFE | 0.7]
+   Inspect relevant files
+   → Prerequisites missing or manual action required
+
+2. [MED | SAFE | 0.7]
+   Make scoped changes
    → Ready to run
 
-2. [HIGH | CONTROLLED | 0.94]
-   Run improve-system
-   → Run now? (y/n)
+3. [MED | CONTROLLED | 0.7]
+   Run focused validation
+   → Prerequisites missing or manual action required
 
-3. [HIGH | CONTROLLED | 0.94]
-   Turn a P0/P1 gap into a goal
-   → Run now? (y/n)
 
-Safety: suggestions require level-appropriate verification.
+Safety: suggestions are not auto-executed.

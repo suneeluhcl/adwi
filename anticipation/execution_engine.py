@@ -125,7 +125,7 @@ def classify_suggestion(text: str, score: float, rank: str) -> tuple[str, float,
     # SAFE: read-only, metadata, analysis
     # RESTRICTED: sending messages, deleting files, external installs
     # CONTROLLED: drafting, planning, local file creation (default)
-    if any(k in text_lower for k in ["send", "delete", "remove", "destroy", "install", "upgrade", "push", "npm install", "pip install", "brew install"]):
+    if any(k in text_lower for k in ["send", "delete", "remove", "destroy", "install", "upgrade", "push", "npm install", "pip install", "brew install", "rm ", "rm -"]):
         level = "RESTRICTED"
     elif any(k in text_lower for k in ["view", "show", "status", "doctor", "history", "recent", "search", "audit", "changes", "list", "read-only", "analysis", "inspect", "check", "gaps", "report", "cat ", "ls ", "git status", "git diff", "git log", "open"]):
         level = "SAFE"

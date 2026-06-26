@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "tests": [
+    {
+      "id": "1_system_health",
+      "name": "System Health Check",
+      "subsystem": "maintenance",
+      "commands": [
+        "bin/agent-doctor",
+        "python3 scripts/system_intelligence.py status"
+      ]
+    },
+    {
+      "id": "2_context_continuity",
+      "name": "Context and Continuity",
+      "subsystem": "anticipation",
+      "description": "Verify context writing, reading, decay, and history updates",
+      "steps": [
+        "write_context",
+        "verify_decay",
+        "verify_history"
+      ]
+    },
+    {
+      "id": "3_intent_anticipation",
+      "name": "Intent and Anticipation Suggestions",
+      "subsystem": "anticipation",
+      "commands": [
+        "bin/anticipate intent agent-status",
+        "bin/anticipate suggest agent-status"
+      ]
+    },
+    {
+      "id": "4_execution_layer",
+      "name": "Execution Layer Safe/Controlled/Restricted Policies",
+      "subsystem": "anticipation",
+      "description": "Test classification and execution policies",
+      "steps": [
+        "test_safe_auto_run",
+        "test_controlled_confirmation",
+        "test_restricted_blocking"
+      ]
+    },
+    {
+      "id": "5_identity_adaptation",
+      "name": "Identity Signals and Adaptive Loop",
+      "subsystem": "identity",
+      "commands": [
+        "bin/identity-accept test_output_id",
+        "bin/identity-reject test_output_id 'wrong formatting'"
+      ]
+    },
+    {
+      "id": "6_duplication_integrity",
+      "name": "Duplication and Integrity Guards",
+      "subsystem": "audit",
+      "description": "Verify layout checks, creation blocking, and function duplicate detection",
+      "steps": [
+        "test_misplaced_script_rejection",
+        "test_creation_duplication_warning",
+        "test_internal_duplication_warning"
+      ]
+    },
+    {
+      "id": "7_research_goal_pipeline",
+      "name": "Research Engine and Goal engine Integration",
+      "subsystem": "goal-engine",
+      "commands": [
+        "bin/goal-status"
+      ]
+    },
+    {
+      "id": "8_comms_workflow",
+      "name": "Safe Comms Workflow Subset",
+      "subsystem": "comms",
+      "commands": [
+        "bin/imessage-recent --limit 1",
+        "bin/mail-status || true"
+      ]
+    }
+  ]
+}

@@ -1,18 +1,15 @@
 # Goal Engine Report
-_Generated: 2026-06-24T16:26:14.933097-05:00_
+_Generated: 2026-06-26T01:31:36.877789-05:00_
 
 ## Summary
-- Active goals: 1
+- Active goals: 0
 - Completed: 0
-- Failed: 0
+- Failed: 1
 
 - Total tasks executed: 0
 - Tasks succeeded: 0
 - Tasks failed: 0
 
-## Active Goals
+## Failed Goals
 
-### G001: Improve workspace documentation for new users
-- Priority: medium | Complexity: low
-- Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/4
-- Created: 2026-06-24T16:25:45.819881-05:00
+- [G001] Improve workspace documentation for new users — Test goal created during validation — cleaned up

@@ -1,7 +1,7 @@
 {
-  "confidence": 0.9,
-  "intent": "system_improvement",
-  "last_command": "system-gaps",
+  "confidence": 0.65,
+  "intent": "development",
+  "last_command": "next",
   "recent_actions": [
     {
       "command": "mail-draft-reply",
@@ -14,8 +14,68 @@
       "context": "general",
       "intent": "system_improvement",
       "timestamp": "2026-06-26T00:51:39.067046-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:30:45.485773-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:30:45.522382-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:11.661370-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:11.695195-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:11.732797-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "intent": "development",
+      "timestamp": "2026-06-26T01:31:11.974399-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:36.624649-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:36.662105-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "general",
+      "intent": "maintenance",
+      "timestamp": "2026-06-26T01:31:36.699376-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "intent": "development",
+      "timestamp": "2026-06-26T01:31:36.939390-05:00"
     }
   ],
-  "updated_at": "2026-06-26T00:51:39.067164-05:00",
+  "updated_at": "2026-06-26T01:31:36.939406-05:00",
   "version": "1.0"
 }

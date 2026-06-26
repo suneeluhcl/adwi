@@ -7,11 +7,76 @@
       "notes": "",
       "outcome": "success",
       "timestamp": "2026-06-26T00:37:16.613335-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "exit_code": 0,
+      "intent": "maintenance",
+      "intent_confidence": 0.9,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T01:31:11.661488-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "exit_code": 0,
+      "intent": "development",
+      "intent_confidence": 0.65,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T01:31:11.974622-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "exit_code": 0,
+      "intent": "maintenance",
+      "intent_confidence": 0.9,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T01:31:36.624770-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "exit_code": 0,
+      "intent": "development",
+      "intent_confidence": 0.65,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T01:31:36.939642-05:00"
     }
   ],
-  "preferred_workflows": [],
-  "sequence_patterns": [],
+  "preferred_workflows": [
+    {
+      "count": 2,
+      "intent_or_context": "maintenance"
+    },
+    {
+      "count": 2,
+      "intent_or_context": "development"
+    }
+  ],
+  "sequence_patterns": [
+    {
+      "after": "agent-status",
+      "count": 2,
+      "next": "next"
+    }
+  ],
   "success_failure_patterns": [
+    {
+      "command": "agent-status",
+      "failure_count": 0,
+      "success_count": 2
+    },
+    {
+      "command": "next",
+      "failure_count": 0,
+      "success_count": 2
+    },
     {
       "command": "system-gaps",
       "failure_count": 0,

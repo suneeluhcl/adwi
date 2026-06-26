@@ -32,3 +32,10 @@ mcp/server/state/
 # Auto-generated workspace state & logs
 agent-system/logs/
 agent-system/state/
+
+# Auto-generated testing results and logs (regenerated continuously by overnight loop)
+testing/test_results.json
+testing/failure_log.json
+testing/repair_log.json
+testing/reports/
+

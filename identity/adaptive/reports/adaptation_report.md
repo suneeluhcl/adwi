@@ -1,17 +1,18 @@
 # Adaptive Identity Report
 
-Generated: 2026-06-26T00:36:19.778634-05:00
+Generated: 2026-06-26T01:31:36.779072-05:00
 
 ## Stability
 
 - Status: stable
-- Feedback events: 0
+- Feedback events: 6
 - Active adjustments: 0
-- Proposed adjustments: 0
+- Proposed adjustments: 2
 
 ## Key Patterns Learned
 
-- No repeated patterns learned yet.
+- reinforce_current_identity: count 3, confidence 0.2
+- review_rejected_outputs: count 3, confidence 0.95
 
 ## Behavior Shifts
 

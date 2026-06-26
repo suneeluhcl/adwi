@@ -1,4 +1,71 @@
 {
-  "events": [],
+  "events": [
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "",
+      "output_id": "test_output_id",
+      "signal_weight": 0.2,
+      "timestamp": "2026-06-26T01:30:45.876346-05:00",
+      "user_action": "accepted"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "wrong formatting",
+      "output_id": "test_output_id",
+      "signal_weight": 1.0,
+      "timestamp": "2026-06-26T01:30:46.037099-05:00",
+      "user_action": "rejected"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "",
+      "output_id": "test_output_id",
+      "signal_weight": 0.2,
+      "timestamp": "2026-06-26T01:31:11.775132-05:00",
+      "user_action": "accepted"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "wrong formatting",
+      "output_id": "test_output_id",
+      "signal_weight": 1.0,
+      "timestamp": "2026-06-26T01:31:11.813654-05:00",
+      "user_action": "rejected"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "",
+      "output_id": "test_output_id",
+      "signal_weight": 0.2,
+      "timestamp": "2026-06-26T01:31:36.740844-05:00",
+      "user_action": "accepted"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "wrong formatting",
+      "output_id": "test_output_id",
+      "signal_weight": 1.0,
+      "timestamp": "2026-06-26T01:31:36.778136-05:00",
+      "user_action": "rejected"
+    }
+  ],
   "version": "1.0"
 }
