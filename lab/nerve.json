@@ -1,7 +1,7 @@
 {
   "organ": "lab",
   "version": "1.0",
-  "description": "Autolab experiments, evolution engine, hypothesis generation",
+  "description": "Autolab experiments, evolution engine, hypothesis generation, tests",
   "status": "active",
   "inbox": "lab/nerve_inbox/",
   "nerve_propagator": "nervous/nerve_propagator.py"

@@ -1,7 +1,7 @@
 {
   "organ": "hands",
   "version": "1.0",
-  "description": "Bin scripts, automation, CI, project management",
+  "description": "Bin scripts, automation, CI, project management, codex env",
   "status": "active",
   "inbox": "hands/nerve_inbox/",
   "nerve_propagator": "nervous/nerve_propagator.py"

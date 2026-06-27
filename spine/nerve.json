@@ -1,7 +1,7 @@
 {
   "organ": "spine",
   "version": "1.0",
-  "description": "Workspace state, audit, docs, snapshots, backups",
+  "description": "Workspace state, audit, docs, snapshots, backups, tools, system-context",
   "status": "active",
   "inbox": "spine/nerve_inbox/",
   "nerve_propagator": "nervous/nerve_propagator.py"
