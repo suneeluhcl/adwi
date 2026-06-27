@@ -1,1700 +1,1712 @@
 {
   "brain": {
-    "hash": "c016401103ab199fb5bf56cab20d6c74",
+    "hash": "a50d08a2c2f48a8f3076b4bd152888a4",
     "health_score": 100,
-    "readme_mtime": 1782559520.3811731,
-    "updated": "2026-06-27T06:25:20.381819"
+    "readme_mtime": 1782561328.9855704,
+    "updated": "2026-06-27T06:55:28.986161"
   },
   ".agent-backups": {
-    "hash": "5b3071867fdcfd238632a5019b58f5b3",
+    "hash": "d93f02af90fc7e047f102e384bd21b4c",
     "health_score": 100,
-    "readme_mtime": 1782559520.1627715,
-    "updated": "2026-06-27T06:25:20.163948"
+    "readme_mtime": 1782561328.7611444,
+    "updated": "2026-06-27T06:55:28.762271"
   },
   ".agent-backups/20260626-005629": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1654565,
-    "updated": "2026-06-27T06:25:20.165898"
+    "readme_mtime": 1782561328.763727,
+    "updated": "2026-06-27T06:55:28.764341"
   },
   ".agent-backups/20260626-005629/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.167284,
-    "updated": "2026-06-27T06:25:20.167772"
+    "readme_mtime": 1782561328.7657485,
+    "updated": "2026-06-27T06:55:28.766225"
   },
   ".agent-backups/20260626-010016": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1691265,
-    "updated": "2026-06-27T06:25:20.169631"
+    "readme_mtime": 1782561328.7675369,
+    "updated": "2026-06-27T06:55:28.768067"
   },
   ".agent-backups/20260626-010016/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1710155,
-    "updated": "2026-06-27T06:25:20.171487"
+    "readme_mtime": 1782561328.7694597,
+    "updated": "2026-06-27T06:55:28.770063"
   },
   ".agent-backups/20260626-010355": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1727734,
-    "updated": "2026-06-27T06:25:20.173303"
+    "readme_mtime": 1782561328.7713532,
+    "updated": "2026-06-27T06:55:28.771837"
   },
   ".agent-backups/20260626-010355/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1746957,
-    "updated": "2026-06-27T06:25:20.175165"
+    "readme_mtime": 1782561328.773187,
+    "updated": "2026-06-27T06:55:28.773667"
   },
   ".agent-backups/20260626-011542": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1764057,
-    "updated": "2026-06-27T06:25:20.176807"
+    "readme_mtime": 1782561328.7749748,
+    "updated": "2026-06-27T06:55:28.775534"
   },
   ".agent-backups/20260626-011542/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.178143,
-    "updated": "2026-06-27T06:25:20.178609"
+    "readme_mtime": 1782561328.7769232,
+    "updated": "2026-06-27T06:55:28.777389"
   },
   ".agent-backups/20260626-014821": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1798782,
-    "updated": "2026-06-27T06:25:20.180366"
+    "readme_mtime": 1782561328.7786815,
+    "updated": "2026-06-27T06:55:28.779168"
   },
   ".agent-backups/20260626-014821/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1816843,
-    "updated": "2026-06-27T06:25:20.182147"
+    "readme_mtime": 1782561328.7805152,
+    "updated": "2026-06-27T06:55:28.780980"
   },
   ".agent-backups/20260626-024823": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1834435,
-    "updated": "2026-06-27T06:25:20.183936"
+    "readme_mtime": 1782561328.7822669,
+    "updated": "2026-06-27T06:55:28.782762"
   },
   ".agent-backups/20260626-024823/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.185266,
-    "updated": "2026-06-27T06:25:20.185717"
+    "readme_mtime": 1782561328.7841303,
+    "updated": "2026-06-27T06:55:28.784627"
   },
   ".agent-backups/20260626-034825": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1869802,
-    "updated": "2026-06-27T06:25:20.187389"
+    "readme_mtime": 1782561328.7859156,
+    "updated": "2026-06-27T06:55:28.786326"
   },
   ".agent-backups/20260626-034825/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1888258,
-    "updated": "2026-06-27T06:25:20.189282"
+    "readme_mtime": 1782561328.7877285,
+    "updated": "2026-06-27T06:55:28.788183"
   },
   ".agent-backups/20260626-044827": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1905205,
-    "updated": "2026-06-27T06:25:20.190929"
+    "readme_mtime": 1782561328.7894475,
+    "updated": "2026-06-27T06:55:28.789851"
   },
   ".agent-backups/20260626-044827/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1922736,
-    "updated": "2026-06-27T06:25:20.192777"
+    "readme_mtime": 1782561328.791305,
+    "updated": "2026-06-27T06:55:28.791762"
   },
   ".agent-backups/20260626-054828": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1940184,
-    "updated": "2026-06-27T06:25:20.194423"
+    "readme_mtime": 1782561328.7930713,
+    "updated": "2026-06-27T06:55:28.793483"
   },
   ".agent-backups/20260626-054828/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1957743,
-    "updated": "2026-06-27T06:25:20.196307"
+    "readme_mtime": 1782561328.7949684,
+    "updated": "2026-06-27T06:55:28.795426"
   },
   ".agent-backups/20260626-064830": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.1975336,
-    "updated": "2026-06-27T06:25:20.197938"
+    "readme_mtime": 1782561328.796681,
+    "updated": "2026-06-27T06:55:28.797239"
   },
   ".agent-backups/20260626-064830/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.1992784,
-    "updated": "2026-06-27T06:25:20.199754"
+    "readme_mtime": 1782561328.7987227,
+    "updated": "2026-06-27T06:55:28.799182"
   },
   ".agent-backups/20260626-074832": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2010117,
-    "updated": "2026-06-27T06:25:20.201409"
+    "readme_mtime": 1782561328.8004344,
+    "updated": "2026-06-27T06:55:28.800846"
   },
   ".agent-backups/20260626-074832/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2027156,
-    "updated": "2026-06-27T06:25:20.203182"
+    "readme_mtime": 1782561328.8022385,
+    "updated": "2026-06-27T06:55:28.802769"
   },
   ".agent-backups/20260626-084834": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2044477,
-    "updated": "2026-06-27T06:25:20.204885"
+    "readme_mtime": 1782561328.8040164,
+    "updated": "2026-06-27T06:55:28.804428"
   },
   ".agent-backups/20260626-084834/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.206182,
-    "updated": "2026-06-27T06:25:20.206642"
+    "readme_mtime": 1782561328.8057754,
+    "updated": "2026-06-27T06:55:28.806325"
   },
   ".agent-backups/20260626-093715": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2078943,
-    "updated": "2026-06-27T06:25:20.208384"
+    "readme_mtime": 1782561328.8075902,
+    "updated": "2026-06-27T06:55:28.808001"
   },
   ".agent-backups/20260626-093715/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2096977,
-    "updated": "2026-06-27T06:25:20.210148"
+    "readme_mtime": 1782561328.8094099,
+    "updated": "2026-06-27T06:55:28.809965"
   },
   ".agent-backups/20260626-094306": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2114096,
-    "updated": "2026-06-27T06:25:20.211833"
+    "readme_mtime": 1782561328.8112261,
+    "updated": "2026-06-27T06:55:28.811636"
   },
   ".agent-backups/20260626-094306/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2131953,
-    "updated": "2026-06-27T06:25:20.213647"
+    "readme_mtime": 1782561328.8129754,
+    "updated": "2026-06-27T06:55:28.813437"
   },
   ".agent-backups/20260626-094556": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2148771,
-    "updated": "2026-06-27T06:25:20.215281"
+    "readme_mtime": 1782561328.8147595,
+    "updated": "2026-06-27T06:55:28.815162"
   },
   ".agent-backups/20260626-094556/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2166207,
-    "updated": "2026-06-27T06:25:20.217107"
+    "readme_mtime": 1782561328.8164978,
+    "updated": "2026-06-27T06:55:28.816959"
   },
   ".agent-backups/20260626-094837": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2183487,
-    "updated": "2026-06-27T06:25:20.218754"
+    "readme_mtime": 1782561328.818328,
+    "updated": "2026-06-27T06:55:28.818763"
   },
   ".agent-backups/20260626-094837/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2201052,
-    "updated": "2026-06-27T06:25:20.220638"
+    "readme_mtime": 1782561328.8200743,
+    "updated": "2026-06-27T06:55:28.820595"
   },
   ".agent-backups/20260626-104840": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2218685,
-    "updated": "2026-06-27T06:25:20.222265"
+    "readme_mtime": 1782561328.8218997,
+    "updated": "2026-06-27T06:55:28.822304"
   },
   ".agent-backups/20260626-104840/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2235951,
-    "updated": "2026-06-27T06:25:20.224119"
+    "readme_mtime": 1782561328.8236315,
+    "updated": "2026-06-27T06:55:28.824082"
   },
   ".agent-backups/20260626-114842": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2253842,
-    "updated": "2026-06-27T06:25:20.225784"
+    "readme_mtime": 1782561328.8253427,
+    "updated": "2026-06-27T06:55:28.825747"
   },
   ".agent-backups/20260626-114842/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2270925,
-    "updated": "2026-06-27T06:25:20.227556"
+    "readme_mtime": 1782561328.8271794,
+    "updated": "2026-06-27T06:55:28.827644"
   },
   ".agent-backups/20260626-124843": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2288277,
-    "updated": "2026-06-27T06:25:20.229274"
+    "readme_mtime": 1782561328.8289654,
+    "updated": "2026-06-27T06:55:28.829378"
   },
   ".agent-backups/20260626-124843/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2305832,
-    "updated": "2026-06-27T06:25:20.231227"
+    "readme_mtime": 1782561328.8307722,
+    "updated": "2026-06-27T06:55:28.831226"
   },
   ".agent-backups/20260626-134845": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.232489,
-    "updated": "2026-06-27T06:25:20.232912"
+    "readme_mtime": 1782561328.8324869,
+    "updated": "2026-06-27T06:55:28.832916"
   },
   ".agent-backups/20260626-134845/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2343025,
-    "updated": "2026-06-27T06:25:20.234757"
+    "readme_mtime": 1782561328.8343146,
+    "updated": "2026-06-27T06:55:28.834819"
   },
   ".agent-backups/20260626-144847": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2360039,
-    "updated": "2026-06-27T06:25:20.236427"
+    "readme_mtime": 1782561328.8360515,
+    "updated": "2026-06-27T06:55:28.836454"
   },
   ".agent-backups/20260626-144847/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2377727,
-    "updated": "2026-06-27T06:25:20.238224"
+    "readme_mtime": 1782561328.8377848,
+    "updated": "2026-06-27T06:55:28.838240"
   },
   ".agent-backups/20260626-154853": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2394779,
-    "updated": "2026-06-27T06:25:20.239877"
+    "readme_mtime": 1782561328.8397675,
+    "updated": "2026-06-27T06:55:28.840310"
   },
   ".agent-backups/20260626-154853/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2413604,
-    "updated": "2026-06-27T06:25:20.241813"
+    "readme_mtime": 1782561328.8417523,
+    "updated": "2026-06-27T06:55:28.842251"
   },
   ".agent-backups/20260626-164858": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2430694,
-    "updated": "2026-06-27T06:25:20.243472"
+    "readme_mtime": 1782561328.8436368,
+    "updated": "2026-06-27T06:55:28.844048"
   },
   ".agent-backups/20260626-164858/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2450151,
-    "updated": "2026-06-27T06:25:20.245468"
+    "readme_mtime": 1782561328.84543,
+    "updated": "2026-06-27T06:55:28.846003"
   },
   ".agent-backups/20260626-174903": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2467408,
-    "updated": "2026-06-27T06:25:20.247186"
+    "readme_mtime": 1782561328.8476126,
+    "updated": "2026-06-27T06:55:28.848133"
   },
   ".agent-backups/20260626-174903/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2488463,
-    "updated": "2026-06-27T06:25:20.249435"
+    "readme_mtime": 1782561328.8497064,
+    "updated": "2026-06-27T06:55:28.850191"
   },
   ".agent-backups/20260626-184909": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2509556,
-    "updated": "2026-06-27T06:25:20.251462"
+    "readme_mtime": 1782561328.8515313,
+    "updated": "2026-06-27T06:55:28.852009"
   },
   ".agent-backups/20260626-184909/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.25307,
-    "updated": "2026-06-27T06:25:20.253528"
+    "readme_mtime": 1782561328.8533423,
+    "updated": "2026-06-27T06:55:28.853808"
   },
   ".agent-backups/20260626-190107": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2547936,
-    "updated": "2026-06-27T06:25:20.255192"
+    "readme_mtime": 1782561328.855079,
+    "updated": "2026-06-27T06:55:28.855564"
   },
   ".agent-backups/20260626-190107/workspace-core": {
-    "hash": "946bfda9cba70613a917409830765887",
+    "hash": "1381c823335460b38eb50e8cc52e2646",
     "health_score": 100,
-    "readme_mtime": 1782559520.2567034,
-    "updated": "2026-06-27T06:25:20.257193"
+    "readme_mtime": 1782561328.8570817,
+    "updated": "2026-06-27T06:55:28.857540"
   },
   ".agent-backups/20260626-204912": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2585282,
-    "updated": "2026-06-27T06:25:20.258926"
+    "readme_mtime": 1782561328.8587766,
+    "updated": "2026-06-27T06:55:28.859182"
   },
   ".agent-backups/20260626-204912/workspace-core": {
-    "hash": "16a6b0ea20fbac78b30e41f14fc92bd0",
+    "hash": "2cfab52bbb1b454ed9996362f7b902d9",
     "health_score": 100,
-    "readme_mtime": 1782559520.2603955,
-    "updated": "2026-06-27T06:25:20.260969"
+    "readme_mtime": 1782561328.8607304,
+    "updated": "2026-06-27T06:55:28.861395"
   },
   ".agent-backups/20260626-214954": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.262198,
-    "updated": "2026-06-27T06:25:20.262604"
+    "readme_mtime": 1782561328.8626816,
+    "updated": "2026-06-27T06:55:28.863161"
   },
   ".agent-backups/20260626-214954/workspace-core": {
-    "hash": "16a6b0ea20fbac78b30e41f14fc92bd0",
+    "hash": "2cfab52bbb1b454ed9996362f7b902d9",
     "health_score": 100,
-    "readme_mtime": 1782559520.264156,
-    "updated": "2026-06-27T06:25:20.264728"
+    "readme_mtime": 1782561328.864642,
+    "updated": "2026-06-27T06:55:28.865266"
   },
   ".agent-backups/20260626-225042": {
-    "hash": "c54986ec1d0979d70c9b2db26c152f59",
+    "hash": "638eac18e4639032865df6f70b5ad306",
     "health_score": 100,
-    "readme_mtime": 1782559520.2659523,
-    "updated": "2026-06-27T06:25:20.266356"
+    "readme_mtime": 1782561328.8666008,
+    "updated": "2026-06-27T06:55:28.867031"
   },
   ".agent-backups/20260626-225042/workspace-core": {
-    "hash": "16a6b0ea20fbac78b30e41f14fc92bd0",
+    "hash": "2cfab52bbb1b454ed9996362f7b902d9",
     "health_score": 100,
-    "readme_mtime": 1782559520.2678661,
-    "updated": "2026-06-27T06:25:20.268454"
+    "readme_mtime": 1782561328.8685515,
+    "updated": "2026-06-27T06:55:28.869124"
   },
   ".agent-backups/20260626-235046": {
-    "hash": "fb766babc4e976f03fbce0420d13f25e",
+    "hash": "aeb5cae6e1bf47889c6f5e799bfe2ad6",
     "health_score": 100,
-    "readme_mtime": 1782559520.2696958,
-    "updated": "2026-06-27T06:25:20.270110"
+    "readme_mtime": 1782561328.870356,
+    "updated": "2026-06-27T06:55:28.870766"
   },
   ".agent-backups/20260626-235046/workspace-core": {
-    "hash": "16a6b0ea20fbac78b30e41f14fc92bd0",
+    "hash": "2cfab52bbb1b454ed9996362f7b902d9",
     "health_score": 100,
-    "readme_mtime": 1782559520.2717147,
-    "updated": "2026-06-27T06:25:20.272282"
+    "readme_mtime": 1782561328.872271,
+    "updated": "2026-06-27T06:55:28.872995"
   },
   ".agents": {
-    "hash": "7da34c0d4d96fc173630c422f077a3e0",
+    "hash": "93bd2fda83ee6eff9ae855efa175ff11",
     "health_score": 100,
-    "readme_mtime": 1782559520.2968621,
-    "updated": "2026-06-27T06:25:20.297287"
+    "readme_mtime": 1782561328.9008288,
+    "updated": "2026-06-27T06:55:28.901290"
   },
   ".agents/skills": {
-    "hash": "bd19eb4336d4e86283bbc4eed7453987",
+    "hash": "b66641441e26b24700a2d16203f5c8c7",
     "health_score": 100,
-    "readme_mtime": 1782559520.2985702,
-    "updated": "2026-06-27T06:25:20.299009"
+    "readme_mtime": 1782561328.9025726,
+    "updated": "2026-06-27T06:55:28.903029"
   },
   ".agents/skills/copilot-optimizer": {
-    "hash": "3d7a85a12542f719273851869d5a2a9c",
+    "hash": "133b607967f009ab120a1edd5ac19839",
     "health_score": 100,
-    "readme_mtime": 1782559520.300301,
-    "updated": "2026-06-27T06:25:20.300848"
+    "readme_mtime": 1782561328.9046154,
+    "updated": "2026-06-27T06:55:28.905150"
   },
   ".agents/skills/headroom-rtk": {
-    "hash": "ac8b54dba274124b444dbfb06bdac9ce",
+    "hash": "f91c7443c8e60a31e3c8a81a0496886e",
     "health_score": 100,
-    "readme_mtime": 1782559520.3021395,
-    "updated": "2026-06-27T06:25:20.302563"
+    "readme_mtime": 1782561328.9064171,
+    "updated": "2026-06-27T06:55:28.906839"
   },
   ".agents/skills/self-repair": {
-    "hash": "092139d71f4fc1112727370ec1e43501",
+    "hash": "3a204672a4cc128425b17ac561ca407c",
     "health_score": 100,
-    "readme_mtime": 1782559520.3038623,
-    "updated": "2026-06-27T06:25:20.304382"
+    "readme_mtime": 1782561328.9080994,
+    "updated": "2026-06-27T06:55:28.908526"
   },
   ".claude": {
-    "hash": "404c352e7e9cdf7a4bcf8d13fcfedd7f",
+    "hash": "55fd563753145b9354dd965d4fb912d9",
     "health_score": 100,
-    "readme_mtime": 1782559520.3058832,
-    "updated": "2026-06-27T06:25:20.306401"
+    "readme_mtime": 1782561328.9100525,
+    "updated": "2026-06-27T06:55:28.910590"
   },
   ".claude/agents": {
-    "hash": "460bc0ec1428a1ff64e56265bac0b756",
+    "hash": "d8938946081c360987e7e728e00ab038",
     "health_score": 100,
-    "readme_mtime": 1782559520.3078065,
-    "updated": "2026-06-27T06:25:20.308320"
+    "readme_mtime": 1782561328.9119911,
+    "updated": "2026-06-27T06:55:28.912434"
   },
   ".claude/skills": {
-    "hash": "120ecf2b6ed71c312234be30c815eda2",
+    "hash": "4dfe4c0653f30738d49999d508640280",
     "health_score": 100,
-    "readme_mtime": 1782559520.3099928,
-    "updated": "2026-06-27T06:25:20.310593"
+    "readme_mtime": 1782561328.9138002,
+    "updated": "2026-06-27T06:55:28.914370"
   },
   ".claude/skills/adwi-commit": {
-    "hash": "50d34221ae9d8b467838c8e558cc044b",
+    "hash": "ed39ea812f5b92850afecde6168bcc90",
     "health_score": 100,
-    "readme_mtime": 1782559520.3118649,
-    "updated": "2026-06-27T06:25:20.312291"
+    "readme_mtime": 1782561328.9156404,
+    "updated": "2026-06-27T06:55:28.916062"
   },
   ".claude/skills/adwi-session-end": {
-    "hash": "1d813752222dd61be24dc9723eb44785",
+    "hash": "0a9cce8e34f0438578c60a3ef7d0bf5d",
     "health_score": 100,
-    "readme_mtime": 1782559520.3136203,
-    "updated": "2026-06-27T06:25:20.314074"
+    "readme_mtime": 1782561328.9173524,
+    "updated": "2026-06-27T06:55:28.917819"
   },
   ".claude/skills/adwi-sync-check": {
-    "hash": "8c14a36a5d7e93384f2cbbc9c23075fb",
+    "hash": "7db2715d224042e20814c1eae679b1a8",
     "health_score": 100,
-    "readme_mtime": 1782559520.3153338,
-    "updated": "2026-06-27T06:25:20.315759"
+    "readme_mtime": 1782561328.919135,
+    "updated": "2026-06-27T06:55:28.919558"
   },
   ".claude/skills/codex-advisor": {
-    "hash": "bbadcd07941b224ef13509f06b6216f3",
+    "hash": "8acbe5d06df64eaeba0d33ccbbcad808",
     "health_score": 100,
-    "readme_mtime": 1782559520.3170562,
-    "updated": "2026-06-27T06:25:20.317565"
+    "readme_mtime": 1782561328.9208424,
+    "updated": "2026-06-27T06:55:28.921282"
   },
   ".claude/skills/eval-summary": {
-    "hash": "c1dd437959079e2c885f95a9d4d99d42",
+    "hash": "66d47ce71657b44a7d4ecdc34cffc2a8",
     "health_score": 100,
-    "readme_mtime": 1782559520.318844,
-    "updated": "2026-06-27T06:25:20.319274"
+    "readme_mtime": 1782561328.9226165,
+    "updated": "2026-06-27T06:55:28.923038"
   },
   ".claude/skills/nlu-fix": {
-    "hash": "26e5f75f175aaccee3a5ca081c3312bc",
+    "hash": "bd83cc62d03ecacf1f47e4f8f988e7b0",
     "health_score": 100,
-    "readme_mtime": 1782559520.3205826,
-    "updated": "2026-06-27T06:25:20.321046"
+    "readme_mtime": 1782561328.9243193,
+    "updated": "2026-06-27T06:55:28.924754"
   },
   ".claude/skills/prompt-relay": {
-    "hash": "6652e7cd7dd3e13b89e91bfb08180e3d",
+    "hash": "b7f9fda383c419ba1c759db7e3ba55c6",
     "health_score": 100,
-    "readme_mtime": 1782559520.322336,
-    "updated": "2026-06-27T06:25:20.322751"
+    "readme_mtime": 1782561328.9260786,
+    "updated": "2026-06-27T06:55:28.926507"
   },
   ".claude/worktrees": {
-    "hash": "872ddb22cc9468a6b973860a05d96dd2",
+    "hash": "30a659a162f7328d1abe0400451cf0b7",
     "health_score": 100,
-    "readme_mtime": 1782559520.323996,
-    "updated": "2026-06-27T06:25:20.324383"
+    "readme_mtime": 1782561328.9277852,
+    "updated": "2026-06-27T06:55:28.928175"
   },
   ".gstack": {
-    "hash": "35f65e2617fbce92d34e8bc1ba341309",
+    "hash": "d033dff75195b4bc7311fbf30b912b0a",
     "health_score": 100,
-    "readme_mtime": 1782559520.3256896,
-    "updated": "2026-06-27T06:25:20.326078"
+    "readme_mtime": 1782561328.92939,
+    "updated": "2026-06-27T06:55:28.929783"
   },
   ".gstack/security-reports": {
-    "hash": "cb87c75d5af0b1eed0d9b88d2c2a618f",
+    "hash": "04be59fe49d488a5955dd6f32a9117bc",
     "health_score": 100,
-    "readme_mtime": 1782559520.3273318,
-    "updated": "2026-06-27T06:25:20.327749"
+    "readme_mtime": 1782561328.9312258,
+    "updated": "2026-06-27T06:55:28.931777"
   },
   ".playwright-mcp": {
-    "hash": "88ce5f6bbf93b1ce88146a7170268c78",
+    "hash": "026356fe01df863f51981e60778b07be",
     "health_score": 100,
-    "readme_mtime": 1782559520.3291,
-    "updated": "2026-06-27T06:25:20.329609"
+    "readme_mtime": 1782561328.9333048,
+    "updated": "2026-06-27T06:55:28.933804"
   },
   ".pytest_cache": {
-    "hash": "9c509f1a7e278d60eef7e4bfc2a828a9",
+    "hash": "5b27137d3569f62eef80317dfe8fd9e6",
     "health_score": 100,
-    "readme_mtime": 1782559520.3308897,
-    "updated": "2026-06-27T06:25:20.331327"
+    "readme_mtime": 1782561328.9350777,
+    "updated": "2026-06-27T06:55:28.935516"
   },
   ".pytest_cache/v": {
-    "hash": "d394a96a5c1c010876c1353311efc5a9",
+    "hash": "09decbfe088bedac5b94f2c00420e767",
     "health_score": 100,
-    "readme_mtime": 1782559520.332614,
-    "updated": "2026-06-27T06:25:20.333023"
+    "readme_mtime": 1782561328.936812,
+    "updated": "2026-06-27T06:55:28.937217"
   },
   ".pytest_cache/v/cache": {
-    "hash": "f9794d7a1a542ff74399effbcc563b29",
+    "hash": "2359370642f46c67f16c842f270f8a5a",
     "health_score": 100,
-    "readme_mtime": 1782559520.334293,
-    "updated": "2026-06-27T06:25:20.334902"
+    "readme_mtime": 1782561328.9384952,
+    "updated": "2026-06-27T06:55:28.938912"
   },
   ".rtk": {
-    "hash": "3453d19f4049532c3aa449435afc9f8d",
+    "hash": "0b0b673c38241a826a026ab7c43b3518",
     "health_score": 100,
-    "readme_mtime": 1782559520.3363104,
-    "updated": "2026-06-27T06:25:20.336836"
+    "readme_mtime": 1782561328.9402106,
+    "updated": "2026-06-27T06:55:28.940610"
   },
   ".serena": {
-    "hash": "f71735dc5b1facdf1b5987c535db27e5",
+    "hash": "9d2cd1f5687c2c5b7dcb27972eca2796",
     "health_score": 100,
-    "readme_mtime": 1782559520.3384256,
-    "updated": "2026-06-27T06:25:20.338881"
+    "readme_mtime": 1782561328.9419124,
+    "updated": "2026-06-27T06:55:28.942386"
   },
   ".serena/cache": {
-    "hash": "69c258a2dd48029caefc5eccdcc75325",
+    "hash": "bc7f68076456ba6e0e5946b3a8a06fe5",
     "health_score": 100,
-    "readme_mtime": 1782559520.3401418,
-    "updated": "2026-06-27T06:25:20.340592"
+    "readme_mtime": 1782561328.943656,
+    "updated": "2026-06-27T06:55:28.944105"
   },
   ".serena/cache/python": {
-    "hash": "c3c2f9097ccb1dc1a663f950cac4f4bb",
+    "hash": "1399fc864df818e73bb3839731a789e2",
     "health_score": 100,
-    "readme_mtime": 1782559520.341862,
-    "updated": "2026-06-27T06:25:20.342330"
+    "readme_mtime": 1782561328.9453454,
+    "updated": "2026-06-27T06:55:28.945749"
   },
   ".serena/memories": {
-    "hash": "37f3e5d19a87ef41bd24ea1f69c933dc",
+    "hash": "4dae11a41179365f6fc2e9acf5e3c111",
     "health_score": 100,
-    "readme_mtime": 1782559520.3435636,
-    "updated": "2026-06-27T06:25:20.343948"
+    "readme_mtime": 1782561328.9469914,
+    "updated": "2026-06-27T06:55:28.947438"
   },
   ".vscode": {
-    "hash": "6ed1441d1c70441d25ce69c519c76fe3",
+    "hash": "067492341a541f90b46d311a857a9da8",
     "health_score": 100,
-    "readme_mtime": 1782559520.3452075,
-    "updated": "2026-06-27T06:25:20.345629"
+    "readme_mtime": 1782561328.9487076,
+    "updated": "2026-06-27T06:55:28.949126"
   },
   "agent-system": {
-    "hash": "189ed58a6f438cf5d7ebd031bff7286f",
+    "hash": "9e1ba88336eb1540cd31432f3339aa64",
     "health_score": 100,
-    "readme_mtime": 1782559520.3472052,
-    "updated": "2026-06-27T06:25:20.347594"
+    "readme_mtime": 1782561328.9503872,
+    "updated": "2026-06-27T06:55:28.950823"
   },
   "autolab": {
-    "hash": "6558d65429caeb3ce11a38377197588b",
+    "hash": "c1d08f6c761197ca28d54a02601d9ffe",
     "health_score": 100,
-    "readme_mtime": 1782559520.3488054,
-    "updated": "2026-06-27T06:25:20.349265"
+    "readme_mtime": 1782561328.9520378,
+    "updated": "2026-06-27T06:55:28.952495"
   },
   "autolab/reports": {
-    "hash": "69f77d172abcb957c2f6d63ceaa72cf1",
+    "hash": "610c0f7283e45a7f4b0998a0ab912439",
     "health_score": 100,
-    "readme_mtime": 1782559520.3505402,
-    "updated": "2026-06-27T06:25:20.350993"
+    "readme_mtime": 1782561328.953787,
+    "updated": "2026-06-27T06:55:28.954212"
   },
   "automation": {
-    "hash": "38c5a9005dc8eecae234bc929dbfb970",
+    "hash": "2e04dd30389274f281f7f76dfde8cc8c",
     "health_score": 100,
-    "readme_mtime": 1782559520.3523555,
-    "updated": "2026-06-27T06:25:20.352744"
+    "readme_mtime": 1782561328.9554613,
+    "updated": "2026-06-27T06:55:28.955916"
   },
   "automation/reports": {
-    "hash": "84b504456f781568697d909814d29bb6",
+    "hash": "d5985cc83a23dcf627a0e0527153d880",
     "health_score": 100,
-    "readme_mtime": 1782559520.3540215,
-    "updated": "2026-06-27T06:25:20.354478"
+    "readme_mtime": 1782561328.957185,
+    "updated": "2026-06-27T06:55:28.957615"
   },
   "bin": {
-    "hash": "522bb90c7d29e08afd31a6d260ceff7d",
+    "hash": "aefdb9c23fe07c9795bc88ea3cf8b46d",
     "health_score": 100,
-    "readme_mtime": 1782559520.3597212,
-    "updated": "2026-06-27T06:25:20.363382"
+    "readme_mtime": 1782561328.9626443,
+    "updated": "2026-06-27T06:55:28.966357"
   },
   "blood": {
-    "hash": "839b4e6f2e7f6ba60b225ccf16e6bb91",
+    "hash": "7596b61acc72d22ebb0feb6194d1b469",
     "health_score": 90,
-    "readme_mtime": 1782559520.365121,
-    "updated": "2026-06-27T06:25:20.365669"
+    "readme_mtime": 1782561328.9679823,
+    "updated": "2026-06-27T06:55:28.968538"
   },
   "blood/metrics": {
-    "hash": "0b8741e3c2695b35785d686cddbdf1d8",
+    "hash": "f1133b194fb5dabde969bc9c6d1a1753",
     "health_score": 100,
-    "readme_mtime": 1782559520.3669896,
-    "updated": "2026-06-27T06:25:20.367387"
+    "readme_mtime": 1782561328.9698277,
+    "updated": "2026-06-27T06:55:28.970248"
   },
   "blood/telemetry": {
-    "hash": "e1e4b2339b2da1105467b3fc2481628a",
+    "hash": "cd6414ec5606fe57ff6f432dc3a30121",
     "health_score": 90,
-    "readme_mtime": 1782559520.3724875,
-    "updated": "2026-06-27T06:25:20.375081"
+    "readme_mtime": 1782561328.97569,
+    "updated": "2026-06-27T06:55:28.978623"
   },
   "blood/telemetry/comparison": {
-    "hash": "f660d88c228bf2cdd4cdf22a685d0c24",
+    "hash": "44751f579daea37d99487f4a37388a29",
     "health_score": 90,
-    "readme_mtime": 1782559520.378077,
-    "updated": "2026-06-27T06:25:20.379487"
+    "readme_mtime": 1782561328.9822526,
+    "updated": "2026-06-27T06:55:28.983962"
   },
   "brain/anticipation": {
-    "hash": "bfce2c76ba7a49fa06c58a098240a39c",
+    "hash": "28f078659f5de20ef02ae3508fa2b51b",
     "health_score": 90,
-    "readme_mtime": 1782559520.4001234,
-    "updated": "2026-06-27T06:25:20.410887"
+    "readme_mtime": 1782561329.0041912,
+    "updated": "2026-06-27T06:55:29.015019"
   },
   "brain/anticipation/reports": {
-    "hash": "2c0ef06e78576f3105951773ab5a4485",
+    "hash": "00e8993d38a351d318d8cde59d096d4f",
     "health_score": 100,
-    "readme_mtime": 1782559520.412369,
-    "updated": "2026-06-27T06:25:20.412923"
+    "readme_mtime": 1782561329.016594,
+    "updated": "2026-06-27T06:55:29.017062"
   },
   "brain/graph": {
-    "hash": "95ebf5ddf4eea0692308024a57939c14",
+    "hash": "49922caf2dd9c5631022ddb94bbcc36d",
     "health_score": 90,
-    "readme_mtime": 1782559520.418149,
-    "updated": "2026-06-27T06:25:20.420879"
+    "readme_mtime": 1782561329.022296,
+    "updated": "2026-06-27T06:55:29.025018"
   },
   "brain/graph/reports": {
-    "hash": "ba4ea3cacf9149c5c141ec6697fc9315",
+    "hash": "f0670ea75e36462ea421f8fc63b2db19",
     "health_score": 100,
-    "readme_mtime": 1782559520.422283,
-    "updated": "2026-06-27T06:25:20.422735"
+    "readme_mtime": 1782561329.0264103,
+    "updated": "2026-06-27T06:55:29.026871"
   },
   "brain/injector": {
-    "hash": "afdfe5c388f2508dc2a475bb59b83a94",
+    "hash": "41f674313feedeb09d84c4ab5a3a128b",
     "health_score": 90,
-    "readme_mtime": 1782559520.427499,
-    "updated": "2026-06-27T06:25:20.429938"
+    "readme_mtime": 1782561329.0315604,
+    "updated": "2026-06-27T06:55:29.033942"
   },
   "brain/memory": {
-    "hash": "0381b2cf0916f8ce26b78981032b79c9",
+    "hash": "cef7165f01ea9317d80f3d47dfb82279",
     "health_score": 100,
-    "readme_mtime": 1782559520.431515,
-    "updated": "2026-06-27T06:25:20.432150"
+    "readme_mtime": 1782561329.035533,
+    "updated": "2026-06-27T06:55:29.036164"
   },
   "brain/memory/docs": {
-    "hash": "0cb9d136fd15ad2d0c1755f7f190a597",
+    "hash": "a5d2e49fc2614f7c0bd41fcb1a5ca31f",
     "health_score": 100,
-    "readme_mtime": 1782559520.4334576,
-    "updated": "2026-06-27T06:25:20.433893"
+    "readme_mtime": 1782561329.0374734,
+    "updated": "2026-06-27T06:55:29.037896"
   },
   "brain/memory/memory": {
-    "hash": "d8641247212edf725b09f9fc3a41e071",
+    "hash": "217bf258b212579c42fc41b8c1c41013",
     "health_score": 100,
-    "readme_mtime": 1782559520.4352548,
-    "updated": "2026-06-27T06:25:20.435794"
+    "readme_mtime": 1782561329.0392504,
+    "updated": "2026-06-27T06:55:29.039759"
   },
   "brain/memory/shared": {
-    "hash": "d8641247212edf725b09f9fc3a41e071",
+    "hash": "217bf258b212579c42fc41b8c1c41013",
     "health_score": 100,
-    "readme_mtime": 1782559520.4371276,
-    "updated": "2026-06-27T06:25:20.437550"
+    "readme_mtime": 1782561329.0410638,
+    "updated": "2026-06-27T06:55:29.041506"
   },
   "brain/memory/state": {
-    "hash": "4dc7372807a22d5e7252d415c69a2014",
+    "hash": "e6d5277787a06b742338fbf9a9248b21",
     "health_score": 100,
-    "readme_mtime": 1782559520.4389582,
-    "updated": "2026-06-27T06:25:20.439543"
+    "readme_mtime": 1782561329.0429118,
+    "updated": "2026-06-27T06:55:29.043385"
   },
   "brain/memory/tasks": {
-    "hash": "4dc7372807a22d5e7252d415c69a2014",
+    "hash": "e6d5277787a06b742338fbf9a9248b21",
     "health_score": 100,
-    "readme_mtime": 1782559520.4410195,
-    "updated": "2026-06-27T06:25:20.441439"
+    "readme_mtime": 1782561329.0447788,
+    "updated": "2026-06-27T06:55:29.045202"
   },
   "brain/memory/templates": {
-    "hash": "882ff75dab694291852d8233ff11635b",
+    "hash": "7ae372ffeed086bdad2a9572e366f089",
     "health_score": 100,
-    "readme_mtime": 1782559520.4427364,
-    "updated": "2026-06-27T06:25:20.443159"
+    "readme_mtime": 1782561329.0464957,
+    "updated": "2026-06-27T06:55:29.046921"
   },
   "brain/memory/vector": {
-    "hash": "b470c8b44e8dd55de5db44595250c55e",
+    "hash": "6cdc30cf6ad7431b3d16075422711470",
     "health_score": 90,
-    "readme_mtime": 1782559520.448028,
-    "updated": "2026-06-27T06:25:20.450494"
+    "readme_mtime": 1782561329.0516932,
+    "updated": "2026-06-27T06:55:29.054124"
   },
   "brain/research": {
-    "hash": "bec82ac3c349525e9cd7ea726cec4ea2",
+    "hash": "1c8216f81301643f739f08f0af3cddae",
     "health_score": 90,
-    "readme_mtime": 1782559520.455384,
-    "updated": "2026-06-27T06:25:20.457925"
+    "readme_mtime": 1782561329.0589695,
+    "updated": "2026-06-27T06:55:29.061553"
   },
   "brain/research/analyses": {
-    "hash": "c657cf65caabe578051dc4fe5189eea6",
+    "hash": "7e8b4b9e1f78dbea2edb75330487bb36",
     "health_score": 100,
-    "readme_mtime": 1782559520.4592817,
-    "updated": "2026-06-27T06:25:20.459747"
+    "readme_mtime": 1782561329.0629482,
+    "updated": "2026-06-27T06:55:29.063407"
   },
   "brain/research/decisions": {
-    "hash": "a923c89eee3802020df6a9cd5f887a1b",
+    "hash": "e416e47153c8a4c4e6df795b08470bb6",
     "health_score": 100,
-    "readme_mtime": 1782559520.4611924,
-    "updated": "2026-06-27T06:25:20.461689"
+    "readme_mtime": 1782561329.0648413,
+    "updated": "2026-06-27T06:55:29.065346"
   },
   "brain/research/ideas": {
-    "hash": "1b66cff0cbcfd6b6348d13e19e4eda87",
+    "hash": "aef117bdaebe0781dc76af5ef67b6ff3",
     "health_score": 100,
-    "readme_mtime": 1782559520.4631944,
-    "updated": "2026-06-27T06:25:20.463709"
+    "readme_mtime": 1782561329.066807,
+    "updated": "2026-06-27T06:55:29.067305"
   },
   "brain/research/plans": {
-    "hash": "c7b1755e630658299fb1ce638f154629",
+    "hash": "e67d865ba57590adcf54945bfafb29b3",
     "health_score": 100,
-    "readme_mtime": 1782559520.4650383,
-    "updated": "2026-06-27T06:25:20.465513"
+    "readme_mtime": 1782561329.068673,
+    "updated": "2026-06-27T06:55:29.069153"
   },
   "brain/research/scripts": {
-    "hash": "e4809146a49aedbd7bf41fa3782ba950",
+    "hash": "1cec391c9cd062c693f46c6fb5d3abcc",
     "health_score": 100,
-    "readme_mtime": 1782559520.467058,
-    "updated": "2026-06-27T06:25:20.467593"
+    "readme_mtime": 1782561329.0706458,
+    "updated": "2026-06-27T06:55:29.071164"
   },
   "brain/system": {
-    "hash": "8fe389772ad0dcc0c294fcc4c67aa2f4",
+    "hash": "3aae869e511fff62d796c37d60635e86",
     "health_score": 100,
-    "readme_mtime": 1782559520.4701843,
-    "updated": "2026-06-27T06:25:20.471260"
+    "readme_mtime": 1782561329.0737686,
+    "updated": "2026-06-27T06:55:29.074785"
   },
   "brain/vault": {
-    "hash": "99ce988c9a363e49155186681724af51",
+    "hash": "0275276494e39a621a1edb8da1a7910e",
     "health_score": 90,
-    "readme_mtime": 1782559520.4733124,
-    "updated": "2026-06-27T06:25:20.474246"
+    "readme_mtime": 1782561329.0767207,
+    "updated": "2026-06-27T06:55:29.077612"
   },
   "brain/vault/.obsidian": {
-    "hash": "faf639dddc8ea512baab03838b23d33c",
+    "hash": "3ca5163735f967d4ab88a7f1c0cfb318",
     "health_score": 100,
-    "readme_mtime": 1782559520.4760652,
-    "updated": "2026-06-27T06:25:20.476751"
+    "readme_mtime": 1782561329.0794585,
+    "updated": "2026-06-27T06:55:29.080196"
   },
   "brain/vault/anticipation": {
-    "hash": "2a0424372b0539f650296db7adc74a4f",
+    "hash": "853a7bc25d4c5ab0bd60cc977c56017c",
     "health_score": 90,
-    "readme_mtime": 1782559520.4943411,
-    "updated": "2026-06-27T06:25:20.505504"
+    "readme_mtime": 1782561329.0982437,
+    "updated": "2026-06-27T06:55:29.108476"
   },
   "brain/vault/archives": {
-    "hash": "c0d81ee019550b22e12da888b9459726",
+    "hash": "893a175b644b8d8165257d359f4d824f",
     "health_score": 100,
-    "readme_mtime": 1782559520.5099773,
-    "updated": "2026-06-27T06:25:20.510415"
+    "readme_mtime": 1782561329.1098135,
+    "updated": "2026-06-27T06:55:29.110206"
   },
   "brain/vault/automations": {
-    "hash": "1e42c88754bbcf60fa9c6830672b1c23",
+    "hash": "47e9eb72290f986789a03a19ebd5263e",
     "health_score": 100,
-    "readme_mtime": 1782559520.5152092,
-    "updated": "2026-06-27T06:25:20.516171"
+    "readme_mtime": 1782561329.1115363,
+    "updated": "2026-06-27T06:55:29.111956"
   },
   "brain/vault/daily-notes": {
-    "hash": "4ef207f6c7c2f1cde37abfcb2f2b9bba",
+    "hash": "096c3af4634550c2d5c3d9c41d77133b",
     "health_score": 100,
-    "readme_mtime": 1782559520.520286,
-    "updated": "2026-06-27T06:25:20.521019"
+    "readme_mtime": 1782561329.11339,
+    "updated": "2026-06-27T06:55:29.114018"
   },
   "brain/vault/decisions": {
-    "hash": "df5be1e8abfa8ecb257029ff68e5cd5e",
+    "hash": "7ae372ffeed086bdad2a9572e366f089",
     "health_score": 100,
-    "readme_mtime": 1782559520.5254185,
-    "updated": "2026-06-27T06:25:20.525996"
+    "readme_mtime": 1782561329.115485,
+    "updated": "2026-06-27T06:55:29.115966"
   },
   "brain/vault/experiments": {
-    "hash": "7b4e53ea48dad0ecc3b701c353c38eff",
+    "hash": "58e20d4626f75b8601062abe1fb56c85",
     "health_score": 100,
-    "readme_mtime": 1782559520.5274181,
-    "updated": "2026-06-27T06:25:20.527846"
+    "readme_mtime": 1782561329.1172457,
+    "updated": "2026-06-27T06:55:29.117644"
   },
   "brain/vault/graph": {
-    "hash": "67084f2ab6a2c6a9acc598fa55db6357",
+    "hash": "2ea1d9e0563c8017c5c63a419460d666",
     "health_score": 90,
-    "readme_mtime": 1782559520.5334651,
-    "updated": "2026-06-27T06:25:20.536338"
+    "readme_mtime": 1782561329.1227756,
+    "updated": "2026-06-27T06:55:29.125455"
   },
   "brain/vault/ideas": {
-    "hash": "96a04c810b9553f4d9761ff01cc830e4",
+    "hash": "e6d5277787a06b742338fbf9a9248b21",
     "health_score": 100,
-    "readme_mtime": 1782559520.5376801,
-    "updated": "2026-06-27T06:25:20.538148"
+    "readme_mtime": 1782561329.1266906,
+    "updated": "2026-06-27T06:55:29.127081"
   },
   "brain/vault/inbox": {
-    "hash": "96a04c810b9553f4d9761ff01cc830e4",
+    "hash": "e6d5277787a06b742338fbf9a9248b21",
     "health_score": 100,
-    "readme_mtime": 1782559520.539584,
-    "updated": "2026-06-27T06:25:20.540068"
+    "readme_mtime": 1782561329.1283267,
+    "updated": "2026-06-27T06:55:29.128716"
   },
   "brain/vault/injector": {
-    "hash": "c0d81ee019550b22e12da888b9459726",
+    "hash": "893a175b644b8d8165257d359f4d824f",
     "health_score": 100,
-    "readme_mtime": 1782559520.5414207,
-    "updated": "2026-06-27T06:25:20.541850"
+    "readme_mtime": 1782561329.1299558,
+    "updated": "2026-06-27T06:55:29.130404"
   },
   "brain/vault/knowledge": {
-    "hash": "b24f81f8de0b11da42b23e881bbd8fb7",
+    "hash": "6faf5ab745ee37174b439352a3914029",
     "health_score": 100,
-    "readme_mtime": 1782559520.5438569,
-    "updated": "2026-06-27T06:25:20.544781"
+    "readme_mtime": 1782561329.1324813,
+    "updated": "2026-06-27T06:55:29.133421"
   },
   "brain/vault/learning": {
-    "hash": "c0d81ee019550b22e12da888b9459726",
+    "hash": "893a175b644b8d8165257d359f4d824f",
     "health_score": 100,
-    "readme_mtime": 1782559520.5461566,
-    "updated": "2026-06-27T06:25:20.546568"
+    "readme_mtime": 1782561329.1348467,
+    "updated": "2026-06-27T06:55:29.135341"
   },
   "brain/vault/memory": {
-    "hash": "cdb6af6ebcf9daa6f071427b187a4df3",
+    "hash": "ab3aa822de520afd20f2f186ed0c50d8",
     "health_score": 90,
-    "readme_mtime": 1782559520.548114,
-    "updated": "2026-06-27T06:25:20.548705"
+    "readme_mtime": 1782561329.1368835,
+    "updated": "2026-06-27T06:55:29.137458"
   },
   "brain/vault/projects": {
-    "hash": "633335124d2fcf85f8c817b06140a112",
+    "hash": "2aa5d4df3d83d618e01e1fcbe88848db",
     "health_score": 100,
-    "readme_mtime": 1782559520.5500994,
-    "updated": "2026-06-27T06:25:20.550608"
+    "readme_mtime": 1782561329.1387513,
+    "updated": "2026-06-27T06:55:29.139192"
   },
   "brain/vault/prompts": {
-    "hash": "427e9c8186ddf6e67b73780cf27c65c2",
+    "hash": "e1038e7d38d270dd1014c889ba6b5150",
     "health_score": 100,
-    "readme_mtime": 1782559520.5520277,
-    "updated": "2026-06-27T06:25:20.552466"
+    "readme_mtime": 1782561329.1406164,
+    "updated": "2026-06-27T06:55:29.141109"
   },
   "brain/vault/research": {
-    "hash": "e0046fcdad00493063092301b41587db",
+    "hash": "e0d27c9a8d784576a225eded6206f259",
     "health_score": 90,
-    "readme_mtime": 1782559520.5574756,
-    "updated": "2026-06-27T06:25:20.560080"
+    "readme_mtime": 1782561329.1460488,
+    "updated": "2026-06-27T06:55:29.148643"
   },
   "brain/vault/system": {
-    "hash": "1e71d46330645db177d5d7269ade82df",
+    "hash": "2e94159d1865d25f64cacabc77829fbe",
     "health_score": 100,
-    "readme_mtime": 1782559520.5615826,
-    "updated": "2026-06-27T06:25:20.562113"
+    "readme_mtime": 1782561329.1501079,
+    "updated": "2026-06-27T06:55:29.150628"
   },
   "brain/vault/templates": {
-    "hash": "d8edad355dae64e5c5cd1d881cfd4df7",
+    "hash": "124948d8fde63755745f6ed4cce69bf4",
     "health_score": 100,
-    "readme_mtime": 1782559520.5636635,
-    "updated": "2026-06-27T06:25:20.564249"
+    "readme_mtime": 1782561329.1524522,
+    "updated": "2026-06-27T06:55:29.153206"
   },
   "brain/vault/vault": {
-    "hash": "63e14939b94ec688374f64a65cde04e9",
+    "hash": "3027f46d091808dadc5e05356c280196",
     "health_score": 100,
-    "readme_mtime": 1782559520.5662403,
-    "updated": "2026-06-27T06:25:20.567080"
+    "readme_mtime": 1782561329.1553714,
+    "updated": "2026-06-27T06:55:29.156168"
   },
   "brain/vault/workflows": {
-    "hash": "f85e66bf69099bf43d712d67c5d874a5",
+    "hash": "d6c3b7d0a9d082173067d8a05e943560",
     "health_score": 100,
-    "readme_mtime": 1782559520.5685096,
-    "updated": "2026-06-27T06:25:20.569013"
+    "readme_mtime": 1782561329.1575625,
+    "updated": "2026-06-27T06:55:29.158059"
   },
   "dna": {
-    "hash": "bb6e39147848749f9178198579c4015d",
+    "hash": "988f19ca4ac698484aa37c07284d55ad",
     "health_score": 90,
-    "readme_mtime": 1782559520.5707028,
-    "updated": "2026-06-27T06:25:20.571399"
+    "readme_mtime": 1782561329.159635,
+    "updated": "2026-06-27T06:55:29.160139"
   },
   "dna/feedback": {
-    "hash": "9a31a1c1b5a9b3df23001ce205a85dfd",
+    "hash": "40a850bb4ad0f5d4edfc336437661da9",
     "health_score": 90,
-    "readme_mtime": 1782559520.5753243,
-    "updated": "2026-06-27T06:25:20.577291"
+    "readme_mtime": 1782561329.164043,
+    "updated": "2026-06-27T06:55:29.165958"
   },
   "dna/feedback/inbox": {
-    "hash": "935f6d8fa7fff03560d4a2ce4dd42bae",
+    "hash": "3b8e3fd22e7ca52ef3dc1a9ff316523e",
     "health_score": 100,
-    "readme_mtime": 1782559520.5786757,
-    "updated": "2026-06-27T06:25:20.579091"
+    "readme_mtime": 1782561329.167251,
+    "updated": "2026-06-27T06:55:29.167665"
   },
   "dna/feedback/processed": {
-    "hash": "09bfc302836b91a6491251d00c5fdd9c",
+    "hash": "0da06bc9c765a86314a7ebd3be201ebc",
     "health_score": 100,
-    "readme_mtime": 1782559520.580453,
-    "updated": "2026-06-27T06:25:20.580945"
+    "readme_mtime": 1782561329.1690078,
+    "updated": "2026-06-27T06:55:29.169420"
   },
   "dna/identity": {
-    "hash": "2d694de7d5e1f0489b5e1864eeba261a",
+    "hash": "c14d2c4a5f432e229f508272ce924d6f",
     "health_score": 90,
-    "readme_mtime": 1782559520.5824356,
-    "updated": "2026-06-27T06:25:20.582971"
+    "readme_mtime": 1782561329.1708598,
+    "updated": "2026-06-27T06:55:29.171458"
   },
   "dna/identity/adaptive": {
-    "hash": "5b63579df63fb47465a43a2c5a82a469",
+    "hash": "444a05110e6d1050c580723bbf156dca",
     "health_score": 90,
-    "readme_mtime": 1782559520.590421,
-    "updated": "2026-06-27T06:25:20.594440"
+    "readme_mtime": 1782561329.1787508,
+    "updated": "2026-06-27T06:55:29.182729"
   },
   "dna/identity/integration": {
-    "hash": "77360fd0eb61d32772516db9c4d82d55",
+    "hash": "cad74844bc9b6676d9c1262842805ec1",
     "health_score": 100,
-    "readme_mtime": 1782559520.5958474,
-    "updated": "2026-06-27T06:25:20.596422"
+    "readme_mtime": 1782561329.1841388,
+    "updated": "2026-06-27T06:55:29.184790"
   },
   "dna/identity/interview": {
-    "hash": "0c839170d66097237ca386ed5313587f",
+    "hash": "17619539358d0cce64d96b601f848182",
     "health_score": 100,
-    "readme_mtime": 1782559520.597797,
-    "updated": "2026-06-27T06:25:20.598272"
+    "readme_mtime": 1782561329.1861973,
+    "updated": "2026-06-27T06:55:29.186710"
   },
   "dna/identity/profile": {
-    "hash": "e64cf67fba55439374a344893a68416a",
+    "hash": "6676920b73c1e03a684087deb2f1f25b",
     "health_score": 100,
-    "readme_mtime": 1782559520.59972,
-    "updated": "2026-06-27T06:25:20.600305"
+    "readme_mtime": 1782561329.1881828,
+    "updated": "2026-06-27T06:55:29.188799"
   },
   "dna/identity/prompts": {
-    "hash": "e2a28c6c9a682cc85c89714411b7a17e",
+    "hash": "020b4902ebfc65c12ab13caa4a36f94e",
     "health_score": 100,
-    "readme_mtime": 1782559520.6016748,
-    "updated": "2026-06-27T06:25:20.602150"
+    "readme_mtime": 1782561329.1902025,
+    "updated": "2026-06-27T06:55:29.190675"
   },
   "dna/identity/reports": {
-    "hash": "c7a6e164b4e70465db5818ee237b4221",
+    "hash": "87730db9755fa23deb4660ba739fa925",
     "health_score": 100,
-    "readme_mtime": 1782559520.603469,
-    "updated": "2026-06-27T06:25:20.603938"
+    "readme_mtime": 1782561329.1919723,
+    "updated": "2026-06-27T06:55:29.192449"
   },
   "docs": {
-    "hash": "f9a97fcd04348a517cfe9819f7e9bba4",
+    "hash": "c64ab2d876b2217fd777783e4c05625d",
     "health_score": 100,
-    "readme_mtime": 1782559520.6052701,
-    "updated": "2026-06-27T06:25:20.605702"
+    "readme_mtime": 1782561329.1937692,
+    "updated": "2026-06-27T06:55:29.194156"
   },
   "docs/superpowers": {
-    "hash": "975e3fd1b0899b378ad186ab7ba8249e",
+    "hash": "4a039866b62343dc33d4bbf762aed37d",
     "health_score": 100,
-    "readme_mtime": 1782559520.6069658,
-    "updated": "2026-06-27T06:25:20.607396"
+    "readme_mtime": 1782561329.1954122,
+    "updated": "2026-06-27T06:55:29.195825"
   },
   "docs/superpowers/plans": {
-    "hash": "8ba2f066759b3ce54c42e8b504137043",
+    "hash": "ed4ad7e53b6da5c4bfc8e48ed52ba336",
     "health_score": 100,
-    "readme_mtime": 1782559520.6088328,
-    "updated": "2026-06-27T06:25:20.609299"
+    "readme_mtime": 1782561329.1971343,
+    "updated": "2026-06-27T06:55:29.197571"
   },
   "ears": {
-    "hash": "c8d911fae6996316cf65ceb6266e7d89",
+    "hash": "0a61027166f78d29947534df730c2b4f",
     "health_score": 90,
-    "readme_mtime": 1782559520.6107605,
-    "updated": "2026-06-27T06:25:20.611249"
+    "readme_mtime": 1782561329.1990232,
+    "updated": "2026-06-27T06:55:29.199565"
   },
   "ears/monitor": {
-    "hash": "737fcfe6ad819028d7ac835bacbc8972",
+    "hash": "7f0a03b14c833b502089e7ec7945a942",
     "health_score": 90,
-    "readme_mtime": 1782559520.6134393,
-    "updated": "2026-06-27T06:25:20.614346"
+    "readme_mtime": 1782561329.2017405,
+    "updated": "2026-06-27T06:55:29.202683"
   },
   "ears/monitor/cache": {
-    "hash": "cab38e90e03136af31996484676e23e4",
+    "hash": "e283d2758b448a58fbfe86e2a2887b86",
     "health_score": 100,
-    "readme_mtime": 1782559520.615639,
-    "updated": "2026-06-27T06:25:20.616168"
+    "readme_mtime": 1782561329.2040453,
+    "updated": "2026-06-27T06:55:29.204458"
   },
   "ears/monitor/config": {
-    "hash": "8c05b580a44826b39c71dd8a911e4837",
+    "hash": "6100710b1ac9ae09b37085f7b8c06d09",
     "health_score": 100,
-    "readme_mtime": 1782559520.6176825,
-    "updated": "2026-06-27T06:25:20.618160"
+    "readme_mtime": 1782561329.2058327,
+    "updated": "2026-06-27T06:55:29.206259"
   },
   "ears/monitor/digest": {
-    "hash": "7f5c01c3e7bae3f6c9bdd7cfb2d59276",
+    "hash": "91e769b10d107172e8900b5a69de2b4b",
     "health_score": 90,
-    "readme_mtime": 1782559520.621902,
-    "updated": "2026-06-27T06:25:20.623637"
+    "readme_mtime": 1782561329.2097547,
+    "updated": "2026-06-27T06:55:29.211478"
   },
   "ears/monitor/sources": {
-    "hash": "8a3244a993baa49e12dc10270a11e847",
+    "hash": "ca717b5302f5dc9034b219c0947ea5cb",
     "health_score": 90,
-    "readme_mtime": 1782559520.6292157,
-    "updated": "2026-06-27T06:25:20.632268"
+    "readme_mtime": 1782561329.217007,
+    "updated": "2026-06-27T06:55:29.220037"
   },
   "eyes": {
-    "hash": "c7256960ede20d81b87c67dddf2f4457",
+    "hash": "1d125cb7bc03415420a400cd71222ae0",
     "health_score": 90,
-    "readme_mtime": 1782559520.633756,
-    "updated": "2026-06-27T06:25:20.634291"
+    "readme_mtime": 1782561329.2215297,
+    "updated": "2026-06-27T06:55:29.222068"
   },
   "eyes/agent-system": {
-    "hash": "cf03329214f5d1d32ee078dcafe987ba",
+    "hash": "fbfd6f70753d48ba1683255bb7d94b38",
     "health_score": 100,
-    "readme_mtime": 1782559520.635591,
-    "updated": "2026-06-27T06:25:20.636005"
+    "readme_mtime": 1782561329.223329,
+    "updated": "2026-06-27T06:55:29.223729"
   },
   "eyes/dashboard": {
-    "hash": "08fc0d94072d574c907508bce98bc77b",
+    "hash": "088b2a34a3c3bf375586546f8c112470",
     "health_score": 90,
-    "readme_mtime": 1782559520.6504009,
-    "updated": "2026-06-27T06:25:20.659285"
+    "readme_mtime": 1782561329.237605,
+    "updated": "2026-06-27T06:55:29.246295"
   },
   "eyes/dashboard/execution": {
-    "hash": "c2aeab108e58067e37786b52f735fb2c",
+    "hash": "3be5256932899ce83c8e6210a22638dd",
     "health_score": 90,
-    "readme_mtime": 1782559520.6645205,
-    "updated": "2026-06-27T06:25:20.667093"
+    "readme_mtime": 1782561329.2517111,
+    "updated": "2026-06-27T06:55:29.254317"
   },
   "eyes/dashboard/pipeline": {
-    "hash": "4031615b39b46deca27628e9b6042d55",
+    "hash": "fa0fc7de5286700e9239a491c34fce32",
     "health_score": 90,
-    "readme_mtime": 1782559520.6732445,
-    "updated": "2026-06-27T06:25:20.676496"
+    "readme_mtime": 1782561329.2605982,
+    "updated": "2026-06-27T06:55:29.263861"
   },
   "eyes/dashboard/screenshots": {
-    "hash": "081f125d70abd32a3b4a6f23d52a9356",
+    "hash": "e1afe18fed797bb40d09136a130303ff",
     "health_score": 100,
-    "readme_mtime": 1782559520.677869,
-    "updated": "2026-06-27T06:25:20.678422"
+    "readme_mtime": 1782561329.2653615,
+    "updated": "2026-06-27T06:55:29.265811"
   },
   "eyes/dashboard/static": {
-    "hash": "2e16e6404e7930bd1c11dcd1bbd29ea0",
+    "hash": "75d7016e7b562854c830787a02809c8f",
     "health_score": 100,
-    "readme_mtime": 1782559520.679785,
-    "updated": "2026-06-27T06:25:20.680221"
+    "readme_mtime": 1782561329.267172,
+    "updated": "2026-06-27T06:55:29.267624"
   },
   "eyes/dashboard/widgets": {
-    "hash": "000de1212737b8ad02dcd51d9d8ec157",
+    "hash": "129037f45f1053bdcfffe93f7550a17f",
     "health_score": 90,
-    "readme_mtime": 1782559520.687476,
-    "updated": "2026-06-27T06:25:20.691545"
+    "readme_mtime": 1782561329.2749557,
+    "updated": "2026-06-27T06:55:29.279030"
   },
   "eyes/visual": {
-    "hash": "4db2dbea3fb36b48d5dc667605f6ece5",
+    "hash": "2b12c660de1b9b76adcdefa08b5dd07d",
     "health_score": 90,
-    "readme_mtime": 1782559520.700395,
-    "updated": "2026-06-27T06:25:20.705509"
+    "readme_mtime": 1782561329.2881312,
+    "updated": "2026-06-27T06:55:29.293192"
   },
   "eyes/visual/screenshots": {
-    "hash": "a5241fe64f40d3a2877085b6dba50ccb",
+    "hash": "333d6a9b66424e1fd61c2012e9037d6e",
     "health_score": 100,
-    "readme_mtime": 1782559520.7068934,
-    "updated": "2026-06-27T06:25:20.707364"
+    "readme_mtime": 1782561329.294556,
+    "updated": "2026-06-27T06:55:29.295009"
   },
   "hands": {
-    "hash": "c89d2b38018f4d331073d4e63748d7f9",
+    "hash": "dc479ff3957834873941760bcd99278b",
     "health_score": 90,
-    "readme_mtime": 1782559520.708881,
-    "updated": "2026-06-27T06:25:20.709445"
+    "readme_mtime": 1782561329.296527,
+    "updated": "2026-06-27T06:55:29.297152"
   },
   "hands/automation": {
-    "hash": "aa89997ac8766794796b456c7b30e944",
+    "hash": "c1a0231323fbe1b6feb513e91fb04960",
     "health_score": 90,
-    "readme_mtime": 1782559520.7124856,
-    "updated": "2026-06-27T06:25:20.713937"
+    "readme_mtime": 1782561329.3003151,
+    "updated": "2026-06-27T06:55:29.301762"
   },
   "hands/automation/ci": {
-    "hash": "f57203d86c11eb3b74683bc803874181",
+    "hash": "2789ef1d98fd4dee1e29a12dbf07dfe4",
     "health_score": 90,
-    "readme_mtime": 1782559520.7173107,
-    "updated": "2026-06-27T06:25:20.718969"
+    "readme_mtime": 1782561329.3052576,
+    "updated": "2026-06-27T06:55:29.306923"
   },
   "hands/automation/cron": {
-    "hash": "1e86c85a60f46af636c37d7b5ff89715",
+    "hash": "b9264e694682509e7c7c609a73ee1500",
     "health_score": 100,
-    "readme_mtime": 1782559520.720303,
-    "updated": "2026-06-27T06:25:20.720787"
+    "readme_mtime": 1782561329.3082974,
+    "updated": "2026-06-27T06:55:29.308732"
   },
   "hands/automation/doctor": {
-    "hash": "71e8a540253c65ceddde44bbecaa86c4",
+    "hash": "80af4e66e96f781c1df5648c346129ac",
     "health_score": 100,
-    "readme_mtime": 1782559520.7224922,
-    "updated": "2026-06-27T06:25:20.723000"
+    "readme_mtime": 1782561329.310107,
+    "updated": "2026-06-27T06:55:29.310575"
   },
   "hands/automation/git": {
-    "hash": "aa290bf84b42ec0b2d0823a652299af5",
+    "hash": "3bb169c0a404dc9730836e49a7eab2fa",
     "health_score": 90,
-    "readme_mtime": 1782559520.7304971,
-    "updated": "2026-06-27T06:25:20.735462"
+    "readme_mtime": 1782561329.3181617,
+    "updated": "2026-06-27T06:55:29.323303"
   },
   "hands/automation/hooks": {
-    "hash": "162043ec8dad0b45b0e4dfbba8c1dcea",
+    "hash": "e3903179123bce56c4db14e408cf728b",
     "health_score": 100,
-    "readme_mtime": 1782559520.7369144,
-    "updated": "2026-06-27T06:25:20.737338"
+    "readme_mtime": 1782561329.3249822,
+    "updated": "2026-06-27T06:55:29.325510"
   },
   "hands/automation/launchd": {
-    "hash": "c80ed132c1bb106d676e0ea6110344b8",
+    "hash": "b26839f66a9ae3ee40cac118ccbbf20c",
     "health_score": 100,
-    "readme_mtime": 1782559520.7387815,
-    "updated": "2026-06-27T06:25:20.739258"
+    "readme_mtime": 1782561329.3270636,
+    "updated": "2026-06-27T06:55:29.327576"
   },
   "hands/automation/maintenance": {
-    "hash": "2fce2ac33d4c7e8734883ac7e34d118e",
+    "hash": "112a402ccbb9ec0c94a2114f5420698f",
     "health_score": 100,
-    "readme_mtime": 1782559520.7436204,
-    "updated": "2026-06-27T06:25:20.746770"
+    "readme_mtime": 1782561329.3319557,
+    "updated": "2026-06-27T06:55:29.335478"
   },
   "hands/automation/readme": {
-    "hash": "c9b25f93c996303f971fbec0060a54c0",
+    "hash": "1332e4bd9113c41094346ce3ca432835",
     "health_score": 90,
-    "readme_mtime": 1782559520.8021154,
-    "updated": "2026-06-27T06:25:20.837813"
+    "readme_mtime": 1782561329.3903453,
+    "updated": "2026-06-27T06:55:29.426326"
   },
   "hands/automation/repair": {
-    "hash": "71e8a540253c65ceddde44bbecaa86c4",
+    "hash": "80af4e66e96f781c1df5648c346129ac",
     "health_score": 100,
-    "readme_mtime": 1782559520.839373,
-    "updated": "2026-06-27T06:25:20.839791"
+    "readme_mtime": 1782561329.4278772,
+    "updated": "2026-06-27T06:55:29.428298"
   },
   "hands/automation/reports": {
-    "hash": "b36a8dc4a3c4a97a632d34ebea2790a6",
+    "hash": "6e3e32840eaf042d861f255d22145bc2",
     "health_score": 100,
-    "readme_mtime": 1782559520.8412087,
-    "updated": "2026-06-27T06:25:20.841689"
+    "readme_mtime": 1782561329.4296846,
+    "updated": "2026-06-27T06:55:29.430159"
   },
   "hands/bin": {
-    "hash": "6e87bc89048cba5c6218d7ffa6f08286",
+    "hash": "364211d6d44a34e96524a00419774d8f",
     "health_score": 100,
-    "readme_mtime": 1782559520.8468409,
-    "updated": "2026-06-27T06:25:20.850171"
+    "readme_mtime": 1782561329.435169,
+    "updated": "2026-06-27T06:55:29.438563"
   },
   "hands/codex": {
-    "hash": "6939e58959fd55a30a2620c7700c265f",
+    "hash": "bf59345f157f2b61540140be663cfd13",
     "health_score": 100,
-    "readme_mtime": 1782559520.8516173,
-    "updated": "2026-06-27T06:25:20.852056"
+    "readme_mtime": 1782561329.4400105,
+    "updated": "2026-06-27T06:55:29.440451"
   },
   "hands/projects": {
-    "hash": "2acbc92c4b3bafbbc82a32bd0abd71ae",
+    "hash": "7d6b14ba817dbe832f940628554e3343",
     "health_score": 100,
-    "readme_mtime": 1782559520.8533149,
-    "updated": "2026-06-27T06:25:20.853720"
+    "readme_mtime": 1782561329.4417598,
+    "updated": "2026-06-27T06:55:29.442198"
   },
   "hands/projects/fine-tuning": {
-    "hash": "68ae2561a54981590c9c642b1f7093ca",
+    "hash": "8071c57848b2640eda9b907dac0e4be8",
     "health_score": 90,
-    "readme_mtime": 1782559520.856606,
-    "updated": "2026-06-27T06:25:20.857927"
+    "readme_mtime": 1782561329.445117,
+    "updated": "2026-06-27T06:55:29.446421"
   },
   "hands/prompts": {
-    "hash": "4282089a5123ea8ee3130bc7e5ff159d",
+    "hash": "8951e17c36686eba9ffcb1492315e05c",
     "health_score": 100,
-    "readme_mtime": 1782559520.8591752,
-    "updated": "2026-06-27T06:25:20.859597"
+    "readme_mtime": 1782561329.4476438,
+    "updated": "2026-06-27T06:55:29.448028"
   },
   "hands/scripts": {
-    "hash": "c1507168c5e8b440aabe8e59ac60bd01",
+    "hash": "1c3db9c87858fcd552bd6cce90b09a33",
     "health_score": 90,
-    "readme_mtime": 1782559520.943131,
-    "updated": "2026-06-27T06:25:21.007381"
+    "readme_mtime": 1782561329.5319874,
+    "updated": "2026-06-27T06:55:29.595757"
   },
   "hands/scripts/workflows": {
-    "hash": "33138d21f37fba5dd8d0662c34bb911e",
+    "hash": "14bf06d8e05da422c9bdb535eaaf379b",
     "health_score": 60,
-    "readme_mtime": 1782559521.0153425,
-    "updated": "2026-06-27T06:25:21.020068"
+    "readme_mtime": 1782561329.6035435,
+    "updated": "2026-06-27T06:55:29.608571"
   },
   "heart": {
-    "hash": "cafbd684838c5bb511c0a2e1e24b29b8",
+    "hash": "2a5d68c9b3f6f141c2242f2e9ed57607",
     "health_score": 90,
-    "readme_mtime": 1782559521.0218601,
-    "updated": "2026-06-27T06:25:21.022444"
+    "readme_mtime": 1782561329.610407,
+    "updated": "2026-06-27T06:55:29.611033"
   },
   "heart/goals": {
-    "hash": "a4681ab302b6a691208f1a5de1f9e083",
+    "hash": "5325258c7937b8b2f835c4db19c0c25e",
     "health_score": 90,
-    "readme_mtime": 1782559521.023954,
-    "updated": "2026-06-27T06:25:21.024517"
+    "readme_mtime": 1782561329.6126375,
+    "updated": "2026-06-27T06:55:29.613233"
   },
   "heart/goals/execution": {
-    "hash": "c7a5e3de9ded1c5ce373135d30ba9bd3",
+    "hash": "fab7bbca08d48885534069ebc1d3f744",
     "health_score": 100,
-    "readme_mtime": 1782559521.0259483,
-    "updated": "2026-06-27T06:25:21.026484"
+    "readme_mtime": 1782561329.6147168,
+    "updated": "2026-06-27T06:55:29.615318"
   },
   "heart/goals/goals": {
-    "hash": "09bc8a12cd6c5c2b957e2e99ff4ced00",
+    "hash": "bbe8649c59a90cec66098f84c74afa79",
     "health_score": 100,
-    "readme_mtime": 1782559521.0280297,
-    "updated": "2026-06-27T06:25:21.028494"
+    "readme_mtime": 1782561329.6169078,
+    "updated": "2026-06-27T06:55:29.617454"
   },
   "heart/goals/graph": {
-    "hash": "fa66d0bfc7832831055d3a067644ec1a",
+    "hash": "21a41caf1445f330354810e209d342d0",
     "health_score": 100,
-    "readme_mtime": 1782559521.0299351,
-    "updated": "2026-06-27T06:25:21.030430"
+    "readme_mtime": 1782561329.619043,
+    "updated": "2026-06-27T06:55:29.619667"
   },
   "heart/goals/planner": {
-    "hash": "97db1f8c1f14d480bfc659ef251ef5e8",
+    "hash": "0934793aab488d25c786e1f88ed04154",
     "health_score": 100,
-    "readme_mtime": 1782559521.0320199,
-    "updated": "2026-06-27T06:25:21.032520"
+    "readme_mtime": 1782561329.6275747,
+    "updated": "2026-06-27T06:55:29.628116"
   },
   "heart/goals/reports": {
-    "hash": "4320860011f1fafc79e51cb32bc2f8f4",
+    "hash": "d8d7f9707100d890b32004d93ec972cd",
     "health_score": 100,
-    "readme_mtime": 1782559521.033932,
-    "updated": "2026-06-27T06:25:21.034393"
+    "readme_mtime": 1782561329.6294959,
+    "updated": "2026-06-27T06:55:29.629948"
   },
   "heart/goals/scripts": {
-    "hash": "1e5e93aecec1f9abd6e666a49d3fb30d",
+    "hash": "ed74af1c6c009b50f84bdb08041e518a",
     "health_score": 100,
-    "readme_mtime": 1782559521.0358925,
-    "updated": "2026-06-27T06:25:21.036442"
+    "readme_mtime": 1782561329.6314409,
+    "updated": "2026-06-27T06:55:29.632006"
   },
   "heart/goals/state": {
-    "hash": "6f8c5e1b67f99e8d25808008a365a8ae",
+    "hash": "93f720b91a72676338c89e8d65495367",
     "health_score": 100,
-    "readme_mtime": 1782559521.0379624,
-    "updated": "2026-06-27T06:25:21.038477"
+    "readme_mtime": 1782561329.638651,
+    "updated": "2026-06-27T06:55:29.639280"
   },
   "heart/model_router": {
-    "hash": "ada0fc6e14fad53d261b8d714fd4b37f",
+    "hash": "44a14e590e8b01a5916f56724cb05582",
     "health_score": 90,
-    "readme_mtime": 1782559521.04301,
-    "updated": "2026-06-27T06:25:21.045621"
+    "readme_mtime": 1782561329.651928,
+    "updated": "2026-06-27T06:55:29.656226"
   },
   "heart/orchestrator": {
-    "hash": "a4681ab302b6a691208f1a5de1f9e083",
+    "hash": "5325258c7937b8b2f835c4db19c0c25e",
     "health_score": 90,
-    "readme_mtime": 1782559521.0471067,
-    "updated": "2026-06-27T06:25:21.047658"
+    "readme_mtime": 1782561329.6582108,
+    "updated": "2026-06-27T06:55:29.658813"
   },
   "heart/orchestrator/dag": {
-    "hash": "598ac7c05e50f5523eff6708d7a17434",
+    "hash": "002570a3f4eb84d5147d3e882afca0b3",
     "health_score": 90,
-    "readme_mtime": 1782559521.0566049,
-    "updated": "2026-06-27T06:25:21.061565"
+    "readme_mtime": 1782561329.6678376,
+    "updated": "2026-06-27T06:55:29.672855"
   },
   "heart/orchestrator/mesh": {
-    "hash": "5f51e79fa6fac0d3515969933535187f",
+    "hash": "9552ec587ea2366cb94e75f0838ac477",
     "health_score": 90,
-    "readme_mtime": 1782559521.064429,
-    "updated": "2026-06-27T06:25:21.065783"
+    "readme_mtime": 1782561329.6756973,
+    "updated": "2026-06-27T06:55:29.677029"
   },
   "heart/orchestrator/models": {
-    "hash": "8bdcd069cf0df3ca820080ad4842c01a",
+    "hash": "8f7913d6b871101d54008f188f21cff0",
     "health_score": 100,
-    "readme_mtime": 1782559521.0671792,
-    "updated": "2026-06-27T06:25:21.067691"
+    "readme_mtime": 1782561329.6784441,
+    "updated": "2026-06-27T06:55:29.678934"
   },
   "heart/orchestrator/reports": {
-    "hash": "a8e40348ac7002f27029e569dd6b1a9a",
+    "hash": "d222a980464d2b7d5b1a2c449f8b8ff3",
     "health_score": 100,
-    "readme_mtime": 1782559521.0692253,
-    "updated": "2026-06-27T06:25:21.069799"
+    "readme_mtime": 1782561329.6803427,
+    "updated": "2026-06-27T06:55:29.680957"
   },
   "heart/orchestrator/router": {
-    "hash": "c8ef7d4b1301f1129c3dac4ba03cbd51",
+    "hash": "8f727f6dad8f0199b95f0b02c5e27b42",
     "health_score": 90,
-    "readme_mtime": 1782559521.0738611,
-    "updated": "2026-06-27T06:25:21.075836"
+    "readme_mtime": 1782561329.6849406,
+    "updated": "2026-06-27T06:55:29.686873"
   },
   "heart/orchestrator/scripts": {
-    "hash": "90b047af718d3ee42555bc002f2c1da1",
+    "hash": "d2d0694e640eef7654dc08690f22ee41",
     "health_score": 100,
-    "readme_mtime": 1782559521.0773733,
-    "updated": "2026-06-27T06:25:21.077850"
+    "readme_mtime": 1782561329.6882958,
+    "updated": "2026-06-27T06:55:29.688811"
   },
   "heart/orchestrator/state": {
-    "hash": "829de163cb988f83b150df5404ed6aa8",
+    "hash": "29dab6dafd1bb432363c20d2aaa4b2c9",
     "health_score": 100,
-    "readme_mtime": 1782559521.0792816,
-    "updated": "2026-06-27T06:25:21.079885"
+    "readme_mtime": 1782561329.6903863,
+    "updated": "2026-06-27T06:55:29.690860"
   },
   "heart/tasks": {
-    "hash": "931c5b4a9911c5bb73011aef90accb27",
+    "hash": "3751fd705ec4e5319cd18b379eafb4f8",
     "health_score": 90,
-    "readme_mtime": 1782559521.0813522,
-    "updated": "2026-06-27T06:25:21.081853"
+    "readme_mtime": 1782561329.6923096,
+    "updated": "2026-06-27T06:55:29.692907"
   },
   "lab": {
-    "hash": "c458d5ed24240b310b2d57ff7767cef9",
+    "hash": "07a865a854f38a78c85a22aec259cacb",
     "health_score": 90,
-    "readme_mtime": 1782559521.0834427,
-    "updated": "2026-06-27T06:25:21.084167"
+    "readme_mtime": 1782561329.6945088,
+    "updated": "2026-06-27T06:55:29.695070"
   },
   "lab/autolab": {
-    "hash": "8445b8fb4ea1fb304d19af9c73f86da2",
+    "hash": "2edd2c988db926057abfba0a6606dc7a",
     "health_score": 90,
-    "readme_mtime": 1782559521.0977557,
-    "updated": "2026-06-27T06:25:21.105617"
+    "readme_mtime": 1782561329.708547,
+    "updated": "2026-06-27T06:55:29.716422"
   },
   "lab/autolab/archive": {
-    "hash": "cd2609835e79c693a6ab284e1acc3608",
+    "hash": "185eb77a2ab843b760129ce874bbf877",
     "health_score": 100,
-    "readme_mtime": 1782559521.1069708,
-    "updated": "2026-06-27T06:25:21.107413"
+    "readme_mtime": 1782561329.7177868,
+    "updated": "2026-06-27T06:55:29.718237"
   },
   "lab/autolab/experiments": {
-    "hash": "e181143112cef069f3948c60f05a037a",
+    "hash": "382c591c3b89b59354ff2027a6219d51",
     "health_score": 100,
-    "readme_mtime": 1782559521.108749,
-    "updated": "2026-06-27T06:25:21.109188"
+    "readme_mtime": 1782561329.7195773,
+    "updated": "2026-06-27T06:55:29.720025"
   },
   "lab/autolab/meta": {
-    "hash": "c11865714b6aea3d2c4c4e7a06632c82",
+    "hash": "851ac7e54f13c350cff6f09b4778aee6",
     "health_score": 100,
-    "readme_mtime": 1782559521.1108527,
-    "updated": "2026-06-27T06:25:21.111527"
+    "readme_mtime": 1782561329.7217724,
+    "updated": "2026-06-27T06:55:29.722470"
   },
   "lab/autolab/patches": {
-    "hash": "7b702270b7a47aeadc6d587b1ede1a64",
+    "hash": "a39eac1156cb751fc5b57fff7834cac9",
     "health_score": 100,
-    "readme_mtime": 1782559521.1131172,
-    "updated": "2026-06-27T06:25:21.113652"
+    "readme_mtime": 1782561329.7238946,
+    "updated": "2026-06-27T06:55:29.724373"
   },
   "lab/autolab/quarantine": {
-    "hash": "21ef769e43ea2cb5e2f9da748851a8c7",
+    "hash": "8606d164b6ee872311e20d06b2156936",
     "health_score": 100,
-    "readme_mtime": 1782559521.1151273,
-    "updated": "2026-06-27T06:25:21.115674"
+    "readme_mtime": 1782561329.7256763,
+    "updated": "2026-06-27T06:55:29.726168"
   },
   "lab/autolab/reports": {
-    "hash": "18e70e875ee903cb2c45643e10870ddd",
+    "hash": "b2053084626e53b7dbdf74456af13ae4",
     "health_score": 100,
-    "readme_mtime": 1782559521.1171775,
-    "updated": "2026-06-27T06:25:21.117750"
+    "readme_mtime": 1782561329.7278626,
+    "updated": "2026-06-27T06:55:29.728422"
   },
   "lab/autolab/sandboxes": {
-    "hash": "1323f5ab3617e0734c77e6218830ffe5",
+    "hash": "79e02ebe3e014d620f2768ec51cab777",
     "health_score": 100,
-    "readme_mtime": 1782559521.11908,
-    "updated": "2026-06-27T06:25:21.119604"
+    "readme_mtime": 1782561329.7296638,
+    "updated": "2026-06-27T06:55:29.730058"
   },
   "lab/autolab/scripts": {
-    "hash": "e3bfb3be50baf988f5bd4e280fb5bcd5",
+    "hash": "6d494255f5d7be78ebd17926d2fe6de2",
     "health_score": 100,
-    "readme_mtime": 1782559521.121546,
-    "updated": "2026-06-27T06:25:21.122306"
+    "readme_mtime": 1782561329.7322516,
+    "updated": "2026-06-27T06:55:29.733253"
   },
   "lab/autolab/snapshots": {
-    "hash": "91729d0e9c83951fb660214737f241c9",
+    "hash": "d77c2406a220963e7b3be3a14e50aa94",
     "health_score": 100,
-    "readme_mtime": 1782559521.1236062,
-    "updated": "2026-06-27T06:25:21.124031"
+    "readme_mtime": 1782561329.7348626,
+    "updated": "2026-06-27T06:55:29.735395"
   },
   "lab/autolab/state": {
-    "hash": "9d3ace124f781361a3ae4019e9efae70",
+    "hash": "ad8d490a7b9ad8689152af13929b0711",
     "health_score": 100,
-    "readme_mtime": 1782559521.1255794,
-    "updated": "2026-06-27T06:25:21.126217"
+    "readme_mtime": 1782561329.7370067,
+    "updated": "2026-06-27T06:55:29.737517"
   },
   "lab/autolab/templates": {
-    "hash": "e4a6a5a96b3d6c5c748bc6687d21cdc0",
+    "hash": "6b48077dab7fcc131a5c02a49618851a",
     "health_score": 100,
-    "readme_mtime": 1782559521.1278958,
-    "updated": "2026-06-27T06:25:21.128494"
+    "readme_mtime": 1782561329.738965,
+    "updated": "2026-06-27T06:55:29.739426"
   },
   "lab/autolab/training_data": {
-    "hash": "8a60b1a043be64cb14be25bfecd36002",
+    "hash": "e26801cc6471e86408b0910bb24a75cd",
     "health_score": 100,
-    "readme_mtime": 1782559521.1301036,
-    "updated": "2026-06-27T06:25:21.130533"
+    "readme_mtime": 1782561329.7406588,
+    "updated": "2026-06-27T06:55:29.741054"
   },
   "lab/brain": {
-    "hash": "5613eba751f2e9c0ebfda7fd5ffa0258",
+    "hash": "82f516d26861f5c4ce3901080f8bc834",
     "health_score": 100,
-    "readme_mtime": 1782559521.131862,
-    "updated": "2026-06-27T06:25:21.132291"
+    "readme_mtime": 1782561329.7423313,
+    "updated": "2026-06-27T06:55:29.742816"
   },
   "lab/brain/system": {
-    "hash": "531b88e8f3c56802be9fe8cf4d0750f5",
+    "hash": "074462f948c1efd12f06651d994abf87",
     "health_score": 100,
-    "readme_mtime": 1782559521.1336567,
-    "updated": "2026-06-27T06:25:21.134114"
+    "readme_mtime": 1782561329.7441351,
+    "updated": "2026-06-27T06:55:29.744567"
   },
   "lab/evolution": {
-    "hash": "ab838cc1e202d2cc59054255f0a59138",
+    "hash": "896c1fe685eb248370f8da7975e28cd5",
     "health_score": 90,
-    "readme_mtime": 1782559521.1399314,
-    "updated": "2026-06-27T06:25:21.143045"
+    "readme_mtime": 1782561329.7504346,
+    "updated": "2026-06-27T06:55:29.753555"
   },
   "lab/prompts": {
-    "hash": "087e53b5a1dd674c15941149817d9bfb",
+    "hash": "0c6c27f338998fbd9d4aad3c21a6930a",
     "health_score": 100,
-    "readme_mtime": 1782559521.1442893,
-    "updated": "2026-06-27T06:25:21.144678"
+    "readme_mtime": 1782561329.754815,
+    "updated": "2026-06-27T06:55:29.755198"
   },
   "lab/testing": {
-    "hash": "95e709d57d98f49b21c4d618b8378eed",
+    "hash": "a71da9a75e01f64cfb6d61a03f4439d8",
     "health_score": 90,
-    "readme_mtime": 1782559521.1505897,
-    "updated": "2026-06-27T06:25:21.153761"
+    "readme_mtime": 1782561329.7611635,
+    "updated": "2026-06-27T06:55:29.764437"
   },
   "lab/testing/reports": {
-    "hash": "ee7fdf6949cb1929ce3da9bb582e3aa3",
+    "hash": "e43a0451b621d392d8f597f2d90ded3b",
     "health_score": 100,
-    "readme_mtime": 1782559521.155086,
-    "updated": "2026-06-27T06:25:21.155523"
+    "readme_mtime": 1782561329.7657328,
+    "updated": "2026-06-27T06:55:29.766187"
   },
   "lab/tests": {
-    "hash": "04dba72f5bca00ac026cb7937d6af554",
+    "hash": "6b2a38b1a4c0844ec31858d4b60af1d2",
     "health_score": 100,
-    "readme_mtime": 1782559521.1597214,
-    "updated": "2026-06-27T06:25:21.161722"
+    "readme_mtime": 1782561329.770203,
+    "updated": "2026-06-27T06:55:29.772349"
   },
   "mouth": {
-    "hash": "07f64fc2a6247f0c9d68071d0260ffc7",
+    "hash": "6a09ea68282122990f055a866bd586af",
     "health_score": 90,
-    "readme_mtime": 1782559521.1666684,
-    "updated": "2026-06-27T06:25:21.167186"
+    "readme_mtime": 1782561329.7774918,
+    "updated": "2026-06-27T06:55:29.778009"
   },
   "mouth/comms": {
-    "hash": "8510420689ea7de4c6b87f4b3f41fc28",
+    "hash": "fdc0808374a6179037bd9e9bb7b09d39",
     "health_score": 90,
-    "readme_mtime": 1782559521.1686447,
-    "updated": "2026-06-27T06:25:21.169175"
+    "readme_mtime": 1782561329.7795732,
+    "updated": "2026-06-27T06:55:29.780185"
   },
   "mouth/comms/config": {
-    "hash": "f0964fb6a81c135ea53648f461efbf2c",
+    "hash": "cae7abb3d69216f922a33e722694767f",
     "health_score": 100,
-    "readme_mtime": 1782559521.170837,
-    "updated": "2026-06-27T06:25:21.171525"
+    "readme_mtime": 1782561329.7818458,
+    "updated": "2026-06-27T06:55:29.782455"
   },
   "mouth/comms/docs": {
-    "hash": "e522367c90b061c66901b6ef6dd090b2",
+    "hash": "9e10ea49cdf14df191ad0f840d6bbb1b",
     "health_score": 100,
-    "readme_mtime": 1782559521.172954,
-    "updated": "2026-06-27T06:25:21.173472"
+    "readme_mtime": 1782561329.783865,
+    "updated": "2026-06-27T06:55:29.784484"
   },
   "mouth/comms/imessage": {
-    "hash": "e00887ef5e0a399da2045927da25de23",
+    "hash": "46cfa3d88ebd3936a1b12f9480486ce5",
     "health_score": 100,
-    "readme_mtime": 1782559521.1748142,
-    "updated": "2026-06-27T06:25:21.175257"
+    "readme_mtime": 1782561329.785929,
+    "updated": "2026-06-27T06:55:29.786391"
   },
   "mouth/comms/mail": {
-    "hash": "72006f8e6d3f26a65c482b09ad99c146",
+    "hash": "a20b4a5fa4f1c5069b406c03a1e57db5",
     "health_score": 100,
-    "readme_mtime": 1782559521.1765792,
-    "updated": "2026-06-27T06:25:21.177178"
+    "readme_mtime": 1782561329.7877183,
+    "updated": "2026-06-27T06:55:29.788150"
   },
   "mouth/comms/reports": {
-    "hash": "2c107134aecfb0b91319c7db28853cb0",
+    "hash": "07b45260ef0192ae86262a27678ca826",
     "health_score": 100,
-    "readme_mtime": 1782559521.1786342,
-    "updated": "2026-06-27T06:25:21.179080"
+    "readme_mtime": 1782561329.7894552,
+    "updated": "2026-06-27T06:55:29.789892"
   },
   "mouth/comms/workflows": {
-    "hash": "b9e0f8e1c7a0e36df77e415de0f3179d",
+    "hash": "1680d5e456b9b9e9ebf561bb6cdc0fee",
     "health_score": 100,
-    "readme_mtime": 1782559521.1803746,
-    "updated": "2026-06-27T06:25:21.180823"
+    "readme_mtime": 1782561329.7912428,
+    "updated": "2026-06-27T06:55:29.791810"
   },
   "mouth/dispatcher": {
-    "hash": "2fa9c823cb1a9a329a99096ad01f1c72",
+    "hash": "dfb60e8730b161f14534a412edceb12c",
     "health_score": 90,
-    "readme_mtime": 1782559521.184701,
-    "updated": "2026-06-27T06:25:21.186619"
+    "readme_mtime": 1782561329.7956827,
+    "updated": "2026-06-27T06:55:29.797700"
   },
   "nervous": {
-    "hash": "6bbf1a706664f08af0ce43581b65108e",
+    "hash": "f83c892a0a2d07a932aa6734508cb983",
     "health_score": 90,
-    "readme_mtime": 1782559521.1911383,
-    "updated": "2026-06-27T06:25:21.193530"
+    "readme_mtime": 1782561329.8023088,
+    "updated": "2026-06-27T06:55:29.804609"
   },
   "nervous/gateway": {
-    "hash": "1263fb53cc7298186f4ba1965fc3d5ae",
+    "hash": "8af40df2d28934669fb6beec1ce7e6b5",
     "health_score": 90,
-    "readme_mtime": 1782559521.197593,
-    "updated": "2026-06-27T06:25:21.199573"
+    "readme_mtime": 1782561329.8084853,
+    "updated": "2026-06-27T06:55:29.810512"
   },
   "nervous/gateway/clients": {
-    "hash": "625b90a192df91f3b77a8ca631b11a05",
+    "hash": "7ee6c401f3a5470952452dba7037c64f",
     "health_score": 90,
-    "readme_mtime": 1782559521.2055926,
-    "updated": "2026-06-27T06:25:21.209569"
+    "readme_mtime": 1782561329.8162534,
+    "updated": "2026-06-27T06:55:29.820062"
   },
   "nervous/gateway/routes": {
-    "hash": "cc2cd68a338d20d836dbde7dd8593764",
+    "hash": "1537d5d338dc7780ffc01bf0f41b7428",
     "health_score": 100,
-    "readme_mtime": 1782559521.2110963,
-    "updated": "2026-06-27T06:25:21.211528"
+    "readme_mtime": 1782561329.8215227,
+    "updated": "2026-06-27T06:55:29.821944"
   },
   "nervous/mcp": {
-    "hash": "c7802f85fe083293d3429c4dab0c6486",
+    "hash": "0397fe00e1a2a5aa0a09437ab3d77e74",
     "health_score": 90,
-    "readme_mtime": 1782559521.2131069,
-    "updated": "2026-06-27T06:25:21.213648"
+    "readme_mtime": 1782561329.8235183,
+    "updated": "2026-06-27T06:55:29.824051"
   },
   "nervous/mcp/config": {
-    "hash": "08fac99a97613cc58626ba4aed954e70",
+    "hash": "2729b2e1100938ce6024089825dffdbb",
     "health_score": 100,
-    "readme_mtime": 1782559521.215059,
-    "updated": "2026-06-27T06:25:21.215526"
+    "readme_mtime": 1782561329.825398,
+    "updated": "2026-06-27T06:55:29.825840"
   },
   "nervous/mcp/docs": {
-    "hash": "af6e04a1f633807688ce91be1ccd0162",
+    "hash": "308a6a9c4da12bfa4adfdc9efca11383",
     "health_score": 100,
-    "readme_mtime": 1782559521.2170641,
-    "updated": "2026-06-27T06:25:21.217581"
+    "readme_mtime": 1782561329.8272524,
+    "updated": "2026-06-27T06:55:29.827819"
   },
   "nervous/mcp/server": {
-    "hash": "82fa34a0c6d160b0a7c3946aa5831748",
+    "hash": "9e8e0add7df7f8aa41ff22f5d4549b67",
     "health_score": 90,
-    "readme_mtime": 1782559521.2528515,
-    "updated": "2026-06-27T06:25:21.274019"
+    "readme_mtime": 1782561329.8630877,
+    "updated": "2026-06-27T06:55:29.884167"
   },
   "nervous/skills": {
-    "hash": "406e037b5e9c20b4ecea57b037c23e6e",
+    "hash": "a8dde64377e7991f97abe62bef8136a2",
     "health_score": 100,
-    "readme_mtime": 1782559521.2754343,
-    "updated": "2026-06-27T06:25:21.275878"
+    "readme_mtime": 1782561329.8855991,
+    "updated": "2026-06-27T06:55:29.886046"
   },
   "nervous/skills/copilot-optimizer": {
-    "hash": "9a1474125f0288464aa321c4c9f9385c",
+    "hash": "a5abfb1db10dbb9ce64a846d526eae9b",
     "health_score": 100,
-    "readme_mtime": 1782559521.2771997,
-    "updated": "2026-06-27T06:25:21.277625"
+    "readme_mtime": 1782561329.8873587,
+    "updated": "2026-06-27T06:55:29.887780"
   },
   "nervous/skills/headroom-rtk": {
-    "hash": "76a3359f92ad0ed201d78cde9e86fc5c",
+    "hash": "6eb7b57392844b0537d92400348beab3",
     "health_score": 100,
-    "readme_mtime": 1782559521.2789319,
-    "updated": "2026-06-27T06:25:21.279437"
+    "readme_mtime": 1782561329.8891923,
+    "updated": "2026-06-27T06:55:29.889661"
   },
   "nervous/skills/self-repair": {
-    "hash": "44e7bcd947126a9cb420cc736308d4c5",
+    "hash": "514ac31a3a4558dfc0a383a0ca415c0f",
     "health_score": 100,
-    "readme_mtime": 1782559521.280978,
-    "updated": "2026-06-27T06:25:21.281392"
+    "readme_mtime": 1782561329.8911917,
+    "updated": "2026-06-27T06:55:29.891608"
   },
   "projects": {
-    "hash": "66f5322be07b1a1497bcf92cfd3b3de4",
+    "hash": "f7c0345f75e3c8ba2df747eddc64c612",
     "health_score": 100,
-    "readme_mtime": 1782559521.2826269,
-    "updated": "2026-06-27T06:25:21.283004"
+    "readme_mtime": 1782561329.8929193,
+    "updated": "2026-06-27T06:55:29.893341"
   },
   "server": {
-    "hash": "dca99fe239e40b68307438b1d9bbd020",
+    "hash": "2ad7d6586cda6ee13d5c64bdb4783954",
     "health_score": 100,
-    "readme_mtime": 1782559521.2844205,
-    "updated": "2026-06-27T06:25:21.284854"
+    "readme_mtime": 1782561329.8948212,
+    "updated": "2026-06-27T06:55:29.895215"
   },
   "server/storage": {
-    "hash": "ebb90215cc5d2fbb918b8c83cc7df840",
+    "hash": "0e08fa6835979bf6fe4abf95057609cf",
     "health_score": 100,
-    "readme_mtime": 1782559521.2862332,
-    "updated": "2026-06-27T06:25:21.286680"
+    "readme_mtime": 1782561329.896462,
+    "updated": "2026-06-27T06:55:29.896901"
   },
   "skeleton": {
-    "hash": "4677a7bb037a2628950bfbf54bfc7282",
+    "hash": "b26a3d02cc53741b0eb8bd7f5bcdd915",
     "health_score": 90,
-    "readme_mtime": 1782559521.288242,
-    "updated": "2026-06-27T06:25:21.288773"
+    "readme_mtime": 1782561329.8985538,
+    "updated": "2026-06-27T06:55:29.899053"
   },
   "skeleton/rules": {
-    "hash": "8b77dea2e0659cf9fddae0db131b7a3e",
+    "hash": "2b40438e771094ed19678a34c1062181",
     "health_score": 90,
-    "readme_mtime": 1782559521.2902741,
-    "updated": "2026-06-27T06:25:21.290854"
+    "readme_mtime": 1782561329.9005485,
+    "updated": "2026-06-27T06:55:29.901150"
   },
   "spine": {
-    "hash": "075762034e11c7733e116842e8a2a7f1",
+    "hash": "e6e784e8fc5f07ff5c2f58a657945de7",
     "health_score": 90,
-    "readme_mtime": 1782559521.294096,
-    "updated": "2026-06-27T06:25:21.295597"
+    "readme_mtime": 1782561329.9044836,
+    "updated": "2026-06-27T06:55:29.905930"
   },
   "spine/audit": {
-    "hash": "f9c5a97d5b9dc0755eb1e1a2e982cbf1",
+    "hash": "10a016bedf69ff4a19624bad39af68a3",
     "health_score": 90,
-    "readme_mtime": 1782559521.2993927,
-    "updated": "2026-06-27T06:25:21.301129"
+    "readme_mtime": 1782561329.9097328,
+    "updated": "2026-06-27T06:55:29.911502"
   },
   "spine/audit/security": {
-    "hash": "4c7b0a6804999c96a42f5e3d90b16e12",
+    "hash": "b6fce5c33d0239538207b017a50556bd",
     "health_score": 100,
-    "readme_mtime": 1782559521.302429,
-    "updated": "2026-06-27T06:25:21.302863"
+    "readme_mtime": 1782561329.9127889,
+    "updated": "2026-06-27T06:55:29.913212"
   },
   "spine/backups": {
-    "hash": "c0d81ee019550b22e12da888b9459726",
+    "hash": "8b816e0053d3d6d02b0d61a95d23ddd2",
     "health_score": 100,
-    "readme_mtime": 1782559521.3041544,
-    "updated": "2026-06-27T06:25:21.304598"
+    "readme_mtime": 1782561329.9144614,
+    "updated": "2026-06-27T06:55:29.914901"
   },
   "spine/backups/pre-restructure-20260626": {
-    "hash": "18f740a75c43f3a5089bf8a74758ee93",
+    "hash": "9643e6bc2d740aeaecced410e062a9ee",
     "health_score": 100,
-    "readme_mtime": 1782559521.3066692,
-    "updated": "2026-06-27T06:25:21.307470"
+    "readme_mtime": 1782561329.9169183,
+    "updated": "2026-06-27T06:55:29.917761"
   },
   "spine/docs": {
-    "hash": "637f277adc7f2637bdc5bdc7270d922a",
+    "hash": "3dbde4763076b82f90f4d0b67bfc41d9",
     "health_score": 100,
-    "readme_mtime": 1782559521.3088126,
-    "updated": "2026-06-27T06:25:21.309300"
+    "readme_mtime": 1782561329.919376,
+    "updated": "2026-06-27T06:55:29.919903"
   },
   "spine/docs/superpowers": {
-    "hash": "42ab34b7eaf602fa504bd194051be4d9",
+    "hash": "b34505a073ea33268f14ff4960ef45d0",
     "health_score": 100,
-    "readme_mtime": 1782559521.3106246,
-    "updated": "2026-06-27T06:25:21.311144"
+    "readme_mtime": 1782561329.9215753,
+    "updated": "2026-06-27T06:55:29.922181"
   },
   "spine/snapshots": {
-    "hash": "232d317e78b8fb2ce46dcb0f0cd08544",
+    "hash": "a323bb65ae543816ad5a53de804d9e9a",
     "health_score": 100,
-    "readme_mtime": 1782559521.312531,
-    "updated": "2026-06-27T06:25:21.312976"
+    "readme_mtime": 1782561329.9237888,
+    "updated": "2026-06-27T06:55:29.924327"
   },
   "spine/snapshots/gstack": {
-    "hash": "48b6413951a9f3433ed6bfa77c24e535",
+    "hash": "18d2a98ebe6413ab458ae811c2ac95b3",
     "health_score": 100,
-    "readme_mtime": 1782559521.314381,
-    "updated": "2026-06-27T06:25:21.314837"
+    "readme_mtime": 1782561329.9260008,
+    "updated": "2026-06-27T06:55:29.926474"
   },
   "spine/state": {
-    "hash": "2ffde130c471d64331ec450c2c1c696a",
+    "hash": "991772c42945f1852ca72ddeaeb8e3d9",
     "health_score": 90,
-    "readme_mtime": 1782559521.3196492,
-    "updated": "2026-06-27T06:25:21.321832"
+    "readme_mtime": 1782561329.9311104,
+    "updated": "2026-06-27T06:55:29.933185"
   },
   "spine/system-context": {
-    "hash": "8fe16c84c174059a5f40dc56da651990",
+    "hash": "459c13037f3b62149c672e1f403d447b",
     "health_score": 100,
-    "readme_mtime": 1782559521.3232343,
-    "updated": "2026-06-27T06:25:21.323693"
+    "readme_mtime": 1782561329.9345696,
+    "updated": "2026-06-27T06:55:29.935038"
   },
   "spine/tools": {
-    "hash": "5328990f43173387d5f60dfd34da7e6c",
+    "hash": "433c66415b596d4067852c5736d4825f",
     "health_score": 90,
-    "readme_mtime": 1782559521.326797,
-    "updated": "2026-06-27T06:25:21.328294"
+    "readme_mtime": 1782561329.9384356,
+    "updated": "2026-06-27T06:55:29.940075"
   },
   ".agent-backups/20260627-005050": {
-    "hash": "6feec0212a2128c2f4865412bc01f860",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2735214,
-    "updated": "2026-06-27T06:25:20.273935"
+    "readme_mtime": 1782561328.874244,
+    "updated": "2026-06-27T06:55:28.874742"
   },
   ".agent-backups/20260627-005050/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.2754538,
-    "updated": "2026-06-27T06:25:20.276023"
+    "readme_mtime": 1782561328.876277,
+    "updated": "2026-06-27T06:55:28.876876"
   },
   ".agent-backups/20260627-015054": {
-    "hash": "6feec0212a2128c2f4865412bc01f860",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2773821,
-    "updated": "2026-06-27T06:25:20.277858"
+    "readme_mtime": 1782561328.8781123,
+    "updated": "2026-06-27T06:55:28.878518"
   },
   ".agent-backups/20260627-015054/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.2795393,
-    "updated": "2026-06-27T06:25:20.280151"
+    "readme_mtime": 1782561328.8800569,
+    "updated": "2026-06-27T06:55:28.880751"
   },
   "mcp": {
-    "hash": "b8f2379b90a2e158ee939d0a85948dc9",
+    "hash": "0ccc3f513dc82264149bdd3341e99075",
     "health_score": 100,
-    "readme_mtime": 1782559521.1629891,
-    "updated": "2026-06-27T06:25:21.163378"
+    "readme_mtime": 1782561329.7737887,
+    "updated": "2026-06-27T06:55:29.774250"
   },
   "mcp/server": {
-    "hash": "36f9f2ac7f0166300747e7ae19976cae",
+    "hash": "a87685d30a7d7cb581095efdebb1781a",
     "health_score": 100,
-    "readme_mtime": 1782559521.1646142,
-    "updated": "2026-06-27T06:25:21.165032"
+    "readme_mtime": 1782561329.7755668,
+    "updated": "2026-06-27T06:55:29.775975"
   },
   ".agent-backups/20260627-025058": {
-    "hash": "6feec0212a2128c2f4865412bc01f860",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2814329,
-    "updated": "2026-06-27T06:25:20.281852"
+    "readme_mtime": 1782561328.8820086,
+    "updated": "2026-06-27T06:55:28.882411"
   },
   ".agent-backups/20260627-025058/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.2834072,
-    "updated": "2026-06-27T06:25:20.283990"
+    "readme_mtime": 1782561328.8838754,
+    "updated": "2026-06-27T06:55:28.884539"
   },
   ".agent-backups/20260627-035102": {
-    "hash": "6feec0212a2128c2f4865412bc01f860",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2852418,
-    "updated": "2026-06-27T06:25:20.285650"
+    "readme_mtime": 1782561328.885815,
+    "updated": "2026-06-27T06:55:28.886240"
   },
   ".agent-backups/20260627-035102/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.2871468,
-    "updated": "2026-06-27T06:25:20.287840"
+    "readme_mtime": 1782561328.887716,
+    "updated": "2026-06-27T06:55:28.888373"
   },
   ".agent-backups/20260627-045107": {
-    "hash": "6feec0212a2128c2f4865412bc01f860",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2891135,
-    "updated": "2026-06-27T06:25:20.289518"
+    "readme_mtime": 1782561328.889654,
+    "updated": "2026-06-27T06:55:28.890056"
   },
   ".agent-backups/20260627-045107/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.2910278,
-    "updated": "2026-06-27T06:25:20.291692"
+    "readme_mtime": 1782561328.8915303,
+    "updated": "2026-06-27T06:55:28.892169"
   },
   ".agent-backups/20260627-055111": {
-    "hash": "54931dc3e4917dffbe3f315391f723a6",
+    "hash": "3dcec4f07c1794628d7123a8ed899b61",
     "health_score": 100,
-    "readme_mtime": 1782559520.2929997,
-    "updated": "2026-06-27T06:25:20.293409"
+    "readme_mtime": 1782561328.8934505,
+    "updated": "2026-06-27T06:55:28.893857"
   },
   ".agent-backups/20260627-055111/workspace-core": {
-    "hash": "65b6d20e71f240d45095439dd966c978",
+    "hash": "14a815bcc9e36ebd4a2bc45b15c3806d",
     "health_score": 100,
-    "readme_mtime": 1782559520.294895,
-    "updated": "2026-06-27T06:25:20.295501"
+    "readme_mtime": 1782561328.8953269,
+    "updated": "2026-06-27T06:55:28.895923"
+  },
+  ".agent-backups/20260627-065116": {
+    "hash": "ed89b39b01feafc8455bb7084a35bac0",
+    "health_score": 100,
+    "readme_mtime": 1782561328.8969502,
+    "updated": "2026-06-27T06:55:28.897411"
+  },
+  ".agent-backups/20260627-065116/workspace-core": {
+    "hash": "2cfab52bbb1b454ed9996362f7b902d9",
+    "health_score": 100,
+    "readme_mtime": 1782561328.8989222,
+    "updated": "2026-06-27T06:55:28.899530"
   }
 }

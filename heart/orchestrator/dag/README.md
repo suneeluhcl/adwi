@@ -66,13 +66,13 @@ Emits `readme_updated` events to nervous system on change.
 **Ghost references (in README, not on disk):**
 - `README.md` *(referenced but missing)*
 
-*Last reconciled: 2026-06-27T06:25:21*
+*Last reconciled: 2026-06-27T06:55:29*
 
 ## 🎯 Intent Alignment
 
 **Alignment:** ⚠️ PARTIAL (60/100)
 
-*Last checked: 2026-06-27T06:25:21*
+*Last checked: 2026-06-27T06:55:29*
 
 ## 🌐 Failure Impact Map
 
@@ -86,7 +86,7 @@ Emits `readme_updated` events to nervous system on change.
 **Cascade (depth 1-1):**
 - Depth 1: `eyes/dashboard`, `eyes/dashboard/widgets`, `eyes/visual`
 
-*Computed: 2026-06-27T06:25:21*
+*Computed: 2026-06-27T06:55:29*
 
 ## 📈 Trends
 
