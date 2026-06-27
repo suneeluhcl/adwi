@@ -1,22 +1,36 @@
 #!/usr/bin/env bash
 # git-safe-push — validate documentation then push
-# Usage: git-safe-push [git push args]
-# Example: git-safe-push origin main
+# Usage: git-safe-push [--no-update] [git push args]
+#   --no-update  Skip readme-update-all + root rebuild (use after auto-commit pipeline)
 set -euo pipefail
 
 WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
 VENV_PY="$WORKSPACE/.venv/bin/python3"
 
+NO_UPDATE=false
+GIT_ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" == "--no-update" ]]; then
+    NO_UPDATE=true
+  else
+    GIT_ARGS+=("$arg")
+  fi
+done
+
 echo ""
 echo "🚀 git-safe-push starting..."
 
-echo ""
-echo "  Step 1/4: Updating all READMEs (rule-based)..."
-"$VENV_PY" "$WORKSPACE/hands/automation/readme/run_update_all.py" --no-claude --quiet
+if [[ "$NO_UPDATE" == "false" ]]; then
+  echo ""
+  echo "  Step 1/4: Updating all READMEs (rule-based)..."
+  "$VENV_PY" "$WORKSPACE/hands/automation/readme/run_update_all.py" --no-claude --quiet
 
-echo ""
-echo "  Step 2/4: Rebuilding root README..."
-"$VENV_PY" "$WORKSPACE/hands/automation/readme/root_synthesizer.py"
+  echo ""
+  echo "  Step 2/4: Rebuilding root README..."
+  "$VENV_PY" "$WORKSPACE/hands/automation/readme/root_synthesizer.py"
+else
+  echo "  ⚡ --no-update: skipping update + rebuild (pipeline already ran)"
+fi
 
 echo ""
 echo "  Step 3/4: Validating documentation..."
@@ -29,7 +43,7 @@ fi
 
 echo ""
 echo "  Step 4/4: Pushing..."
-git push "$@"
+git push "${GIT_ARGS[@]}"
 
 echo ""
 echo "✅ git-safe-push complete."

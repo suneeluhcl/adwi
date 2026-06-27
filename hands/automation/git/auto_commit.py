@@ -203,9 +203,9 @@ def auto_commit(dry_run: bool = False, force_push: bool = False) -> int:
 
     # Auto push
     if auto_push:
-        _log("Auto-push enabled — running git-safe-push...")
+        _log("Auto-push enabled — running git-safe-push --no-update...")
         if GIT_SAFE_PUSH.exists():
-            rc, out, err = _run([str(GIT_SAFE_PUSH)])
+            rc, out, err = _run([str(GIT_SAFE_PUSH), "--no-update"])
             if rc == 0:
                 _log("✅ Auto-push succeeded.")
             else:

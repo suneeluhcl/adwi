@@ -120,7 +120,7 @@ AUTO_PUSH=$(python3 -c \
   2>/dev/null || echo "false")
 log "Step 12/12: Auto-push check (enabled=$AUTO_PUSH)..."
 if [[ "$AUTO_PUSH" == "true" ]]; then
-  if "$WORKSPACE/hands/bin/git-safe-push" >> "$LOG" 2>&1; then
+  if "$WORKSPACE/hands/bin/git-safe-push" --no-update >> "$LOG" 2>&1; then
     log "  ✅ Auto-push succeeded"
   else
     log "  ⚠️  Auto-push failed (commit preserved — check pre-push guard log)"
