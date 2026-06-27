@@ -1,0 +1,16 @@
+{
+  "updated": "2026-06-27T00:07:55.219878",
+  "snapshots": [
+    {
+      "timestamp": "2026-06-27T00:07:55.219822",
+      "date": "2026-06-27",
+      "overall_score": 97.7,
+      "total_folders": 269,
+      "healthy": 268,
+      "warning": 1,
+      "critical": 0,
+      "min_score": 60,
+      "max_score": 100
+    }
+  ]
+}

@@ -56,3 +56,17 @@ spine/backups/
 *.gz
 *.bin
 *.safetensors
+
+# Root-level legacy directories (pre-12-organ architecture, not part of workspace organs)
+/agent-system/
+/autolab/
+/automation/
+/projects/
+/server/
+
+# IDE and tool config directories (no READMEs needed)
+/.gstack/
+/.vscode/
+
+# Auto-generated README in root bin/ (not a workspace organ)
+/bin/README.md
