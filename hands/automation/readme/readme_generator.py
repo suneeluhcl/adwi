@@ -264,10 +264,75 @@ def generate_readme(analysis: dict, existing_content: str = "", use_claude: bool
     return _rule_based_readme(analysis, existing_content)
 
 
+def _get_git_changelog(folder_path: Path, limit: int = 5) -> list:
+    """Extract recent git commit messages touching this folder."""
+    try:
+        rel = str(folder_path.relative_to(WORKSPACE))
+        result = subprocess.run(
+            ["git", "log", f"--max-count={limit}", "--pretty=format:%as %s", "--", rel],
+            capture_output=True, text=True, cwd=str(WORKSPACE), timeout=5,
+        )
+        if result.returncode == 0:
+            return [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
+    except Exception:
+        pass
+    return []
+
+
+def _add_health_sections(content: str, folder_path: Path) -> str:
+    """Inject Health Score, Critical Issues, and Runtime Status sections before Change Log."""
+    if "Health Score" in content:
+        return content
+    try:
+        from hands.automation.readme.health_scorer import score_folder
+        from hands.automation.readme.runtime_probe import probe_folder
+        probe = probe_folder(str(folder_path))
+        scored = score_folder(str(folder_path), probe=probe)
+        score = scored["score"]
+        issues = scored["critical_issues"]
+        breakdown = scored.get("breakdown", {})
+
+        score_emoji = "🟢" if score >= 80 else ("🟡" if score >= 60 else "🔴")
+        breakdown_md = (
+            "\n".join(f"| {k} | -{v} |" for k, v in breakdown.items())
+            if breakdown else "_No deductions_"
+        )
+        runtime_md = (
+            f"- Python files: {probe.get('python_file_count', 0)} "
+            f"({len(probe.get('importable', []))} valid, "
+            f"{len(probe.get('broken_imports', []))} broken)\n"
+            f"- Shell scripts: {probe.get('shell_file_count', 0)} "
+            f"({len(probe.get('runnable_scripts', []))} valid)\n"
+            f"- Tests detected: {'✅' if probe.get('has_tests') else '❌'}"
+        )
+
+        health_block = (
+            f"\n## 🏥 Health Score\n"
+            f"{score_emoji} **{score}/100**\n\n"
+            f"| Category | Deduction |\n|----------|----------|\n"
+            f"{breakdown_md}\n\n"
+            f"## 🔥 Critical Issues\n"
+            + ("\n".join(f"- {i}" for i in issues) if issues else "None — folder is healthy ✅")
+            + f"\n\n## ✅ Runtime Status\n{runtime_md}\n"
+        )
+
+        if "## 📝 Change Log" in content:
+            content = content.replace("## 📝 Change Log", health_block + "\n## 📝 Change Log")
+        else:
+            content += health_block
+    except Exception:
+        pass
+    return content
+
+
 def update_readme_for_folder(folder_path: str, use_claude: bool = True) -> bool:
     path = Path(folder_path).resolve()
     if not path.is_dir():
         return False
+
+    # README.lock guard — skip auto-update for manually managed folders
+    if (path / "README.lock").exists():
+        return True
 
     from hands.automation.readme.intelligence_engine import analyze_folder
     analysis = analyze_folder(str(path))
@@ -277,8 +342,54 @@ def update_readme_for_folder(folder_path: str, use_claude: bool = True) -> bool:
     readme_path = path / "README.md"
     existing = readme_path.read_text(errors="ignore") if readme_path.exists() else ""
 
+    # Tiered generation: Claude CLI → rule-based
     new_content = generate_readme(analysis, existing, use_claude=use_claude)
-    readme_path.write_text(new_content, encoding="utf-8")
+
+    # Inject health score sections
+    new_content = _add_health_sections(new_content, path)
+
+    # Inject git changelog
+    git_log = _get_git_changelog(path)
+    if git_log and "## 📝 Change Log" in new_content:
+        today = datetime.now().strftime("%Y-%m-%d")
+        log_entries = "\n".join(f"- {e}" for e in git_log)
+        new_entry = f"- {today}: README auto-updated by README Intelligence System"
+        full_log = f"## 📝 Change Log (Auto)\n{new_entry}\n{log_entries}"
+        new_content = re.sub(
+            r"## 📝 Change Log.*",
+            full_log,
+            new_content,
+            flags=re.DOTALL,
+        )
+
+    # Security filter — scrub credentials before writing
+    from hands.automation.readme.security_filter import scrub_readme
+    new_content, redacted = scrub_readme(new_content)
+
+    # Atomic write: tmp → validate → rename
+    tmp_path = readme_path.with_suffix(".tmp.md")
+    try:
+        tmp_path.write_text(new_content, encoding="utf-8")
+        if tmp_path.stat().st_size > 0 and new_content.lstrip().startswith("#"):
+            tmp_path.rename(readme_path)
+        else:
+            tmp_path.unlink(missing_ok=True)
+            return False
+    except Exception:
+        tmp_path.unlink(missing_ok=True)
+        raise
+
+    # Update health cache
+    try:
+        from hands.automation.readme.health_scorer import score_folder
+        from hands.automation.readme.cache_manager import load_cache, update_cache, save_cache
+        scored = score_folder(str(path))
+        cache = load_cache()
+        cache = update_cache(str(path), scored["score"], cache)
+        save_cache(cache)
+    except Exception:
+        pass
+
     return True
 
 
