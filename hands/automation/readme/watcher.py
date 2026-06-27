@@ -44,13 +44,7 @@ def _handle_change(changed_path: Path) -> None:
     if _should_ignore(changed_path):
         return
 
-    folder = changed_path.parent if changed_path.is_file() else changed_path
-    if not folder.is_dir():
-        return
-
-    organ = _get_organ(folder)
     ts = time.strftime("%H:%M:%S")
-
     try:
         rel = changed_path.relative_to(WORKSPACE)
     except ValueError:
@@ -58,41 +52,56 @@ def _handle_change(changed_path: Path) -> None:
 
     print(f"[{ts}] 📝 Change: {rel}")
 
-    # Update this folder's README
+    # Use semantic impact engine to determine affected folders
     try:
-        from hands.automation.readme.readme_generator import update_readme_for_folder
-        update_readme_for_folder(str(folder), use_claude=False)
-        print(f"[{ts}]   ✅ {folder.name}/README.md updated")
+        from hands.automation.readme.change_impact_engine import get_impacted_folders
+        impacted = get_impacted_folders([str(rel)])
     except Exception as e:
-        print(f"[{ts}]   ❌ README update failed: {e}")
+        print(f"[{ts}]   ⚠️  Impact engine failed ({e}), using direct folder")
+        folder = changed_path.parent if changed_path.is_file() else changed_path
+        impacted = [folder] if folder.is_dir() else []
+
+    if not impacted:
         return
 
-    # Rebuild root README
+    from hands.automation.readme.readme_generator import update_readme_for_folder
+    from hands.automation.readme.root_synthesizer import synthesize_root
+
+    updated_organs = set()
+    for folder in impacted:
+        organ = _get_organ(folder)
+        try:
+            update_readme_for_folder(str(folder), use_claude=False)
+            print(f"[{ts}]   ✅ {folder.name}/README.md")
+            updated_organs.add(organ)
+        except Exception as e:
+            print(f"[{ts}]   ❌ {folder.name}: {e}")
+
+    # Rebuild root once after all impacted folders are updated
     try:
-        from hands.automation.readme.root_synthesizer import synthesize_root
         synthesize_root()
         print(f"[{ts}]   ✅ Root README rebuilt")
     except Exception as e:
-        print(f"[{ts}]   ⚠️  Root rebuild failed: {e}")
+        print(f"[{ts}]   ⚠️  Root rebuild: {e}")
 
-    # Run consistency check
-    try:
-        from hands.automation.readme.consistency_engine import check_consistency
-        result = check_consistency(str(folder))
-        if not result["ok"]:
-            print(f"[{ts}]   ⚠️  Consistency: {result['issues']}")
-    except Exception:
-        pass
+    # Notify nervous system per updated organ
+    for organ in updated_organs:
+        if organ and organ != "unknown":
+            try:
+                subprocess.run(
+                    [sys.executable, str(WORKSPACE / "nervous/nerve_propagator.py"),
+                     "notify", organ, "readme_updated"],
+                    cwd=str(WORKSPACE),
+                    capture_output=True,
+                    timeout=5,
+                )
+            except Exception:
+                pass
 
-    # Notify nervous system
+    # Trigger lab evolution for any newly low-health folders
     try:
-        subprocess.run(
-            [sys.executable, str(WORKSPACE / "nervous/nerve_propagator.py"),
-             "notify", organ, "readme_updated"],
-            cwd=str(WORKSPACE),
-            capture_output=True,
-            timeout=5,
-        )
+        from hands.automation.readme.lab_bridge import trigger_evolution_for_low_health
+        trigger_evolution_for_low_health(threshold=60, dry_run=False)
     except Exception:
         pass
 
