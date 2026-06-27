@@ -65,13 +65,13 @@ Emits `readme_updated` events to nervous system on change.
 **Wiring mismatches:**
 - README links ears/ but not in dep map
 
-*Last reconciled: 2026-06-27T05:25:04*
+*Last reconciled: 2026-06-27T05:55:12*
 
 ## 🎯 Intent Alignment
 
 **Alignment:** ⚠️ PARTIAL (60/100)
 
-*Last checked: 2026-06-27T05:25:04*
+*Last checked: 2026-06-27T05:55:12*
 
 ## 🌐 Failure Impact Map
 
@@ -79,7 +79,7 @@ Emits `readme_updated` events to nervous system on change.
 
 No downstream dependents. Failure is isolated.
 
-*Computed: 2026-06-27T05:25:04*
+*Computed: 2026-06-27T05:55:12*
 
 ## 📈 Trends
 
