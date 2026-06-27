@@ -1,29 +1,46 @@
-# 📋 Spine — SuneelWorkSpace Organ
+# 📁 spine
 
-## Purpose
-Tracks workspace state files, indexes, audits, and tool maps.
+## 🧠 Purpose
+Health state tracking and workspace index management
 
-## What\s Inside
-* `state/`: Health registers and index stores.
-* `tools/`: MCP tool inventory and recommendations.
-* `audit/`: Duplicate files audits and CSO reports.
+## ⚙️ Responsibilities
+- Health state tracking
+- Workspace index management
 
-## Key Files
-* [spine/state/CURRENT_STATE.json](file:///Users/MAC/SuneelWorkSpace/spine/state/CURRENT_STATE.json): Persistent workspace variables.
-* [spine/state/WORKSPACE_HEALTH.json](file:///Users/MAC/SuneelWorkSpace/spine/state/WORKSPACE_HEALTH.json): System health registers.
-* [spine/system-context/system_profile.json](file:///Users/MAC/SuneelWorkSpace/spine/system-context/system_profile.json): Platform parameters.
+## 🔗 System Role
+Part of the **spine** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Workspace state registers and tool indexes.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `enhancement_logger.py`
+- `nerve.json`
+- `readme_dependency_map.json`
+- `audit/` *(directory)*
+- `backups/` *(directory)*
+- `docs/` *(directory)*
+- `snapshots/` *(directory)*
+- `state/` *(directory)*
+- `system-context/` *(directory)*
+- `tools/` *(directory)*
 
-## Needs (from other organs)
-* Nerve notification reports from `nervous`.
-* Telemetry flags from `blood`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `workspace-index`: Re-scans indexing patterns.
-* `log-enhancement`: Logs updates to main enhancement indices.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Edit tool mappings inside `spine/tools/tool_inventory.json`.
-2. Update audit checklist profiles under `spine/audit/`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

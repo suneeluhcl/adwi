@@ -1,11 +1,38 @@
----
-type: meta
----
+# 📁 experiments
 
-# Experiments
+## 🧠 Purpose
+Vector memory search, context anticipation, and research aggregation
 
-Short-lived explorations — not production features.
+## ⚙️ Responsibilities
+- Vector memory search
+- Context anticipation
+- Research aggregation
 
-Put things here when you're trying out an idea that may not survive contact with reality. If it works, graduate it to `projects/`. If it doesn't, delete it or move it to `archives/`.
+## 🔗 System Role
+Part of the **brain** organ in the 12-organ SuneelWorkSpace architecture.
 
-**Rule:** anything in `experiments/` should have a clear expiry or purpose. Don't let it accumulate.
+## 📂 Contents
+- `README.md`
+
+## 🔄 Dependencies
+None detected
+
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
+
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+- No executable code found
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+- Add semantic clustering for memory retrieval
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

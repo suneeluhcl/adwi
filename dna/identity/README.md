@@ -1,18 +1,42 @@
-# Identity Capture System
+# 📁 identity
 
-Local-first identity subsystem for capturing Suneel's voice, preferences, decision style, and workflow expectations.
+## 🧠 Purpose
+Identity prompt management and adapt loop scoring
 
-## Workflow
+## ⚙️ Responsibilities
+- Identity prompt management
+- Adapt loop scoring
 
-1. Interview one question at a time.
-2. Store each answer in `interview/responses.md`.
-3. Extract signals into `interview/extracted_signals.json`.
-4. Generate identity, tone, decision, and preference profiles.
-5. Integrate approved identity context into Claude, Codex, MCP, orchestrator, goal-engine, and comms surfaces.
+## 🔗 System Role
+Part of the **dna** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Safety
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `adaptive/` *(directory)*
+- `integration/` *(directory)*
+- `interview/` *(directory)*
+- `profile/` *(directory)*
+- `prompts/` *(directory)*
+- `reports/` *(directory)*
 
-- Do not invent identity traits.
-- Use only Suneel's answers and clearly marked inferences.
-- Keep all identity files inspectable plain text or JSON.
-- Do not weaken existing safety boundaries.
+## 🔄 Dependencies
+None detected
+
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
+
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

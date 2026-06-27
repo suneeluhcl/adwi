@@ -1,35 +1,42 @@
-# 👁️ Eyes — SuneelWorkSpace Organ
+# 📁 eyes
 
-## Purpose
-Serves FastAPI/WebSocket Control Center dashboards and implements visual screen monitoring.
+## 🧠 Purpose
+Web dashboard serving, visual monitoring, and screenshot healing
 
-## What\s Inside
-* `dashboard/`: FastAPI servers, visual dashboard layout static CSS/JS files, and pipeline runner daemons.
-* `visual/`: Screenshot managers, visual repair engines, and vision-to-implementation managers.
+## ⚙️ Responsibilities
+- Web dashboard serving
+- Visual monitoring
+- Screenshot healing
 
-## Key Files
-* [eyes/dashboard/server.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/server.py): Main dashboard endpoint manager.
-* [eyes/dashboard/execution/health_repair_pipeline.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/execution/health_repair_pipeline.py): 8-stage repair daemon.
-* [eyes/visual/visual_repair_agent.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/visual_repair_agent.py): CSS patches auto-healer.
-* [eyes/visual/screenshot_manager.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/screenshot_manager.py): Visual capture helper.
+## 🔗 System Role
+Part of the **eyes** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Dashboard frontend view interface on port 7777.
-* Executed repair reports.
-* Visual CSS bug repairs.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `agent-system/` *(directory)*
+- `dashboard/` *(directory)*
+- `visual/` *(directory)*
 
-## Needs (from other organs)
-* System state records from `spine`.
-* Telemetry database statistics from `blood`.
-* Model statuses from `heart`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `workspace-dashboard`: Starts Control Center server.
-* `screenshot-take`: Takes live screenshots.
-* `visual-monitor`: Background screenshot daemon.
-* `visual-repair`: Visual repair queue manager.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Put HTML widgets inside `eyes/dashboard/widgets/`.
-2. Add style selectors inside `eyes/dashboard/static/style.css`.
-3. Propagate changes via nerve notifications.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+- Add real-time alerting dashboard panels
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

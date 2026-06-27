@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# readme-watch-start — start the real-time README file watcher
+# Runs in foreground; Ctrl-C to stop. Use nohup for background.
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+exec "$WORKSPACE/.venv/bin/python3" "$WORKSPACE/hands/automation/readme/watcher.py" "$@"

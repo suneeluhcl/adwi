@@ -1,38 +1,43 @@
-# 💓 Heart — SuneelWorkSpace Organ
+# 📁 heart
 
-## Purpose
-Orchestrates task execution workflows, goals state machines, model Fallback Routing, and DAG scheduling.
+## 🧠 Purpose
+Goal scheduling, task queue management, and model fallback routing
 
-## What\s Inside
-* `tasks/`: ACTIVE_TASKS.md and COMPLETED_TASKS.md logs.
-* `goals/`: Dependency maps, retry queues, planners, and goal progress logs.
-* `model_router/`: Model provider select algorithms and daily call quotas.
-* `orchestrator/`: Mesh routing protocols and DAG runner logic.
+## ⚙️ Responsibilities
+- Goal scheduling
+- Task queue management
+- Model fallback routing
 
-## Key Files
-* [heart/tasks/ACTIVE_TASKS.md](file:///Users/MAC/SuneelWorkSpace/heart/tasks/ACTIVE_TASKS.md): Current session task checklists.
-* [heart/model_router/router.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/router.py): Best model mapping logic.
-* [heart/model_router/quota_tracker.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/quota_tracker.py): Usage metrics and midnight reset logic.
-* [heart/orchestrator/dag/dag_runner.py](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/dag_runner.py): Sequencer of yaml execution workflows.
+## 🔗 System Role
+Part of the **heart** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Fallback model targets to execution clients.
-* Scheduled pipeline workflows to `hands` and `eyes`.
-* Active goal markers to morning brief compilers.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `goals/` *(directory)*
+- `model_router/` *(directory)*
+- `orchestrator/` *(directory)*
+- `tasks/` *(directory)*
 
-## Needs (from other organs)
-* Injected context from `brain`.
-* Telemetry records from `blood`.
-* Binary shortcuts from `hands`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `model-status`: Prints models token usage and limits.
-* `model-health`: Provider response latency checks.
-* `goal-create`: Instantiates goal tracker files.
-* `goal-plan`: Schedules step sequences and dependencies.
-* `goal-status`: Goal progress summary.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Write custom workflows in `heart/orchestrator/dag/pipelines/` as YAML.
-2. Add routing patterns in `heart/orchestrator/router/`.
-3. Link CLI triggers in `hands/bin/`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+- Add priority queuing with SLA tracking
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

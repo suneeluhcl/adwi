@@ -1,24 +1,39 @@
-# 🦴 Skeleton — SuneelWorkSpace Organ
+# 📁 skeleton
 
-## Purpose
-Houses shared guidelines, operating style rules, and safety boundaries.
+## 🧠 Purpose
+Agent rules enforcement, safety gate checks, and shared instructions
 
-## What\s Inside
-* `rules/`: Shared markdown documents.
+## ⚙️ Responsibilities
+- Agent rules enforcement
+- Safety gate checks
+- Shared instructions
 
-## Key Files
-* [skeleton/rules/AGENT_SYSTEM.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/AGENT_SYSTEM.md): Canonical system rules.
-* [skeleton/rules/IDENTITY.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/IDENTITY.md): Suneel profile style.
-* [skeleton/rules/SAFETY_BOUNDARIES.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/SAFETY_BOUNDARIES.md): safety boundaries.
+## 🔗 System Role
+Part of the **skeleton** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Shared policies and checklist procedures.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `rules/` *(directory)*
 
-## Needs (from other organs)
-* Identity adjustments from `dna`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-None (static rule vault).
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Edit rules files under `skeleton/rules/` only after running `integrity-guard`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

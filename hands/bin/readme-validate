@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# readme-validate — validate README freshness before push
+# Exits 0 if valid, 1 if stale (use to gate pushes)
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+exec "$WORKSPACE/.venv/bin/python3" "$WORKSPACE/hands/automation/readme/validator.py" "$@"

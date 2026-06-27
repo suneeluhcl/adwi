@@ -1,30 +1,43 @@
-# 🔬 Lab — SuneelWorkSpace Organ
+# 📁 lab
 
-## Purpose
-Runs autolab experiments, self-challenges, and evolution loops.
+## 🧠 Purpose
+Autolab experiment execution and self-evolution cycles
 
-## What\s Inside
-* `autolab/`: Experiment runner, evaluator, and promotion gates.
-* `evolution/`: Gap scanning and challenge generator.
+## ⚙️ Responsibilities
+- Autolab experiment execution
+- Self-evolution cycles
 
-## Key Files
-* [lab/autolab/runner.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/runner.py): Autolab manager.
-* [lab/autolab/evaluator.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/evaluator.py): Grader loops.
-* [lab/evolution/engine.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/engine.py): Evolution engine background controller.
+## 🔗 System Role
+Part of the **lab** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* System optimization metrics and evolution challenger scripts.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `autolab/` *(directory)*
+- `brain/` *(directory)*
+- `evolution/` *(directory)*
+- `prompts/` *(directory)*
+- `testing/` *(directory)*
+- `tests/` *(directory)*
 
-## Needs (from other organs)
-* Telemetry records from `blood`.
-* Current health score from `spine`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `autolab-run`: Safe experiment loop runner.
-* `autolab-status`: Lists experiment queues.
-* `evolution-start`: Evolution daemon launch.
-* `hypothesis-generate`: Hypotheses generation.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Write experiment definitions in `lab/autolab/experiments/active/`.
-2. Create challenge templates in challenger.py.
+## 📈 Current Capabilities
+- Test suite
+
+## ⚠️ Gaps & Weaknesses
+None identified
+
+## 🚀 Suggested Enhancements
+- Add A/B experiment comparison tracking
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

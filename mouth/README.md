@@ -1,29 +1,40 @@
-# 👄 Mouth — SuneelWorkSpace Organ
+# 📁 mouth
 
-## Purpose
-Interprets user requests and routes comms via Mail or iMessage.
+## 🧠 Purpose
+Communication dispatch, Mail and iMessage delivery
 
-## What\s Inside
-* `dispatcher/`: classifier intents parser ws.py.
-* `comms/`: messaging helper utilities.
+## ⚙️ Responsibilities
+- Communication dispatch
+- Mail delivery
+- iMessage delivery
 
-## Key Files
-* [mouth/dispatcher/ws.py](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/ws.py): NL command interpreter hook.
-* [mouth/dispatcher/intent_map.json](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/intent_map.json): Intent command map.
-* [mouth/comms/mail/scripts/mail-recent](file:///Users/MAC/SuneelWorkSpace/mouth/comms/mail/scripts/mail-recent): Mail list fetcher.
+## 🔗 System Role
+Part of the **mouth** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Command classification mappings and communication links.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `comms/` *(directory)*
+- `dispatcher/` *(directory)*
 
-## Needs (from other organs)
-* Vector search memory matching from `brain`.
-* Goal statuses from `heart`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `ws`: NL command dispatcher.
-* `mail-status`: outbound email status.
-* `imessage-status`: iMessage permissions and delivery.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Put new intents in `dispatcher/intent_map.json`.
-2. Add mailing integrations under `comms/`.
+## 📈 Current Capabilities
+- Event dispatch
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

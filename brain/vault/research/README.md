@@ -1,16 +1,44 @@
-# Research Engine
+# 📁 research
 
-A local-first pipeline for turning ideas into plans, comparisons, and decisions.
+## 🧠 Purpose
+Vector memory search, context anticipation, and research aggregation
 
-## Commands
+## ⚙️ Responsibilities
+- Vector memory search
+- Context anticipation
+- Research aggregation
 
-- `idea-capture`: store a raw idea as a Markdown file and index entry.
-- `idea-research`: create a research plan for an idea.
-- `idea-analyze`: create a solution comparison and risk review.
-- `idea-decide`: record a decision and promote it into shared memory.
-- `idea-bootstrap`: repair/create the directory structure.
-- `idea-start` and `idea-run`: user-facing wrappers in `bin/`.
+## 🔗 System Role
+Part of the **brain** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Safety
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `research_engine.py`
+- `analyses/` *(directory)*
+- `decisions/` *(directory)*
+- `ideas/` *(directory)*
+- `plans/` *(directory)*
+- `scripts/` *(directory)*
 
-This engine stores plain files inside `~/SuneelWorkSpace/research-engine` and does not install tools, spend money, or scan private folders by itself.
+## 🔄 Dependencies
+None detected
+
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
+
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+- Add semantic clustering for memory retrieval
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

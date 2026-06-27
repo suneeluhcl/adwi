@@ -1,27 +1,40 @@
-# 🩸 Blood — SuneelWorkSpace Organ
+# 📁 blood
 
-## Purpose
-Records telemetry traces, performance metrics, and logs anomalies.
+## 🧠 Purpose
+Telemetry logging, SQLite database management, and anomaly detection
 
-## What\s Inside
-* `telemetry/`: SQLite databases and writers.
-* `logs/`: Diagnostic reports and execution journals.
+## ⚙️ Responsibilities
+- Telemetry logging
+- SQLite database management
+- Anomaly detection
 
-## Key Files
-* [blood/telemetry/telemetry_writer.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_writer.py): SQLite telemetry logging script.
-* [blood/telemetry/telemetry_anomaly.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_anomaly.py): Latency peak regressing checker.
-* [blood/telemetry/schema.sql](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/schema.sql): Telemetry DB schema.
+## 🔗 System Role
+Part of the **blood** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Persistent execution analytics and anomaly flags.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `metrics/` *(directory)*
+- `telemetry/` *(directory)*
 
-## Needs (from other organs)
-* Subsystem changes events from `hands`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `telemetry-query`: sqlite query tables.
-* `telemetry-anomalies`: Flags latency regression peaks.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Write analytical metrics functions under `blood/telemetry/`.
-2. Update sql schemas in `schema.sql` if tables expand.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

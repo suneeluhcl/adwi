@@ -1,0 +1,63 @@
+# 📁 knowledge
+
+## 🧠 Purpose
+Vector memory search, context anticipation, and research aggregation
+
+## ⚙️ Responsibilities
+- Vector memory search
+- Context anticipation
+- Research aggregation
+
+## 🔗 System Role
+Part of the **brain** organ in the 12-organ SuneelWorkSpace architecture.
+
+## 📂 Contents
+- `Agent Rules and Guardrails.md`
+- `Automation Map.md`
+- `Capture Workflow.md`
+- `Claude Headroom Setup.md`
+- `Eval and Reliability Map.md`
+- `Ideas Index.md`
+- `Ideas Operating System.md`
+- `Implementation Workflow.md`
+- `Local AI Stack Overview.md`
+- `Master Ideas Index.md`
+- `Memory and Knowledge Map.md`
+- `Obsidian Maintenance.md`
+- `Obsidian Operator Guide.md`
+- `Obsidian Upgrade Handoff.md`
+- `Pending Approval.md`
+- `Pillar-Upgrades-2026-06-15.md`
+- `Planning Workflow.md`
+- `README.md`
+- `Review Workflow.md`
+- `System Map.md`
+- `Telegram Control Plane.md`
+- `Template Guide.md`
+- `Troubleshooting Log.md`
+- `Workspace Organization.md`
+- `index.md`
+- `rollback-and-recovery.md`
+
+## 🔄 Dependencies
+None detected
+
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
+
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+- No executable code found
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+- Add semantic clustering for memory retrieval
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

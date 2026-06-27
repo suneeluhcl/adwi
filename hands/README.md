@@ -1,33 +1,44 @@
-# 🤲 Hands — SuneelWorkSpace Organ
+# 📁 hands
 
-## Purpose
-Stores CLI binaries, launchd schedulers, and workspace CI hooks.
+## 🧠 Purpose
+Script execution, LaunchD automation, and CI runner
 
-## What\s Inside
-* `bin/`: CLI script wrappers.
-* `scripts/`: Python/Bash runner modules.
-* `automation/`: Cron setup configurations.
+## ⚙️ Responsibilities
+- Script execution
+- LaunchD automation
+- CI runner
 
-## Key Files
-* [hands/bin/agent-start](file:///Users/MAC/SuneelWorkSpace/hands/bin/agent-start): Workspace session start hook.
-* [hands/automation/maintenance/common.sh](file:///Users/MAC/SuneelWorkSpace/hands/automation/maintenance/common.sh): Central path configuration.
-* [hands/automation/ci/workspace_ci.py](file:///Users/MAC/SuneelWorkSpace/hands/automation/ci/workspace_ci.py): Test suite controller.
+## 🔗 System Role
+Part of the **hands** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* CLI shortcuts and CI validations.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `automation/` *(directory)*
+- `bin/` *(directory)*
+- `codex/` *(directory)*
+- `projects/` *(directory)*
+- `prompts/` *(directory)*
+- `scripts/` *(directory)*
 
-## Needs (from other organs)
-* Fallback model targets from `heart`.
-* Diagnostic checks from `spine`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `agent-start`: marks active session checkpoints.
-* `agent-finish`: Marks closeouts and logs.
-* `agent-doctor`: Checks health rules.
-* `agent-repair`: Auto-heals symlinks.
-* `workspace-backup`: Packs tar snapshots of the workspace.
-* `workspace-ci`: Runs automated unit testing suites.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Put actual implementations in `hands/scripts/`.
-2. Symlink entrypoint into `hands/bin/`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

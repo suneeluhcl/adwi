@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# readme-update-all — regenerate READMEs for all workspace folders
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+exec "$WORKSPACE/.venv/bin/python3" "$WORKSPACE/hands/automation/readme/run_update_all.py" "$@"

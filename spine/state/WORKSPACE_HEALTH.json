@@ -1,6 +1,6 @@
 {
-  "auto_fixes_applied": 55,
-  "checked_at": "2026-06-26T20:49:11-0500",
+  "auto_fixes_applied": 57,
+  "checked_at": "2026-06-26T22:50:41-0500",
   "error_count": 0,
   "issue_count": 3,
   "issues": [
@@ -21,8 +21,8 @@
       "severity": "info"
     }
   ],
-  "last_doctor_run": "2026-06-26T20:49:11-0500",
-  "last_repair_run": "2026-06-26T20:49:12-0500",
+  "last_doctor_run": "2026-06-26T22:50:41-0500",
+  "last_repair_run": "2026-06-26T22:50:41-0500",
   "launchd": {
     "configured": true,
     "label": "com.suneelworkspace.maintenance",
@@ -30,7 +30,7 @@
     "plist": "/Users/MAC/Library/LaunchAgents/com.suneelworkspace.maintenance.plist"
   },
   "repair_suggestions": [],
-  "state_updated_at": "2026-06-26T20:49:11.964840-05:00",
+  "state_updated_at": "2026-06-26T22:50:41.791914-05:00",
   "status": "repairable",
   "system_intelligence": {
     "checks": {
@@ -44,7 +44,7 @@
       "tool_recommendations": true
     },
     "ready": false,
-    "updated_at": "2026-06-26T20:49:11.964840-05:00"
+    "updated_at": "2026-06-26T22:50:41.791914-05:00"
   },
   "tools": {
     "claude": null,

@@ -1,27 +1,39 @@
-# 👂 Ears — SuneelWorkSpace Organ
+# 📁 ears
 
-## Purpose
-Scans external world feeds and compiles the morning intelligence briefs.
+## 🧠 Purpose
+External RSS monitoring, GitHub event watching, and morning briefing build
 
-## What\s Inside
-* `monitor/`: Feeds scanners (GitHub, Arxiv, RSS).
-* `monitor/digest/`: News format builders.
+## ⚙️ Responsibilities
+- External RSS monitoring
+- GitHub event watching
+- Morning briefing build
 
-## Key Files
-* [ears/monitor/monitor_runner.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/monitor_runner.py): Feeds crawler entrypoint.
-* [ears/monitor/digest/digest_builder.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/digest/digest_builder.py): Morning brief compiling engine.
+## 🔗 System Role
+Part of the **ears** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Formatted daily briefings of external changes.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `monitor/` *(directory)*
 
-## Needs (from other organs)
-* Active goals data from `heart`.
-* Semantic queries from `brain`.
+## 🔄 Dependencies
+None detected
 
-## CLI Commands
-* `monitor-run`: Triggers external feeds fetch.
-* `morning-brief`: Generates daily briefing report.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Write custom monitors under `ears/monitor/sources/`.
-2. Configure targets inside `ears/monitor/config/monitor_config.json`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

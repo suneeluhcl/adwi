@@ -1,34 +1,44 @@
-# 🫀 Nervous — SuneelWorkSpace Organ
+# 📁 nervous
 
-## Purpose
-Coordinates event-driven nerve propagation, REST API gateways, and MCP servers.
+## 🧠 Purpose
+Event propagation, MCP server connections, and nerve routing
 
-## What\s Inside
-* `gateway/`: Gateway client wrappers.
-* `mcp/`: Model Context Protocol server modules.
-* `skills/`: Specialist system prompts and tool policies.
+## ⚙️ Responsibilities
+- Event propagation
+- MCP server connections
+- Nerve routing
 
-## Key Files
-* [nervous/nerve_propagator.py](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_propagator.py): Central communication router.
-* [nervous/nerve_registry.json](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_registry.json): Organ connection maps.
-* [nervous/mcp/server/main.py](file:///Users/MAC/SuneelWorkSpace/nervous/mcp/server/main.py): Exposes filesystem, search, and system connector APIs.
+## 🔗 System Role
+Part of the **nervous** organ in the 12-organ SuneelWorkSpace architecture.
 
-## Provides (to other organs)
-* Event notifications.
-* Gateway REST endpoints.
-* Model Context Protocol resources.
+## 📂 Contents
+- `README.md`
+- `__init__.py`
+- `nerve.json`
+- `nerve_propagator.py`
+- `nerve_registry.json`
+- `nerve_status.py`
+- `gateway/` *(directory)*
+- `mcp/` *(directory)*
+- `skills/` *(directory)*
 
-## Needs (from other organs)
-* Subsystem file listings from `spine`.
-* Global boundaries from `skeleton`.
+## 🔄 Dependencies
+- `spine/`
 
-## CLI Commands
-* `nerve-status`: Checks notifications states.
-* `mcp-start`: Launches MCP server.
-* `mcp-status`: Gateway connection verification.
-* `mcp-doctor`: Pings server diagnostics.
-* `mcp-reindex`: Re-indexes MCP assets.
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
 
-## How To Add Something Here
-1. Add new subscribers to `nerve_registry.json`.
-2. Register resource links inside `nervous/mcp/server/config/resource_map.json`.
+## 📈 Current Capabilities
+- Basic workspace component
+
+## ⚠️ Gaps & Weaknesses
+- No test coverage detected
+
+## 🚀 Suggested Enhancements
+- Add unit and integration tests
+
+## 🔗 Connected Modules
+- [`../spine/README.md`](../spine/README.md)
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

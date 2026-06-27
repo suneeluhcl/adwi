@@ -1,7 +1,7 @@
 {
   "entrypoints": [
     {
-      "modified_epoch": 1782524951,
+      "modified_epoch": 1782532240,
       "path": "/Users/MAC/SuneelWorkSpace/AGENTS.md",
       "relative_path": "AGENTS.md",
       "size": 57,
@@ -9,7 +9,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782524951,
+      "modified_epoch": 1782532240,
       "path": "/Users/MAC/SuneelWorkSpace/CLAUDE.md",
       "relative_path": "CLAUDE.md",
       "size": 57,
@@ -17,7 +17,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782524951,
+      "modified_epoch": 1782532240,
       "path": "/Users/MAC/.codex/AGENTS.md",
       "relative_path": null,
       "size": 57,
@@ -25,7 +25,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782524951,
+      "modified_epoch": 1782532240,
       "path": "/Users/MAC/.claude/CLAUDE.md",
       "relative_path": null,
       "size": 57,
@@ -33,7 +33,7 @@
       "type": "symlink"
     }
   ],
-  "generated_at": "2026-06-26T20:49:12-0500",
+  "generated_at": "2026-06-26T22:50:41-0500",
   "groups": {
     "blood": [
       {
@@ -69,10 +69,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524952,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/blood/logs/MAINTENANCE_LOG.md",
         "relative_path": "blood/logs/MAINTENANCE_LOG.md",
-        "size": 48319,
+        "size": 49985,
         "target": null,
         "type": "file"
       },
@@ -4439,10 +4439,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782522172,
+        "modified_epoch": 1782528594,
         "path": "/Users/MAC/SuneelWorkSpace/hands/automation/reports/status-latest.md",
         "relative_path": "hands/automation/reports/status-latest.md",
-        "size": 1200,
+        "size": 1262,
         "target": null,
         "type": "file"
       },
@@ -9295,7 +9295,7 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524952,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/nervous/mcp/server/state/last_index.json",
         "relative_path": "nervous/mcp/server/state/last_index.json",
         "size": 102,
@@ -9303,7 +9303,7 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524952,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/nervous/mcp/server/state/mcp_state.json",
         "relative_path": "nervous/mcp/server/state/mcp_state.json",
         "size": 255,
@@ -9311,7 +9311,7 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524952,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/nervous/mcp/server/storage/memory_index.db",
         "relative_path": "nervous/mcp/server/storage/memory_index.db",
         "size": 4395008,
@@ -9683,10 +9683,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782518697,
+        "modified_epoch": 1782526115,
         "path": "/Users/MAC/SuneelWorkSpace/spine/backups/pre-restructure-20260626/agent-system/logs/dashboard.log",
         "relative_path": "spine/backups/pre-restructure-20260626/agent-system/logs/dashboard.log",
-        "size": 20985,
+        "size": 21066,
         "target": null,
         "type": "file"
       },
@@ -17971,6 +17971,22 @@
         "type": "file"
       },
       {
+        "modified_epoch": 1782529250,
+        "path": "/Users/MAC/SuneelWorkSpace/spine/docs/PROMPTS_INDEX.md",
+        "relative_path": "spine/docs/PROMPTS_INDEX.md",
+        "size": 2227,
+        "target": null,
+        "type": "file"
+      },
+      {
+        "modified_epoch": 1782529222,
+        "path": "/Users/MAC/SuneelWorkSpace/spine/docs/README_Update_Prompt.md",
+        "relative_path": "spine/docs/README_Update_Prompt.md",
+        "size": 16681,
+        "target": null,
+        "type": "file"
+      },
+      {
         "modified_epoch": 1782520438,
         "path": "/Users/MAC/SuneelWorkSpace/spine/docs/WORKSPACE_MAP.md",
         "relative_path": "spine/docs/WORKSPACE_MAP.md",
@@ -18027,7 +18043,7 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524951,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/spine/state/ACTIVE_CONTEXT.json",
         "relative_path": "spine/state/ACTIVE_CONTEXT.json",
         "size": 4206,
@@ -18043,18 +18059,18 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782522154,
+        "modified_epoch": 1782528639,
         "path": "/Users/MAC/SuneelWorkSpace/spine/state/CURRENT_STATE.json",
         "relative_path": "spine/state/CURRENT_STATE.json",
-        "size": 1965,
+        "size": 1960,
         "target": null,
         "type": "file"
       },
       {
-        "modified_epoch": 1782524951,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/spine/state/INDEX.json",
         "relative_path": "spine/state/INDEX.json",
-        "size": 772214,
+        "size": 772737,
         "target": null,
         "type": "file"
       },
@@ -18067,7 +18083,7 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782524952,
+        "modified_epoch": 1782532241,
         "path": "/Users/MAC/SuneelWorkSpace/spine/state/WORKSPACE_HEALTH.json",
         "relative_path": "spine/state/WORKSPACE_HEALTH.json",
         "size": 1415,

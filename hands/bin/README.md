@@ -1,0 +1,196 @@
+# 📁 bin
+
+## 🧠 Purpose
+Script execution, LaunchD automation, and CI runner
+
+## ⚙️ Responsibilities
+- Script execution
+- LaunchD automation
+- CI runner
+
+## 🔗 System Role
+Part of the **hands** organ in the 12-organ SuneelWorkSpace architecture.
+
+## 📂 Contents
+- `README.md`
+- `agent-autoclose`
+- `agent-compare`
+- `agent-doctor`
+- `agent-finish`
+- `agent-maintain`
+- `agent-repair`
+- `agent-start`
+- `agent-status`
+- `agent-test-loop`
+- `anticipate`
+- `arxiv-mcp`
+- `autolab-promote`
+- `autolab-rollback`
+- `autolab-run`
+- `autolab-status`
+- `brain-graph-build`
+- `brain-graph-orphans`
+- `brain-graph-query`
+- `brain-inject`
+- `brain-staleness`
+- `brain-synthesize`
+- `brave-search-mcp`
+- `build-training-data`
+- `comms-doctor`
+- `comms-permissions-check`
+- `comms-report`
+- `comms-status`
+- `context-reset`
+- `dag-run`
+- `dag-schedule`
+- `dag-validate`
+- `daily-evolve`
+- `docker-mcp`
+- `duplication-guard`
+- `evolution-engine`
+- `evolution-start`
+- `evolution-stop`
+- `evolution-trend`
+- `feedback-ingest`
+- `feedback-status`
+- `filesystem-mcp`
+- `gateway-start`
+- `gateway-status`
+- `gateway-stop`
+- `gateway-token`
+- `git-safe-push`
+- `github-mcp`
+- `goal-adapt`
+- `goal-complete`
+- `goal-create`
+- `goal-execute`
+- `goal-fail`
+- `goal-monitor`
+- `goal-plan`
+- `goal-status`
+- `gstack-create`
+- `gstack-repair`
+- `gstack-verify`
+- `hypothesis-generate`
+- `hypothesis-rank`
+- `idea-run`
+- `idea-start`
+- `identity-accept`
+- `identity-adjust`
+- `identity-reject`
+- `imessage-recent`
+- `imessage-search`
+- `imessage-send-draft`
+- `imessage-status`
+- `improve-system`
+- `imsg-draft`
+- `imsg-recent`
+- `imsg-search`
+- `imsg-send-confirmed`
+- `install-imessage-plugin`
+- `integrity-guard`
+- `jupyter-mcp`
+- `log-enhancement`
+- `macos-shortcuts-mcp`
+- `mail-draft-reply`
+- `mail-recent`
+- `mail-search`
+- `mail-status`
+- `mcp-autodiscover`
+- `mcp-doctor`
+- `mcp-reindex`
+- `mcp-repair`
+- `mcp-report`
+- `mcp-start`
+- `mcp-status`
+- `mcp-stop`
+- `mcp-test`
+- `memory-reindex`
+- `memory-search`
+- `mesh-assign`
+- `mesh-monitor-start`
+- `mesh-monitor-stop`
+- `mesh-status`
+- `model-health`
+- `model-route`
+- `model-status`
+- `monitor-digest`
+- `monitor-run`
+- `morning-brief`
+- `nerve-status`
+- `next`
+- `ollama-mcp`
+- `prompt-eval`
+- `prompt-new`
+- `prompt-promote`
+- `prompt-rollback`
+- `readme-root-build`
+- `readme-update`
+- `readme-update-all`
+- `readme-validate`
+- `readme-watch-start`
+- `route-analyze`
+- `route-execute`
+- `route-learn`
+- `route-task`
+- `screenshot-take`
+- `system-audit`
+- `system-capabilities`
+- `system-gaps`
+- `system-recommend`
+- `telemetry-anomalies`
+- `telemetry-query`
+- `telemetry-write`
+- `use-claude`
+- `use-claude-imessage`
+- `use-codex`
+- `use-gemini`
+- `use-opencode`
+- `use-opencode-gemini`
+- `visual-monitor`
+- `visual-repair`
+- `workflow-audit`
+- `workflow-claude-headroom-setup`
+- `workflow-code-improvement-workflow`
+- `workflow-composed-workflow`
+- `workflow-eval-and-reliability-map`
+- `workflow-implementation-workflow`
+- `workflow-local-ai-stack-overview`
+- `workflow-obsidian-maintenance`
+- `workflow-obsidian-upgrade-handoff`
+- `workflow-rollback-and-recovery`
+- `workflow-system-improvement-workflow`
+- `workflow-telegram-control-plane`
+- `workflow-voice-input`
+- `workspace-backup`
+- `workspace-changes`
+- `workspace-ci`
+- `workspace-context`
+- `workspace-dashboard`
+- `workspace-index`
+- `workspace-report`
+- `ws`
+
+## 🔄 Dependencies
+None detected
+
+## 🧩 Interactions
+Emits `readme_updated` events to nervous system on change.
+
+## 📈 Current Capabilities
+- Database storage
+- Scheduled automation
+- Test suite
+
+## ⚠️ Gaps & Weaknesses
+- No executable code found
+
+## 🚀 Suggested Enhancements
+- Add metrics collection
+- Add integration tests
+
+## 🔗 Connected Modules
+*(no cross-organ references detected)*
+
+## 📝 Change Log (Auto)
+- 2026-06-26: README auto-updated by README Intelligence System

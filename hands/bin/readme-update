@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# readme-update <folder> — regenerate README for a single folder
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: readme-update <folder> [--no-claude]"
+  echo "Example: readme-update brain"
+  echo "         readme-update brain --no-claude"
+  exit 1
+fi
+exec "$WORKSPACE/.venv/bin/python3" "$WORKSPACE/hands/automation/readme/readme_generator.py" "$@"

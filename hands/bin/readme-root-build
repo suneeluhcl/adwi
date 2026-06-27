@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# readme-root-build — rebuild the workspace root README.md
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+exec "$WORKSPACE/.venv/bin/python3" "$WORKSPACE/hands/automation/readme/root_synthesizer.py" "$@"
