@@ -1,0 +1,8 @@
+{
+  "organ": "nervous",
+  "version": "1.0",
+  "description": "MCP server, gateway, nerve propagator",
+  "status": "active",
+  "inbox": "nervous/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

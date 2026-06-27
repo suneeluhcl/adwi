@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""
+goal-fail — Mark a goal as failed with a reason.
+
+Usage:
+  goal-fail GOAL_ID
+  goal-fail GOAL_ID --reason "why it failed"
+
+Exit codes:
+  0  success
+  1  error
+"""
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+ACTIVE_MD = GE / "goals" / "active_goals.md"
+FAILED_MD = GE / "goals" / "failed_goals.md"
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def main():
+    parser = argparse.ArgumentParser(description="Mark goal as failed")
+    parser.add_argument("goal_id", help="Goal ID")
+    parser.add_argument("--reason", default=None, help="Failure reason")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    if args.goal_id not in graph.get("goals", {}):
+        print(f"ERROR: Goal {args.goal_id} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    goal = graph["goals"][args.goal_id]
+    reason = args.reason or "No reason given."
+
+    goal["status"] = "failed"
+    goal["failed_at"] = _now()
+    goal["failure_reason"] = reason
+    graph["_meta"]["last_updated"] = _now()
+    _save(GRAPH_PATH, graph)
+
+    # Remove from active_goals.md
+    text = ACTIVE_MD.read_text()
+    pattern = rf"## \[{re.escape(args.goal_id)}\].*?(?=\n## \[|$)"
+    text = re.sub(pattern, "", text, flags=re.DOTALL).strip()
+    if not any(f"[G" in line for line in text.split("\n") if line.startswith("## [")):
+        text += "\n\n_No active goals yet. Run `goal-create \"description\"` to add one._"
+    ACTIVE_MD.write_text(text)
+
+    # Add to failed_goals.md
+    entry = f"""
+## [{args.goal_id}] {goal['description'][:60]}
+- **failed_at**: {_now()}
+- **reason**: {reason}
+- **description**: {goal['description']}
+- **tasks_completed**: {len([t for t in goal.get('tasks', []) if graph['tasks'].get(t, {}).get('status') == 'succeeded'])}
+- **tasks_total**: {goal.get('task_count', 0)}
+"""
+    fail_text = FAILED_MD.read_text()
+    if "_None yet._" in fail_text:
+        fail_text = fail_text.replace("_None yet._", entry.strip())
+    else:
+        fail_text = fail_text.rstrip() + "\n" + entry
+    FAILED_MD.write_text(fail_text)
+
+    state = _load(STATE_PATH)
+    state["active_goal_count"] = max(0, state.get("active_goal_count", 1) - 1)
+    state["failed_goal_count"] = state.get("failed_goal_count", 0) + 1
+    _save(STATE_PATH, state)
+
+    current = _load(CURRENT_GOAL_PATH)
+    if current.get("goal_id") == args.goal_id:
+        current["goal_id"] = None
+        current["goal_status"] = "failed"
+        current["updated_at"] = _now()
+        _save(CURRENT_GOAL_PATH, current)
+
+    print(f"Goal {args.goal_id} marked FAILED.")
+    print(f"  Reason: {reason}")
+
+if __name__ == "__main__":
+    main()

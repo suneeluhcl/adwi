@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T17:49:06.999126-05:00",
+  "generated_at": "2026-06-26T18:49:09.990677-05:00",
   "tools": [
     {
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-autoclose",
@@ -222,6 +222,20 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/duplication-guard",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "duplication-guard",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/evolution-start",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "evolution-start",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/evolution-stop",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "evolution-stop",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },
@@ -625,6 +639,27 @@
       "safe_to_integrate": true
     },
     {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/model-health",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "model-health",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/model-route",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "model-route",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/model-status",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "model-status",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/monitor-digest",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "monitor-digest",
@@ -705,6 +740,13 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/route-task",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "route-task",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/screenshot-take",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "screenshot-take",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },
@@ -796,6 +838,20 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/use-opencode-gemini",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "use-opencode-gemini",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/visual-monitor",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "visual-monitor",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/visual-repair",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "visual-repair",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },

@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+  "description": "Human Body Architecture — Organ Nerve Registry",
+  "organs": {
+    "brain": {
+      "path": "brain/",
+      "description": "Long-term memory, research, anticipation, knowledge graph",
+      "notifies": ["heart", "spine"],
+      "inbox": "brain/nerve_inbox/"
+    },
+    "heart": {
+      "path": "heart/",
+      "description": "Orchestration, goal engine, task queue, model router",
+      "notifies": ["brain", "hands", "blood"],
+      "inbox": "heart/nerve_inbox/"
+    },
+    "eyes": {
+      "path": "eyes/",
+      "description": "Dashboard UI, visual monitor, screenshot manager",
+      "notifies": ["brain", "spine"],
+      "inbox": "eyes/nerve_inbox/"
+    },
+    "ears": {
+      "path": "ears/",
+      "description": "World monitor, RSS/GitHub/arxiv feeds, digest builder",
+      "notifies": ["brain", "heart"],
+      "inbox": "ears/nerve_inbox/"
+    },
+    "nervous": {
+      "path": "nervous/",
+      "description": "MCP server, gateway, nerve propagator",
+      "notifies": [],
+      "inbox": "nervous/nerve_inbox/"
+    },
+    "skeleton": {
+      "path": "skeleton/",
+      "description": "Shared rules, agent system config, safety boundaries",
+      "notifies": [],
+      "inbox": "skeleton/nerve_inbox/"
+    },
+    "blood": {
+      "path": "blood/",
+      "description": "Telemetry, logs, metrics, anomaly detection",
+      "notifies": ["spine"],
+      "inbox": "blood/nerve_inbox/"
+    },
+    "hands": {
+      "path": "hands/",
+      "description": "Bin scripts, automation, CI, project management",
+      "notifies": ["heart"],
+      "inbox": "hands/nerve_inbox/"
+    },
+    "mouth": {
+      "path": "mouth/",
+      "description": "Dispatcher, comms, outbound communication",
+      "notifies": ["brain"],
+      "inbox": "mouth/nerve_inbox/"
+    },
+    "dna": {
+      "path": "dna/",
+      "description": "Identity, prompts, feedback loop, tone profile",
+      "notifies": ["brain", "skeleton"],
+      "inbox": "dna/nerve_inbox/"
+    },
+    "lab": {
+      "path": "lab/",
+      "description": "Autolab experiments, evolution engine, hypothesis generation",
+      "notifies": ["brain", "spine"],
+      "inbox": "lab/nerve_inbox/"
+    },
+    "spine": {
+      "path": "spine/",
+      "description": "Workspace state, audit, docs, snapshots, backups",
+      "notifies": [],
+      "inbox": "spine/nerve_inbox/"
+    }
+  }
+}

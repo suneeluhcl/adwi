@@ -1,0 +1,8 @@
+{
+  "organ": "ears",
+  "version": "1.0",
+  "description": "World monitor, RSS/GitHub/arxiv feeds, digest builder",
+  "status": "active",
+  "inbox": "ears/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

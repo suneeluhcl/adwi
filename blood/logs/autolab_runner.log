@@ -1,0 +1,78 @@
+[2026-06-26T10:14:54.601129] Runner started | dry_run=True safe_only=False filter=None
+[2026-06-26T10:14:54.601499] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T10:14:54.601572]   ✅ Action 1 complete: Re-embeds all memory files into ChromaDB
+[2026-06-26T10:14:54.601610] Calling evaluator for exp_001...
+[2026-06-26T10:14:54.601655] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T10:14:54.601703]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T10:14:54.601725] Calling evaluator for exp_002...
+[2026-06-26T10:14:54.601758] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T10:14:54.601798]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T10:14:54.601827] Calling evaluator for exp_003...
+[2026-06-26T10:14:54.601862] Runner complete | processed=3 succeeded=3
+[2026-06-26T10:21:05.195977] Runner started | dry_run=True safe_only=False filter=None
+[2026-06-26T10:21:05.196328] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T10:21:05.196392]   ✅ Action 1 complete: Re-embeds all memory files into ChromaDB
+[2026-06-26T10:21:05.196426] Calling evaluator for exp_001...
+[2026-06-26T10:21:05.196466] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T10:21:05.196510]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T10:21:05.196536] Calling evaluator for exp_002...
+[2026-06-26T10:21:05.196566] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T10:21:05.196609]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T10:21:05.196634] Calling evaluator for exp_003...
+[2026-06-26T10:21:05.196665] Runner complete | processed=3 succeeded=3
+[2026-06-26T10:21:27.414623] Runner started | dry_run=True safe_only=False filter=None
+[2026-06-26T10:21:27.414969] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T10:21:27.415033]   ✅ Action 1 complete: Re-embeds all memory files into ChromaDB
+[2026-06-26T10:21:27.415065] Calling evaluator for exp_001...
+[2026-06-26T10:21:27.415105] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T10:21:27.415148]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T10:21:27.415174] Calling evaluator for exp_002...
+[2026-06-26T10:21:27.415203] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T10:21:27.415246]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T10:21:27.415270] Calling evaluator for exp_003...
+[2026-06-26T10:21:27.415301] Runner complete | processed=3 succeeded=3
+[2026-06-26T10:24:52.657567] Runner started | dry_run=True safe_only=False filter=None
+[2026-06-26T10:24:52.657995] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T10:24:52.658078]   ✅ Action 1 complete: Re-embeds all memory files into ChromaDB
+[2026-06-26T10:24:52.658126] Calling evaluator for exp_001...
+[2026-06-26T10:24:52.658177] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T10:24:52.658232]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T10:24:52.658269] Calling evaluator for exp_002...
+[2026-06-26T10:24:52.658307] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T10:24:52.658349]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T10:24:52.658374] Calling evaluator for exp_003...
+[2026-06-26T10:24:52.658406] Runner complete | processed=3 succeeded=3
+[2026-06-26T10:31:07.485994] Runner started | dry_run=True safe_only=False filter=None
+[2026-06-26T10:31:07.486372] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T10:31:07.486436]   ✅ Action 1 complete: Re-embeds all memory files into ChromaDB
+[2026-06-26T10:31:07.486472] Calling evaluator for exp_001...
+[2026-06-26T10:31:07.486510] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T10:31:07.486587]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T10:31:07.486620] Calling evaluator for exp_002...
+[2026-06-26T10:31:07.486662] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T10:31:07.486710]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T10:31:07.486741] Calling evaluator for exp_003...
+[2026-06-26T10:31:07.486775] Runner complete | processed=3 succeeded=3
+[2026-06-26T16:40:23.739199] Runner started | dry_run=False safe_only=False filter=None
+[2026-06-26T16:40:23.742515] ▶ Running SAFE experiment: Full memory vector reindex
+[2026-06-26T16:40:23.742844]   Snapshot: bin/memory-reindex → /Users/MAC/SuneelWorkSpace/autolab/experiments/rollback/exp_001/memory-reindex
+[2026-06-26T16:40:24.123550]   ❌ Action failed: bash bin/memory-reindex → bin/memory-reindex: line 2: import: command not found
+bin/memory-reindex: line 3: import: command not found
+bin/memory-reindex: line 4: import: command not found
+bin/memory-reindex: line 5: import: co
+[2026-06-26T16:40:24.123827] ▶ Running SAFE experiment: Anticipation pattern confidence boost
+[2026-06-26T16:40:24.124458]   Snapshot: anticipation/prediction_memory.json → /Users/MAC/SuneelWorkSpace/autolab/experiments/rollback/exp_002/prediction_memory.json
+[2026-06-26T16:40:24.143805]   ✅ Action 1 complete: Update bootstrap pattern confidence scores from 0.6 to 0.65
+[2026-06-26T16:40:24.144013] Calling evaluator for exp_002...
+[2026-06-26T16:40:24.172782] Experiment exp_002 completed positively (delta: +0.00)
+[2026-06-26T16:40:24.200376] Auto-promoted SAFE experiment: Anticipation pattern confidence boost (delta: +0.00)
+[2026-06-26T16:40:24.207057] ▶ Running SAFE experiment: MCP resource auto-discovery scan
+[2026-06-26T16:40:24.207465]   Snapshot: mcp/server/scripts/auto_discover.py → /Users/MAC/SuneelWorkSpace/autolab/experiments/rollback/exp_003/auto_discover.py
+[2026-06-26T16:40:24.339265]   ✅ Action 1 complete: Scans workspace for unregistered files and proposes addition
+[2026-06-26T16:40:24.339543] Calling evaluator for exp_003...
+[2026-06-26T16:40:24.462307] Experiment exp_003 completed positively (delta: +0.00)
+[2026-06-26T16:40:24.494383] Auto-promoted SAFE experiment: MCP resource auto-discovery scan (delta: +0.00)
+[2026-06-26T16:40:24.503033] Runner complete | processed=3 succeeded=2
+[2026-06-26T16:40:34.175320] Runner started | dry_run=False safe_only=False filter=None
+[2026-06-26T16:41:29.329761] Runner started | dry_run=False safe_only=False filter=None
+[2026-06-26T17:42:08.070496] Runner started | dry_run=False safe_only=False filter=None

@@ -1041,46 +1041,46 @@ Every agent must begin by saying:
 
 Then load:
 
-- `agent-system/shared/AGENT_SYSTEM.md`
-- `agent-system/shared/IDENTITY.md`
-- `agent-system/shared/SAFETY_BOUNDARIES.md`
+- `skeleton/rules/AGENT_SYSTEM.md`
+- `skeleton/rules/IDENTITY.md`
+- `skeleton/rules/SAFETY_BOUNDARIES.md`
 
 Load identity:
 
-- `identity/profile/identity_profile.md`
-- `identity/profile/tone_profile.md`
-- `identity/profile/decision_profile.md`
-- `identity/profile/preferences.json`
-- `identity/profile/behavioral_patterns.json`
-- `identity/prompts/identity_prompt.md`
-- `identity/prompts/communication_prompt.md`
+- `dna/identity/profile/identity_profile.md`
+- `dna/identity/profile/tone_profile.md`
+- `dna/identity/profile/decision_profile.md`
+- `dna/identity/profile/preferences.json`
+- `dna/identity/profile/behavioral_patterns.json`
+- `dna/identity/prompts/identity_prompt.md`
+- `dna/identity/prompts/communication_prompt.md`
 
 Load adaptive identity:
 
-- `identity/adaptive/feedback_log.json`
-- `identity/adaptive/signal_weights.json`
-- `identity/adaptive/signal_memory.json`
-- `identity/adaptive/pattern_updates.json`
-- `identity/adaptive/drift_guardrails.json`
-- `identity/adaptive/adaptation_state.json`
+- `dna/identity/adaptive/feedback_log.json`
+- `dna/identity/adaptive/signal_weights.json`
+- `dna/identity/adaptive/signal_memory.json`
+- `dna/identity/adaptive/pattern_updates.json`
+- `dna/identity/adaptive/drift_guardrails.json`
+- `dna/identity/adaptive/adaptation_state.json`
 
 Load capability context:
 
-- `anticipation/current_context.json`
-- `anticipation/prediction_memory.json`
-- `anticipation/behavior_patterns.json`
-- `anticipation/action_suggestions.md`
-- `research-engine/README.md`
-- `comms/config/comms_config.json`
-- `orchestrator/router/system_intelligence_policy.md`
-- `goal-engine/planner/planner.md`
-- `mcp/server/config/resource_map.json`
+- `brain/anticipation/current_context.json`
+- `brain/anticipation/prediction_memory.json`
+- `brain/anticipation/behavior_patterns.json`
+- `brain/anticipation/action_suggestions.md`
+- `brain/research/README.md`
+- `mouth/comms/config/comms_config.json`
+- `heart/orchestrator/router/system_intelligence_policy.md`
+- `heart/goals/planner/planner.md`
+- `nervous/mcp/server/config/resource_map.json`
 
 Load session state:
 
-- `agent-system/memory/SESSION_HANDOFF.md`
-- `agent-system/state/CURRENT_STATE.json`
-- `agent-system/state/WORKSPACE_HEALTH.json`
+- `brain/memory/SESSION_HANDOFF.md`
+- `spine/state/CURRENT_STATE.json`
+- `spine/state/WORKSPACE_HEALTH.json`
 
 Then confirm:
 

@@ -1,0 +1,66 @@
+{
+  "description": "Simple structured experiment features for analysis. This is not a vector database.",
+  "experiments": [
+    {
+      "experiment_id": "exp-20260624-152836",
+      "features": {
+        "agent_type": "unknown",
+        "failure_reason": "no_score_improvement",
+        "mutation_type": "docs",
+        "result": "revert",
+        "risk_level": "low",
+        "score_delta": "0.0",
+        "target_area": "docs"
+      }
+    },
+    {
+      "experiment_id": "exp-20260624-154055",
+      "features": {
+        "agent_type": "codex",
+        "failure_reason": "safety_gate_failed",
+        "mutation_type": "docs",
+        "result": "revert",
+        "risk_level": "low",
+        "score_delta": "0.0",
+        "target_area": "docs"
+      }
+    },
+    {
+      "experiment_id": "strategy-20260624-154108",
+      "features": {
+        "agent_type": "codex",
+        "failure_reason": "",
+        "mutation_type": "strategy",
+        "result": "keep",
+        "risk_level": "medium",
+        "score_delta": "0.0",
+        "target_area": "program"
+      }
+    },
+    {
+      "experiment_id": "exp-20260624-224933",
+      "features": {
+        "agent_type": "codex",
+        "failure_reason": "safety_gate_failed",
+        "mutation_type": "docs",
+        "result": "revert",
+        "risk_level": "low",
+        "score_delta": "0.0",
+        "target_area": "docs"
+      }
+    },
+    {
+      "experiment_id": "exp-20260626-014821",
+      "features": {
+        "agent_type": "codex",
+        "failure_reason": "safety_gate_failed",
+        "mutation_type": "docs",
+        "result": "revert",
+        "risk_level": "low",
+        "score_delta": "0.0",
+        "target_area": "docs"
+      }
+    }
+  ],
+  "generated_at": "2026-06-26T18:49:09-0500"
+}

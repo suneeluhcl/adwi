@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""
+route-analyze — analyze routing history and agent performance, produce reports.
+
+Usage:
+  route-analyze                 # full analysis, updates agent_performance.md
+  route-analyze --summary       # short summary only, no file writes
+  route-analyze --autolab       # incorporate autolab results into analysis
+"""
+
+import json
+import pathlib
+import sys
+from collections import defaultdict
+from datetime import datetime, timezone
+
+ORCH    = pathlib.Path("/Users/MAC/SuneelWorkSpace/orchestrator")
+WS      = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+HISTORY = ORCH / "router" / "history.json"
+PROFILES= ORCH / "router" / "agent_profiles.json"
+PATTERNS= ORCH / "models" / "routing_patterns.json"
+AUTOLAB_RESULTS = WS / "autolab" / "results.tsv"
+PERF_MD = ORCH / "reports" / "agent_performance.md"
+ROUTING_REPORT = ORCH / "reports" / "routing_report.md"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+
+def _load(path: pathlib.Path) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def analyze_history(entries: list) -> dict:
+    """Per (agent, task_type) success/failure counts from routing history."""
+    stats: dict = defaultdict(lambda: {"success": 0, "failure": 0, "total": 0})
+    agent_totals: dict = defaultdict(lambda: {"success": 0, "failure": 0, "total": 0})
+
+    for e in entries:
+        agent = e.get("agent")
+        task_type = e.get("task_type")
+        outcome = e.get("outcome")
+        if not agent or not task_type or outcome is None:
+            continue
+        key = f"{agent}:{task_type}"
+        stats[key]["total"] += 1
+        agent_totals[agent]["total"] += 1
+        if outcome == "success":
+            stats[key]["success"] += 1
+            agent_totals[agent]["success"] += 1
+        else:
+            stats[key]["failure"] += 1
+            agent_totals[agent]["failure"] += 1
+
+    return {"per_pair": dict(stats), "per_agent": dict(agent_totals)}
+
+
+def analyze_autolab(tsv_path: pathlib.Path) -> dict:
+    """Parse autolab results.tsv and extract per-agent score deltas."""
+    agent_scores: dict = defaultdict(list)
+    if not tsv_path.exists():
+        return {}
+    lines = tsv_path.read_text().strip().splitlines()
+    if len(lines) < 2:
+        return {}
+    headers = lines[0].split("\t")
+    try:
+        ai = headers.index("agent_type")
+        di = headers.index("score_delta")
+        ri = headers.index("result")
+    except ValueError:
+        return {}
+    for line in lines[1:]:
+        parts = line.split("\t")
+        if len(parts) <= max(ai, di, ri):
+            continue
+        agent = parts[ai].strip()
+        try:
+            delta = float(parts[di])
+        except ValueError:
+            continue
+        result = parts[ri].strip()
+        if agent and agent != "unknown":
+            agent_scores[agent].append({"delta": delta, "result": result})
+    return dict(agent_scores)
+
+
+def build_patterns(history_stats: dict) -> dict:
+    """Build routing_patterns.json content from history stats."""
+    patterns_data = _load(PATTERNS)
+    patterns = patterns_data.get("patterns", {})
+    total = patterns_data.get("_meta", {}).get("total_decisions_learned", 0)
+
+    per_pair = history_stats.get("per_pair", {})
+    for key, counts in per_pair.items():
+        existing = patterns.get(key, {})
+        patterns[key] = {
+            "success_count": existing.get("success_count", 0) + counts["success"],
+            "failure_count": existing.get("failure_count", 0) + counts["failure"],
+            "total_count": existing.get("total_count", 0) + counts["total"],
+            "last_updated": _now(),
+        }
+        total += counts["total"]
+
+    return {
+        "_meta": {
+            "description": "Learned routing patterns per (task_type, agent).",
+            "last_updated": _now(),
+            "total_decisions_learned": total,
+        },
+        "patterns": patterns,
+    }
+
+
+def write_performance_report(history_stats: dict, autolab_stats: dict) -> str:
+    """Write agent_performance.md and return summary string."""
+    per_agent = history_stats.get("per_agent", {})
+    per_pair = history_stats.get("per_pair", {})
+    now = _now()
+
+    lines = [
+        "# Agent Performance Report",
+        f"\nGenerated: {now}\n",
+        "## Overall Agent Performance\n",
+    ]
+
+    if not per_agent:
+        lines.append("No routing history yet. Performance data will appear after tasks are routed and executed.\n")
+    else:
+        lines.append("| Agent | Total | Success | Failure | Success Rate |")
+        lines.append("|-------|-------|---------|---------|--------------|")
+        for agent, counts in sorted(per_agent.items()):
+            total = counts["total"]
+            success = counts["success"]
+            failure = counts["failure"]
+            rate = f"{success/total:.0%}" if total > 0 else "—"
+            lines.append(f"| {agent} | {total} | {success} | {failure} | {rate} |")
+
+    lines.append("\n## Per Task-Type Performance\n")
+    if not per_pair:
+        lines.append("No per-task-type data yet.\n")
+    else:
+        lines.append("| Agent | Task Type | Success | Failure | Success Rate |")
+        lines.append("|-------|-----------|---------|---------|--------------|")
+        for key, counts in sorted(per_pair.items()):
+            agent, task_type = key.split(":", 1)
+            total = counts["total"]
+            s = counts["success"]
+            f = counts["failure"]
+            rate = f"{s/total:.0%}" if total > 0 else "—"
+            lines.append(f"| {agent} | {task_type} | {s} | {f} | {rate} |")
+
+    lines.append("\n## Autolab Experiment Performance\n")
+    if not autolab_stats:
+        lines.append("No autolab data with agent tracking yet.\n")
+    else:
+        lines.append("| Agent | Experiments | Avg Score Delta | Keep Rate |")
+        lines.append("|-------|-------------|-----------------|-----------|")
+        for agent, results in sorted(autolab_stats.items()):
+            total = len(results)
+            avg_delta = sum(r["delta"] for r in results) / total if total > 0 else 0
+            kept = sum(1 for r in results if r["result"] == "keep")
+            keep_rate = f"{kept/total:.0%}" if total > 0 else "—"
+            lines.append(f"| {agent} | {total} | {avg_delta:+.2f} | {keep_rate} |")
+
+    lines.append("\n## Routing Recommendation Quality\n")
+    lines.append("_This section will auto-populate as more routing decisions are logged._\n")
+
+    content = "\n".join(lines)
+    PERF_MD.parent.mkdir(parents=True, exist_ok=True)
+    PERF_MD.write_text(content + "\n")
+    return content
+
+
+def write_routing_report(patterns_data: dict) -> None:
+    """Write routing_report.md with patterns summary."""
+    patterns = patterns_data.get("patterns", {})
+    now = _now()
+
+    lines = [
+        "# Routing Report",
+        f"\nGenerated: {now}",
+        f"Total decisions learned: {patterns_data.get('_meta',{}).get('total_decisions_learned', 0)}\n",
+        "## Routing Patterns (learned from history)\n",
+    ]
+
+    if not patterns:
+        lines.append("No patterns learned yet. Route tasks using route-execute to build history.\n")
+    else:
+        lines.append("| Key (agent:task_type) | Success | Failure | Total |")
+        lines.append("|----------------------|---------|---------|-------|")
+        for key, p in sorted(patterns.items()):
+            lines.append(f"| {key} | {p.get('success_count',0)} | {p.get('failure_count',0)} | {p.get('total_count',0)} |")
+
+    ROUTING_REPORT.parent.mkdir(parents=True, exist_ok=True)
+    ROUTING_REPORT.write_text("\n".join(lines) + "\n")
+
+
+def main():
+    args = sys.argv[1:]
+    summary_only = "--summary" in args
+    include_autolab = "--autolab" in args or True  # always include if available
+
+    history = _load(HISTORY)
+    entries = history.get("entries", [])
+    history_stats = analyze_history(entries)
+    autolab_stats = analyze_autolab(AUTOLAB_RESULTS) if include_autolab else {}
+
+    patterns_data = build_patterns(history_stats)
+
+    if summary_only:
+        per_agent = history_stats.get("per_agent", {})
+        if per_agent:
+            for agent, c in per_agent.items():
+                rate = f"{c['success']/c['total']:.0%}" if c['total'] > 0 else "—"
+                print(f"{agent}: {c['total']} tasks, {rate} success")
+        else:
+            print("No routing history yet.")
+        al = autolab_stats
+        if al:
+            for agent, results in al.items():
+                avg = sum(r['delta'] for r in results) / len(results) if results else 0
+                print(f"{agent} autolab: {len(results)} experiments, avg delta {avg:+.2f}")
+        return
+
+    # Full analysis
+    PATTERNS.write_text(json.dumps(patterns_data, indent=2) + "\n")
+    print(f"Updated routing patterns: {PATTERNS}")
+
+    perf_content = write_performance_report(history_stats, autolab_stats)
+    print(f"Performance report: {PERF_MD}")
+
+    write_routing_report(patterns_data)
+    print(f"Routing report: {ROUTING_REPORT}")
+
+    print("\n--- Summary ---")
+    per_agent = history_stats.get("per_agent", {})
+    if per_agent:
+        for agent, c in per_agent.items():
+            rate = f"{c['success']/c['total']:.0%}" if c['total'] > 0 else "—"
+            print(f"  {agent}: {c['total']} tasks, {rate} success")
+    else:
+        print("  No routing history yet.")
+    if autolab_stats:
+        for agent, results in autolab_stats.items():
+            avg = sum(r['delta'] for r in results) / len(results) if results else 0
+            print(f"  {agent} autolab: {len(results)} experiments, avg delta {avg:+.2f}")
+
+
+if __name__ == "__main__":
+    main()

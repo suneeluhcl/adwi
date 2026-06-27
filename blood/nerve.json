@@ -1,0 +1,8 @@
+{
+  "organ": "blood",
+  "version": "1.0",
+  "description": "Telemetry, logs, metrics, anomaly detection",
+  "status": "active",
+  "inbox": "blood/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

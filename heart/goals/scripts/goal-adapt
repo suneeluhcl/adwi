@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""
+goal-adapt — Replan failed or stuck tasks in a goal.
+
+Strategies:
+  - retry: reset task to pending (up to max_attempts)
+  - swap_agent: change preferred_agent to the other agent
+  - split: replace task with 2 simpler subtasks
+  - skip: mark task as skipped (goal continues without it)
+  - abort: mark goal as failed
+
+Usage:
+  goal-adapt GOAL_ID
+  goal-adapt GOAL_ID --task TASK_ID --strategy retry|swap_agent|split|skip
+  goal-adapt GOAL_ID --auto   # auto-choose strategy based on attempt count
+
+Exit codes:
+  0  adaptation applied
+  1  error
+  2  nothing to adapt
+"""
+
+import argparse
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+RETRY_QUEUE = GE / "execution" / "retry_queue.md"
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _log_retry(task_id, goal_id, retry_n, reason):
+    ts = _now()
+    line = f"\n| {task_id} | {goal_id} | {retry_n} | {reason} | {ts} |"
+    text = RETRY_QUEUE.read_text()
+    if "_No retries queued._" in text:
+        text = text.replace(
+            "_No retries queued._",
+            "| Task | Goal | Retry# | Reason | Queued At |\n|---|---|---|---|---|\n" + line.strip()
+        )
+    else:
+        text = text.rstrip() + line
+    RETRY_QUEUE.write_text(text)
+
+def _auto_strategy(task):
+    attempts = task.get("attempts", 0)
+    max_att = task.get("max_attempts", 3)
+    if attempts == 0:
+        return "retry"
+    elif attempts == 1:
+        return "swap_agent"
+    elif attempts < max_att:
+        return "split"
+    else:
+        return "skip"
+
+def _apply_strategy(graph, task_id, strategy):
+    task = graph["tasks"][task_id]
+    if strategy == "retry":
+        task["status"] = "pending"
+        task["result"] = None
+        task["started_at"] = None
+        print(f"  {task_id}: reset to pending (attempt {task['attempts']}/{task['max_attempts']})")
+
+    elif strategy == "swap_agent":
+        old = task.get("preferred_agent", "claude")
+        new = "codex" if old == "claude" else "claude"
+        task["preferred_agent"] = new
+        task["status"] = "pending"
+        task["result"] = None
+        task["started_at"] = None
+        print(f"  {task_id}: swapped agent {old} → {new}, reset to pending")
+
+    elif strategy == "split":
+        # Create two subtasks replacing this one
+        goal_id = task["goal_id"]
+        goal = graph["goals"][goal_id]
+        base_id = task_id + "_a"
+        base_id_b = task_id + "_b"
+
+        sub_a = {**task}
+        sub_a.update({
+            "id": base_id,
+            "description": f"[Part 1/2] {task['description']}",
+            "status": "pending", "attempts": 0, "result": None,
+            "started_at": None, "completed_at": None,
+            "dependencies": task.get("dependencies", []),
+            "notes": f"Split from {task_id}",
+        })
+        sub_b = {**task}
+        sub_b.update({
+            "id": base_id_b,
+            "description": f"[Part 2/2] Verify and finalize: {task['description']}",
+            "task_type": "analysis",
+            "preferred_agent": "claude",
+            "status": "pending", "attempts": 0, "result": None,
+            "started_at": None, "completed_at": None,
+            "dependencies": [base_id],
+            "notes": f"Split from {task_id}",
+        })
+
+        graph["tasks"][base_id] = sub_a
+        graph["tasks"][base_id_b] = sub_b
+
+        # Replace task_id in goal's task list with the two subtasks
+        tlist = goal.get("tasks", [])
+        idx = tlist.index(task_id) if task_id in tlist else -1
+        if idx >= 0:
+            tlist = tlist[:idx] + [base_id, base_id_b] + tlist[idx+1:]
+            goal["tasks"] = tlist
+            goal["task_count"] = len(tlist)
+        task["status"] = "skipped"
+        task["notes"] = f"Split into {base_id} and {base_id_b}"
+        print(f"  {task_id}: split into {base_id} and {base_id_b}")
+
+    elif strategy == "skip":
+        task["status"] = "skipped"
+        task["result"] = "skipped"
+        # Unblock dependent tasks by treating skipped = done
+        task["completed_at"] = _now()
+        print(f"  {task_id}: marked skipped (goal will continue without it)")
+
+    return graph
+
+def main():
+    parser = argparse.ArgumentParser(description="Adapt failed/stuck tasks")
+    parser.add_argument("goal_id", help="Goal ID")
+    parser.add_argument("--task", default=None, help="Specific task ID to adapt")
+    parser.add_argument("--strategy", choices=["retry", "swap_agent", "split", "skip"], default=None)
+    parser.add_argument("--auto", action="store_true", help="Auto-choose strategy")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    if args.goal_id not in graph.get("goals", {}):
+        print(f"ERROR: Goal {args.goal_id} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    goal = graph["goals"][args.goal_id]
+    task_ids = goal.get("tasks", [])
+
+    # Find failed/stuck tasks
+    if args.task:
+        candidates = [args.task] if args.task in graph["tasks"] else []
+    else:
+        candidates = [
+            tid for tid in task_ids
+            if graph["tasks"].get(tid, {}).get("status") in ("failed", "running")
+        ]
+
+    if not candidates:
+        print(f"No failed or stuck tasks found in {args.goal_id}.")
+        sys.exit(2)
+
+    changed = False
+    for task_id in candidates:
+        task = graph["tasks"].get(task_id, {})
+        status = task.get("status", "unknown")
+        attempts = task.get("attempts", 0)
+        max_att = task.get("max_attempts", 3)
+
+        print(f"\nTask: {task_id}")
+        print(f"  Description : {task.get('description', '?')}")
+        print(f"  Status      : {status}")
+        print(f"  Attempts    : {attempts}/{max_att}")
+
+        # Choose strategy
+        if args.strategy:
+            strategy = args.strategy
+        elif args.auto:
+            strategy = _auto_strategy(task)
+        else:
+            print(f"  Choose strategy:")
+            print(f"    retry      — reset to pending, try again")
+            print(f"    swap_agent — switch Claude↔Codex and retry")
+            print(f"    split      — replace with 2 simpler subtasks")
+            print(f"    skip       — skip this task, continue goal")
+            try:
+                strategy = input(f"  Strategy [retry/swap_agent/split/skip]: ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                print("\nAborted.")
+                break
+            if strategy not in ("retry", "swap_agent", "split", "skip"):
+                print(f"  Unknown strategy '{strategy}'. Skipping.")
+                continue
+
+        graph = _apply_strategy(graph, task_id, strategy)
+        _log_retry(task_id, args.goal_id, attempts + 1, strategy)
+        changed = True
+
+    if changed:
+        graph["_meta"]["last_updated"] = _now()
+        _save(GRAPH_PATH, graph)
+
+        state = _load(STATE_PATH)
+        state["last_adapt_at"] = _now()
+        _save(STATE_PATH, state)
+
+        print(f"\nAdaptations applied. Run `goal-execute {args.goal_id}` to continue.")
+    else:
+        print("No adaptations applied.")
+
+if __name__ == "__main__":
+    main()

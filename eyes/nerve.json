@@ -1,0 +1,8 @@
+{
+  "organ": "eyes",
+  "version": "1.0",
+  "description": "Dashboard UI, visual monitor, screenshot manager",
+  "status": "active",
+  "inbox": "eyes/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

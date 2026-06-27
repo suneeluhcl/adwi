@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-06-26T01:48:21-0500",
+  "paths": [
+    "autolab/program.md",
+    "autolab/evaluator.md",
+    "autolab/current_frontier.md",
+    "autolab/experiment_queue.md",
+    "autolab/reports",
+    "autolab/state",
+    "autolab/templates",
+    "autolab/scripts",
+    "autolab/meta",
+    "agent-system/docs",
+    "agent-system/shared",
+    "automation/maintenance",
+    "automation/hooks"
+  ]
+}

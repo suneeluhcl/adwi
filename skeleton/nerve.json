@@ -1,0 +1,8 @@
+{
+  "organ": "skeleton",
+  "version": "1.0",
+  "description": "Shared rules, agent system config, safety boundaries",
+  "status": "active",
+  "inbox": "skeleton/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

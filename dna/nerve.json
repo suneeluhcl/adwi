@@ -1,0 +1,8 @@
+{
+  "organ": "dna",
+  "version": "1.0",
+  "description": "Identity, prompts, feedback loop, tone profile",
+  "status": "active",
+  "inbox": "dna/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

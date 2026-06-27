@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""
+goal-monitor — Check goal and task health; detect failures and stuck tasks.
+
+Usage:
+  goal-monitor                    # check all active goals
+  goal-monitor GOAL_ID            # check a specific goal
+  goal-monitor --json             # machine-readable output
+  goal-monitor --quiet            # only print problems
+
+Exit codes:
+  0  all goals healthy
+  1  error
+  2  warnings detected (stuck/failed tasks)
+  3  critical issues detected
+"""
+
+import argparse
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone, timedelta
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+
+STUCK_THRESHOLD_HOURS = 2  # task in "running" state for more than this = stuck
+
+def _now():
+    return datetime.now(timezone.utc).astimezone()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _parse_ts(ts_str):
+    if not ts_str:
+        return None
+    try:
+        return datetime.fromisoformat(ts_str)
+    except Exception:
+        return None
+
+def _check_goal(graph, goal_id, now):
+    goal = graph["goals"].get(goal_id, {})
+    task_ids = goal.get("tasks", [])
+    issues = []
+    warnings = []
+
+    if not task_ids:
+        if goal.get("status") == "active":
+            warnings.append(f"Goal {goal_id} is active but has no tasks. Run `goal-plan {goal_id}`.")
+        return issues, warnings
+
+    # Tally task statuses
+    statuses = {}
+    for tid in task_ids:
+        t = graph["tasks"].get(tid, {})
+        s = t.get("status", "unknown")
+        statuses[s] = statuses.get(s, 0) + 1
+
+        # Check for stuck running tasks
+        if s == "running":
+            started = _parse_ts(t.get("started_at"))
+            if started and (now - started) > timedelta(hours=STUCK_THRESHOLD_HOURS):
+                issues.append(f"Task {tid} in goal {goal_id} stuck in 'running' for >{STUCK_THRESHOLD_HOURS}h. Reset or mark failed.")
+
+        # Check for exhausted retries
+        if s == "failed":
+            attempts = t.get("attempts", 0)
+            max_att = t.get("max_attempts", 3)
+            if attempts >= max_att:
+                issues.append(f"Task {tid} in goal {goal_id} exhausted {max_att} attempts. Run `goal-adapt` or `goal-fail`.")
+            else:
+                warnings.append(f"Task {tid} in goal {goal_id} failed ({attempts}/{max_att} attempts). Run `goal-adapt`.")
+
+    # Check goal-level stall: no progress recently
+    all_pending = all(s in ("pending",) for s in [graph["tasks"].get(t, {}).get("status") for t in task_ids[1:]])
+    first_task = graph["tasks"].get(task_ids[0], {})
+    if first_task.get("status") == "pending" and goal.get("planned_at"):
+        planned = _parse_ts(goal.get("planned_at"))
+        if planned and (now - planned) > timedelta(hours=24):
+            warnings.append(f"Goal {goal_id} was planned >24h ago but no tasks started. Run `goal-execute {goal_id}`.")
+
+    return issues, warnings
+
+def main():
+    parser = argparse.ArgumentParser(description="Monitor goal health")
+    parser.add_argument("goal_id", nargs="?", default=None)
+    parser.add_argument("--json", dest="json_out", action="store_true")
+    parser.add_argument("--quiet", action="store_true", help="Only print problems")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    now = _now()
+    all_issues = []
+    all_warnings = []
+    goal_summaries = {}
+
+    if args.goal_id:
+        check_ids = [args.goal_id]
+    else:
+        check_ids = [gid for gid, g in graph.get("goals", {}).items() if g.get("status") == "active"]
+
+    if not check_ids:
+        if not args.quiet:
+            print("No active goals to monitor.")
+        sys.exit(0)
+
+    for gid in check_ids:
+        goal = graph["goals"].get(gid)
+        if not goal:
+            all_issues.append(f"Goal {gid} not found in task graph.")
+            continue
+
+        task_ids = goal.get("tasks", [])
+        statuses = {t: graph["tasks"].get(t, {}).get("status", "unknown") for t in task_ids}
+        issues, warnings = _check_goal(graph, gid, now)
+        all_issues.extend(issues)
+        all_warnings.extend(warnings)
+
+        counts = {}
+        for s in statuses.values():
+            counts[s] = counts.get(s, 0) + 1
+
+        goal_summaries[gid] = {
+            "description": goal["description"][:60],
+            "status": goal["status"],
+            "task_counts": counts,
+            "issues": issues,
+            "warnings": warnings,
+        }
+
+    # Update state
+    state = _load(STATE_PATH)
+    state["last_monitor_at"] = now.isoformat()
+    _save(STATE_PATH, state)
+
+    if args.json_out:
+        print(json.dumps({
+            "checked_at": now.isoformat(),
+            "goals": goal_summaries,
+            "total_issues": len(all_issues),
+            "total_warnings": len(all_warnings),
+        }, indent=2))
+        sys.exit(3 if all_issues else (2 if all_warnings else 0))
+
+    if not args.quiet:
+        print(f"Goal Monitor — {now.strftime('%Y-%m-%d %H:%M')}")
+        print()
+
+    for gid, summary in goal_summaries.items():
+        counts = summary["task_counts"]
+        total = sum(counts.values())
+        done = counts.get("succeeded", 0)
+        failed = counts.get("failed", 0)
+        running = counts.get("running", 0)
+        pending = counts.get("pending", 0)
+
+        health = "OK"
+        if summary["issues"]:
+            health = "CRITICAL"
+        elif summary["warnings"]:
+            health = "WARN"
+
+        if not args.quiet or health != "OK":
+            print(f"[{health:8s}] {gid}: {summary['description']}")
+            print(f"           Tasks: {done}/{total} succeeded, {failed} failed, {running} running, {pending} pending")
+            for w in summary["warnings"]:
+                print(f"  WARN:  {w}")
+            for i in summary["issues"]:
+                print(f"  ERROR: {i}")
+            print()
+
+    if not all_issues and not all_warnings:
+        if not args.quiet:
+            print("All goals healthy.")
+    elif all_issues:
+        sys.exit(3)
+    elif all_warnings:
+        sys.exit(2)
+
+if __name__ == "__main__":
+    main()

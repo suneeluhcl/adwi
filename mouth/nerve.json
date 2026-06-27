@@ -1,0 +1,8 @@
+{
+  "organ": "mouth",
+  "version": "1.0",
+  "description": "Dispatcher, comms, outbound communication",
+  "status": "active",
+  "inbox": "mouth/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

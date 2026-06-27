@@ -1,0 +1,8 @@
+{
+  "organ": "heart",
+  "version": "1.0",
+  "description": "Orchestration, goal engine, task queue, model router",
+  "status": "active",
+  "inbox": "heart/nerve_inbox/",
+  "nerve_propagator": "nervous/nerve_propagator.py"
+}

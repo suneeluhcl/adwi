@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""
+goal-create — Create a new goal in the goal engine.
+
+Usage:
+  goal-create "description"
+  goal-create "description" --priority high --complexity medium
+  goal-create "description" --criteria "what done looks like" --constraints "no external APIs"
+
+Options:
+  --priority   low | medium | high | critical  (default: medium)
+  --complexity low | medium | high             (default: medium)
+  --criteria   Success criteria text           (default: derived from description)
+  --constraints Constraints text              (default: none)
+  --json       Output JSON
+
+Exit codes:
+  0  goal created
+  1  error
+"""
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+ACTIVE_GOALS_MD = GE / "goals" / "active_goals.md"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+
+SAFETY_KEYWORDS = [
+    "rm -rf", "delete all", "drop table", "format disk",
+    "wipe", "purge everything", "force push main", "destroy",
+]
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _gen_id(graph):
+    existing = [k for k in graph.get("goals", {}).keys() if re.match(r"G\d+", k)]
+    nums = [int(k[1:]) for k in existing if k[1:].isdigit()]
+    n = max(nums) + 1 if nums else 1
+    return f"G{n:03d}"
+
+def _check_safety(description):
+    desc_lower = description.lower()
+    for kw in SAFETY_KEYWORDS:
+        if kw in desc_lower:
+            return kw
+    return None
+
+def _update_active_goals_md(goal_id, goal):
+    text = ACTIVE_GOALS_MD.read_text()
+    placeholder = "_No active goals yet. Run `goal-create \"description\"` to add one._"
+    entry = f"""
+## [{goal_id}] {goal['description'][:60]}
+- **description**: {goal['description']}
+- **success_criteria**: {goal['success_criteria']}
+- **priority**: {goal['priority']}
+- **complexity**: {goal['complexity']}
+- **constraints**: {goal['constraints'] or 'none'}
+- **created_at**: {goal['created_at']}
+- **status**: {goal['status']}
+- **task_count**: 0
+"""
+    if placeholder in text:
+        text = text.replace(placeholder, entry.strip())
+    else:
+        text = text.rstrip() + "\n" + entry
+    ACTIVE_GOALS_MD.write_text(text)
+
+def main():
+    parser = argparse.ArgumentParser(description="Create a new goal")
+    parser.add_argument("description", help="High-level goal description")
+    parser.add_argument("--priority", choices=["low", "medium", "high", "critical"], default="medium")
+    parser.add_argument("--complexity", choices=["low", "medium", "high"], default="medium")
+    parser.add_argument("--criteria", default=None, help="Success criteria")
+    parser.add_argument("--constraints", default=None, help="Constraints")
+    parser.add_argument("--json", dest="json_out", action="store_true")
+    args = parser.parse_args()
+
+    # Safety check
+    flag = _check_safety(args.description)
+    if flag:
+        print(f"ERROR: Goal description contains unsafe keyword: '{flag}'", file=sys.stderr)
+        print("Refusing to create. Rephrase without destructive intent.", file=sys.stderr)
+        sys.exit(1)
+
+    graph = _load(GRAPH_PATH)
+    if "goals" not in graph:
+        graph["goals"] = {}
+    if "tasks" not in graph:
+        graph["tasks"] = {}
+
+    goal_id = _gen_id(graph)
+    success_criteria = args.criteria or f"Goal '{args.description[:40]}' is fully completed and verified."
+
+    goal = {
+        "id": goal_id,
+        "description": args.description,
+        "success_criteria": success_criteria,
+        "priority": args.priority,
+        "complexity": args.complexity,
+        "constraints": args.constraints,
+        "created_at": _now(),
+        "status": "active",
+        "task_count": 0,
+        "tasks": [],
+        "notes": ""
+    }
+
+    graph["goals"][goal_id] = goal
+    graph["_meta"]["last_updated"] = _now()
+    _save(GRAPH_PATH, graph)
+
+    # Update state
+    state = _load(STATE_PATH)
+    state["active_goal_count"] = state.get("active_goal_count", 0) + 1
+    state["last_goal_created"] = _now()
+    state["_meta"] = state.get("_meta", {})
+    state["_meta"]["last_updated"] = _now()
+    _save(STATE_PATH, state)
+
+    # Update active_goals.md
+    _update_active_goals_md(goal_id, goal)
+
+    # Set as current goal
+    current = _load(CURRENT_GOAL_PATH)
+    current["goal_id"] = goal_id
+    current["goal_description"] = args.description
+    current["goal_status"] = "active"
+    current["ready_tasks"] = []
+    current["pending_tasks"] = []
+    current["completed_tasks"] = []
+    current["failed_tasks"] = []
+    current["updated_at"] = _now()
+    _save(CURRENT_GOAL_PATH, current)
+
+    if args.json_out:
+        print(json.dumps({"goal_id": goal_id, "goal": goal}, indent=2))
+    else:
+        print(f"Goal created: {goal_id}")
+        print(f"  Description : {args.description}")
+        print(f"  Priority    : {args.priority}")
+        print(f"  Complexity  : {args.complexity}")
+        print(f"  Criteria    : {success_criteria}")
+        print(f"")
+        print(f"Next step: goal-plan {goal_id}")
+
+if __name__ == "__main__":
+    main()

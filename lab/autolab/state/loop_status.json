@@ -1,0 +1,11 @@
+{
+  "confidence_score": 0.56,
+  "created_at": "2026-06-24T15:24:13-0500",
+  "last_experiment": "exp-20260626-014821",
+  "last_result": "revert",
+  "last_run_at": "2026-06-26T01:48:21-0500",
+  "last_selection_reason": "queued",
+  "last_successful_improvement": null,
+  "mode": "idle",
+  "status": "idle"
+}

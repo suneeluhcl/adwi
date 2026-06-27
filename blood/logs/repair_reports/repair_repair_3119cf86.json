@@ -1,0 +1,37 @@
+{
+  "job_id": "repair_3119cf86",
+  "timestamp": "2026-06-26T21:39:26.612524+00:00",
+  "initial_score": 50,
+  "final_score": 56,
+  "fixes": [
+    "doctor_pass",
+    "repair_pass"
+  ],
+  "warnings": [],
+  "stages": {
+    "1": {
+      "ok": true,
+      "missing": 0
+    },
+    "2": {
+      "broken_symlinks": 0
+    },
+    "3": {
+      "mcp_checked": true
+    },
+    "4": {
+      "vector_ok": true
+    },
+    "5": {
+      "recovered": false
+    },
+    "6": {
+      "json_errors": 0
+    },
+    "7": {
+      "doctor_ok": true,
+      "repair_ok": true
+    }
+  },
+  "status": "complete"
+}

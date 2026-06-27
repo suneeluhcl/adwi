@@ -1,0 +1,372 @@
+#!/usr/bin/env python3
+"""
+goal-execute — Find ready tasks in a goal and route them through the orchestrator.
+
+Usage:
+  goal-execute GOAL_ID
+  goal-execute GOAL_ID --dry-run     # show what would run, do nothing
+  goal-execute GOAL_ID --auto        # skip per-task confirmation
+  goal-execute GOAL_ID --task TASK_ID  # run a specific task only
+  goal-execute GOAL_ID --max N       # run at most N tasks then stop
+
+Safety:
+  Tasks with requires_confirmation=true always prompt before executing,
+  even when --auto is used.
+
+Exit codes:
+  0  all ready tasks executed (or dry-run complete)
+  1  error
+  2  goal not found or has no ready tasks
+  3  task flagged by orchestrator safety check
+"""
+
+import argparse
+import atexit
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import uuid
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+DEP_MAP_PATH = GE / "graph" / "dependency_map.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+EXEC_LOG_PATH = GE / "execution" / "execution_log.md"
+CURRENT_RUN_PATH = GE / "execution" / "current_run.json"
+ROUTE_TASK = WORKSPACE / "orchestrator" / "scripts" / "route-task"
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+
+def _identity_adaptive_hook():
+    goal_id = None
+    for idx, arg in enumerate(sys.argv):
+        if arg == "--goal-id" and idx + 1 < len(sys.argv):
+            goal_id = sys.argv[idx + 1]
+        elif arg.startswith("--goal-id="):
+            goal_id = arg.split("=", 1)[1]
+    if not goal_id:
+        return
+    script = WORKSPACE / "identity/adaptive/adaptive_identity.py"
+    if not script.exists():
+        return
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "hook",
+                "--output-id",
+                f"goal-execute-{goal_id}",
+                "--context",
+                "goal_execute",
+                "--agent",
+                "Codex",
+                "--notes",
+                "goal execution cycle completed",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+            check=False,
+        )
+    except Exception:
+        pass
+    prediction = WORKSPACE / "anticipation/prediction_engine.py"
+    if prediction.exists():
+        try:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(prediction),
+                    "record",
+                    "--command",
+                    "goal-execute",
+                    "--context",
+                    "goal_engine",
+                    "--exit-code",
+                    "0",
+                    "--quiet",
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+                check=False,
+            )
+        except Exception:
+            pass
+
+
+atexit.register(_identity_adaptive_hook)
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _log_exec(goal_id, task_id, agent, result, note=""):
+    ts = _now()
+    line = f"\n| {ts} | {goal_id} | {task_id} | {agent} | {result} | {note} |"
+    text = EXEC_LOG_PATH.read_text()
+    if "_No executions yet._" in text:
+        text = text.replace(
+            "_No executions yet._",
+            "| Timestamp | Goal | Task | Agent | Result | Note |\n|---|---|---|---|---|---|\n" + line.strip()
+        )
+    else:
+        text = text.rstrip() + line
+    EXEC_LOG_PATH.write_text(text)
+
+def _compute_ready_tasks(graph, goal_id):
+    """Return task IDs that are ready (all deps succeeded)."""
+    goal = graph["goals"].get(goal_id, {})
+    task_ids = goal.get("tasks", [])
+    ready = []
+    for tid in task_ids:
+        t = graph["tasks"].get(tid, {})
+        if t.get("status") != "pending":
+            continue
+        deps = t.get("dependencies", [])
+        all_done = all(
+            graph["tasks"].get(d, {}).get("status") == "succeeded"
+            for d in deps
+        )
+        if all_done:
+            ready.append(tid)
+    return ready
+
+def _route_task_dry(task_description, task_type):
+    """Ask route-task for a recommendation. Returns (agent, confidence, flagged)."""
+    try:
+        result = subprocess.run(
+            [str(ROUTE_TASK), "--json", "--dry-run", task_description],
+            capture_output=True, text=True, timeout=15
+        )
+        if result.returncode == 2:
+            return None, 0.0, True
+        data = json.loads(result.stdout)
+        return data.get("agent", "claude"), data.get("confidence", 0.5), False
+    except Exception:
+        return "claude", 0.5, False
+
+def main():
+    parser = argparse.ArgumentParser(description="Execute ready tasks in a goal")
+    parser.add_argument("goal_id", help="Goal ID (e.g. G001)")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--auto", action="store_true", help="Skip per-task confirmation")
+    parser.add_argument("--task", default=None, help="Run only this specific task ID")
+    parser.add_argument("--max", type=int, default=1, dest="max_tasks",
+                        help="Maximum tasks to execute in this run (default: 1)")
+    parser.add_argument("--json", dest="json_out", action="store_true")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    if args.goal_id not in graph.get("goals", {}):
+        print(f"ERROR: Goal {args.goal_id} not found.", file=sys.stderr)
+        sys.exit(2)
+
+    goal = graph["goals"][args.goal_id]
+
+    if goal.get("status") not in ("active", "paused"):
+        print(f"Goal {args.goal_id} is {goal.get('status')} — nothing to execute.")
+        sys.exit(0)
+
+    # Determine which tasks to run
+    if args.task:
+        if args.task not in graph.get("tasks", {}):
+            print(f"ERROR: Task {args.task} not found.", file=sys.stderr)
+            sys.exit(2)
+        candidate_tasks = [args.task]
+    else:
+        candidate_tasks = _compute_ready_tasks(graph, args.goal_id)
+
+    if not candidate_tasks:
+        print(f"No ready tasks for {args.goal_id}.")
+        # Check if all tasks are done
+        all_tasks = goal.get("tasks", [])
+        statuses = [graph["tasks"].get(t, {}).get("status") for t in all_tasks]
+        if all(s == "succeeded" for s in statuses) and all_tasks:
+            print("All tasks complete! Run `goal-complete` to close this goal.")
+        elif any(s == "running" for s in statuses):
+            print("Some tasks are still running.")
+        elif any(s == "failed" for s in statuses):
+            print("Some tasks failed. Run `goal-adapt` to retry or replan.")
+        sys.exit(2)
+
+    run_id = str(uuid.uuid4())[:8]
+    run_record = {
+        "run_id": run_id, "goal_id": args.goal_id,
+        "started_at": _now(), "completed_at": None,
+        "tasks_attempted": [], "tasks_succeeded": [], "tasks_failed": [],
+        "status": "running"
+    }
+    if not args.dry_run:
+        _save(CURRENT_RUN_PATH, run_record)
+
+    tasks_run = 0
+    for task_id in candidate_tasks[:args.max_tasks]:
+        task = graph["tasks"][task_id]
+        agent_rec, confidence, flagged = _route_task_dry(task["description"], task["task_type"])
+
+        if flagged:
+            print(f"\nTASK {task_id} FLAGGED by orchestrator safety check.")
+            print(f"  Description: {task['description']}")
+            print(f"  This task requires manual review. Skipping.")
+            _log_exec(args.goal_id, task_id, "none", "FLAGGED", "orchestrator safety")
+            continue
+
+        preferred_agent = task.get("preferred_agent", agent_rec or "claude")
+
+        print(f"\nTask: {task_id}")
+        print(f"  Description : {task['description']}")
+        print(f"  Task type   : {task['task_type']}")
+        print(f"  Agent       : {preferred_agent} (orchestrator rec: {agent_rec or 'claude'}, conf: {confidence:.0%})")
+        print(f"  Difficulty  : {task['estimated_difficulty']}")
+        if task.get("gstack_skill"):
+            print(f"  gstack mode : {task['gstack_skill']}  ← {task.get('gstack_hint','')}")
+
+        if args.dry_run:
+            print(f"  [DRY RUN] Would launch {preferred_agent}")
+            continue
+
+        # Confirmation logic
+        needs_confirm = task.get("requires_confirmation", False) or not args.auto
+        if needs_confirm:
+            try:
+                ans = input(f"\n  Proceed with this task? [Y/n/skip]: ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                print("\nAborted.")
+                break
+            if ans == "skip":
+                print(f"  Skipping {task_id}.")
+                continue
+            if ans not in ("", "y", "yes"):
+                print(f"  Cancelled.")
+                break
+
+        # Mark running
+        graph["tasks"][task_id]["status"] = "running"
+        graph["tasks"][task_id]["started_at"] = _now()
+        graph["tasks"][task_id]["attempts"] = task.get("attempts", 0) + 1
+        _save(GRAPH_PATH, graph)
+
+        # Show task instructions for the agent
+        print(f"\n  {'='*60}")
+        print(f"  TASK FOR {preferred_agent.upper()}: {task['description']}")
+        print(f"  Goal: {goal['description']}")
+        print(f"  Task type: {task['task_type']}")
+        if task.get("gstack_skill"):
+            print(f"  Cognitive mode: invoke {task['gstack_skill']} at session start")
+            print(f"  Why: {task.get('gstack_hint','')}")
+        print(f"  Success criteria: {goal['success_criteria']}")
+        print(f"  {'='*60}")
+        print()
+
+        # Ask outcome (the agent has been shown the task; user runs agent separately)
+        # For now, we record the routing decision and ask for manual outcome
+        print(f"  [TASK QUEUED] Open {preferred_agent} and run the above task.")
+        print(f"  After completing, report outcome:")
+
+        try:
+            outcome = input(f"  Outcome [succeeded/failed/skip]: ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            outcome = "skip"
+
+        if outcome in ("succeeded", "s", "success", "yes", "y", "done"):
+            graph["tasks"][task_id]["status"] = "succeeded"
+            graph["tasks"][task_id]["completed_at"] = _now()
+            graph["tasks"][task_id]["result"] = "succeeded"
+            run_record["tasks_succeeded"].append(task_id)
+            _log_exec(args.goal_id, task_id, preferred_agent, "SUCCEEDED")
+            print(f"  Task {task_id} marked succeeded.")
+        elif outcome in ("failed", "f", "fail", "no"):
+            graph["tasks"][task_id]["status"] = "failed"
+            graph["tasks"][task_id]["completed_at"] = _now()
+            graph["tasks"][task_id]["result"] = "failed"
+            run_record["tasks_failed"].append(task_id)
+            _log_exec(args.goal_id, task_id, preferred_agent, "FAILED")
+            print(f"  Task {task_id} marked failed. Run `goal-adapt {args.goal_id}` to retry.")
+        else:
+            graph["tasks"][task_id]["status"] = "pending"
+            graph["tasks"][task_id]["started_at"] = None
+            graph["tasks"][task_id]["attempts"] = max(0, graph["tasks"][task_id].get("attempts", 1) - 1)
+            print(f"  Task {task_id} skipped, reset to pending.")
+
+        run_record["tasks_attempted"].append(task_id)
+        _save(GRAPH_PATH, graph)
+        tasks_run += 1
+
+    # Update current_goal.json
+    ready_now = _compute_ready_tasks(graph, args.goal_id)
+    all_tasks = goal.get("tasks", [])
+    completed = [t for t in all_tasks if graph["tasks"].get(t, {}).get("status") == "succeeded"]
+    failed = [t for t in all_tasks if graph["tasks"].get(t, {}).get("status") == "failed"]
+    pending = [t for t in all_tasks if graph["tasks"].get(t, {}).get("status") == "pending"]
+
+    current = _load(CURRENT_GOAL_PATH)
+    current["ready_tasks"] = ready_now
+    current["pending_tasks"] = pending
+    current["completed_tasks"] = completed
+    current["failed_tasks"] = failed
+    current["updated_at"] = _now()
+    _save(CURRENT_GOAL_PATH, current)
+
+    # Finalize run
+    run_record["completed_at"] = _now()
+    run_record["status"] = "complete"
+    if not args.dry_run:
+        _save(CURRENT_RUN_PATH, run_record)
+
+    # Update state
+    state = _load(STATE_PATH)
+    state["last_execution_at"] = _now()
+    state["total_tasks_executed"] = state.get("total_tasks_executed", 0) + len(run_record["tasks_attempted"])
+    state["total_tasks_succeeded"] = state.get("total_tasks_succeeded", 0) + len(run_record["tasks_succeeded"])
+    state["total_tasks_failed"] = state.get("total_tasks_failed", 0) + len(run_record["tasks_failed"])
+    if not args.dry_run:
+        _save(STATE_PATH, state)
+
+    if tasks_run > 0:
+        print(f"\nRun complete: {len(run_record['tasks_succeeded'])} succeeded, {len(run_record['tasks_failed'])} failed.")
+        if ready_now:
+            print(f"Next ready tasks: {', '.join(ready_now)}")
+            print(f"Run `goal-execute {args.goal_id}` to continue.")
+        elif not pending and not failed:
+            print(f"All tasks complete! Run `goal-complete {args.goal_id}` to close.")
+        elif failed:
+            print(f"Failed tasks: {', '.join(failed)}. Run `goal-adapt {args.goal_id}` to retry.")
+
+    # Update ACTIVE_CONTEXT.json
+    try:
+        active_context_path = WORKSPACE / "agent-system" / "state" / "ACTIVE_CONTEXT.json"
+        if active_context_path.exists():
+            active_context = json.loads(active_context_path.read_text())
+        else:
+            active_context = {}
+        active_context["current_goal"] = goal.get("description", args.goal_id)
+        active_context["active_workflow"] = "idea_execution"
+        active_context["current_intent"] = "idea_execution"
+        active_context["status"] = "active"
+        active_context["last_updated"] = _now()
+        last_actions = active_context.get("last_actions", [])
+        last_actions.append("goal-execute")
+        active_context["last_actions"] = last_actions[-10:]
+        active_context["confidence"] = 0.9 if goal.get("status") in ("active", "paused") else 0.4
+        active_context_path.write_text(json.dumps(active_context, indent=2) + "\n")
+    except Exception:
+        pass
+
+if __name__ == "__main__":
+    main()

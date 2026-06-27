@@ -1,1 +1,1 @@
-/Users/MAC/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md
+/Users/MAC/SuneelWorkSpace/skeleton/rules/AGENT_SYSTEM.md

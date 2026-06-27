@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""
+goal-status — Show current status of all goals and the system.
+
+Usage:
+  goal-status             # overview of all active goals
+  goal-status GOAL_ID     # detailed view of one goal
+  goal-status --json      # machine-readable output
+
+Exit codes:
+  0  success
+"""
+
+import argparse
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone
+
+WORKSPACE = pathlib.Path("/Users/MAC/SuneelWorkSpace")
+GE = WORKSPACE / "goal-engine"
+GRAPH_PATH = GE / "graph" / "task_graph.json"
+STATE_PATH = GE / "state" / "goal_state.json"
+CURRENT_GOAL_PATH = GE / "state" / "current_goal.json"
+REPORTS_DIR = GE / "reports"
+GOAL_REPORT = REPORTS_DIR / "goal_report.md"
+SYS_PROGRESS = REPORTS_DIR / "system_progress.md"
+
+STATUS_ICON = {
+    "succeeded": "✓", "skipped": "~", "failed": "✗",
+    "running": "→", "pending": "·", "aborted": "⊘", "unknown": "?"
+}
+
+def _now():
+    return datetime.now(timezone.utc).astimezone().isoformat()
+
+def _load(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def _save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
+
+def _task_bar(tasks, graph, width=30):
+    """Visual progress bar for tasks."""
+    total = len(tasks)
+    if total == 0:
+        return "[no tasks]"
+    done = sum(1 for t in tasks if graph["tasks"].get(t, {}).get("status") in ("succeeded", "skipped"))
+    frac = done / total
+    filled = int(frac * width)
+    return f"[{'█' * filled}{'░' * (width - filled)}] {done}/{total}"
+
+def _generate_reports(graph, state):
+    """Write goal_report.md and system_progress.md."""
+    now = _now()
+    active = [(gid, g) for gid, g in graph.get("goals", {}).items() if g.get("status") == "active"]
+    completed = [(gid, g) for gid, g in graph.get("goals", {}).items() if g.get("status") == "completed"]
+    failed = [(gid, g) for gid, g in graph.get("goals", {}).items() if g.get("status") == "failed"]
+
+    lines = [f"# Goal Engine Report\n_Generated: {now}_\n"]
+    lines.append(f"## Summary\n- Active goals: {len(active)}\n- Completed: {len(completed)}\n- Failed: {len(failed)}\n")
+    lines.append(f"- Total tasks executed: {state.get('total_tasks_executed', 0)}")
+    lines.append(f"- Tasks succeeded: {state.get('total_tasks_succeeded', 0)}")
+    lines.append(f"- Tasks failed: {state.get('total_tasks_failed', 0)}\n")
+
+    if active:
+        lines.append("## Active Goals\n")
+        for gid, g in active:
+            tasks = g.get("tasks", [])
+            bar = _task_bar(tasks, graph)
+            lines.append(f"### {gid}: {g['description'][:60]}")
+            lines.append(f"- Priority: {g['priority']} | Complexity: {g['complexity']}")
+            lines.append(f"- Progress: {bar}")
+            lines.append(f"- Created: {g['created_at']}\n")
+
+    if completed:
+        lines.append("## Completed Goals\n")
+        for gid, g in completed:
+            lines.append(f"- [{gid}] {g['description'][:60]} — {g.get('final_result', 'done')}")
+        lines.append("")
+
+    if failed:
+        lines.append("## Failed Goals\n")
+        for gid, g in failed:
+            lines.append(f"- [{gid}] {g['description'][:60]} — {g.get('failure_reason', 'unknown')}")
+        lines.append("")
+
+    GOAL_REPORT.write_text("\n".join(lines))
+
+    # system_progress.md
+    prog_lines = [f"# System Progress\n_Generated: {now}_\n"]
+    prog_lines.append(f"## Goal Engine")
+    prog_lines.append(f"- Active goals: {len(active)}")
+    prog_lines.append(f"- Completed goals: {len(completed)}")
+    prog_lines.append(f"- Failed goals: {len(failed)}")
+    prog_lines.append(f"- Last execution: {state.get('last_execution_at', 'never')}")
+    prog_lines.append(f"- Last monitor: {state.get('last_monitor_at', 'never')}")
+    prog_lines.append(f"- Last adaptation: {state.get('last_adapt_at', 'never')}\n")
+    SYS_PROGRESS.write_text("\n".join(prog_lines))
+
+def main():
+    parser = argparse.ArgumentParser(description="Show goal engine status")
+    parser.add_argument("goal_id", nargs="?", default=None)
+    parser.add_argument("--json", dest="json_out", action="store_true")
+    args = parser.parse_args()
+
+    graph = _load(GRAPH_PATH)
+    state = _load(STATE_PATH)
+
+    if args.json_out:
+        active = {gid: g for gid, g in graph.get("goals", {}).items() if g.get("status") == "active"}
+        print(json.dumps({"state": state, "active_goals": active}, indent=2))
+        return
+
+    if args.goal_id:
+        # Detailed single-goal view
+        goal = graph.get("goals", {}).get(args.goal_id)
+        if not goal:
+            print(f"Goal {args.goal_id} not found.")
+            sys.exit(1)
+        print(f"\nGoal: {args.goal_id}")
+        print(f"  Description : {goal['description']}")
+        print(f"  Status      : {goal['status']}")
+        print(f"  Priority    : {goal['priority']}")
+        print(f"  Complexity  : {goal['complexity']}")
+        print(f"  Criteria    : {goal['success_criteria']}")
+        print(f"  Created     : {goal['created_at']}")
+        print(f"  Progress    : {_task_bar(goal.get('tasks', []), graph)}")
+        print()
+        task_ids = goal.get("tasks", [])
+        if task_ids:
+            print("  Tasks:")
+            for tid in task_ids:
+                t = graph["tasks"].get(tid, {})
+                icon = STATUS_ICON.get(t.get("status", "unknown"), "?")
+                dep_str = "→ " + ",".join(t.get("dependencies", [])) if t.get("dependencies") else ""
+                conf = " [CONFIRM]" if t.get("requires_confirmation") else ""
+                print(f"    {icon} {tid}  [{t.get('task_type','?'):20s}]  {t.get('preferred_agent','?'):6s}  {t.get('status','?'):10s}  {dep_str}{conf}")
+                print(f"       {t.get('description','?')}")
+        return
+
+    # Overview of all goals
+    print(f"\nGoal Engine Status — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    print()
+
+    all_goals = graph.get("goals", {})
+    if not all_goals:
+        print("No goals yet. Run `goal-create \"description\"` to start.")
+        return
+
+    for status_group in ("active", "completed", "failed"):
+        goals_in_group = [(gid, g) for gid, g in all_goals.items() if g.get("status") == status_group]
+        if not goals_in_group:
+            continue
+        print(f"  {status_group.upper()} ({len(goals_in_group)}):")
+        for gid, g in goals_in_group:
+            bar = _task_bar(g.get("tasks", []), graph, width=20)
+            print(f"    {gid}  {bar}  {g['description'][:50]}")
+        print()
+
+    print(f"  System stats:")
+    print(f"    Tasks executed : {state.get('total_tasks_executed', 0)}")
+    print(f"    Tasks succeeded: {state.get('total_tasks_succeeded', 0)}")
+    print(f"    Tasks failed   : {state.get('total_tasks_failed', 0)}")
+    print(f"    Last execution : {state.get('last_execution_at', 'never')}")
+
+    _generate_reports(graph, state)
+    print()
+    print("  Reports: goal-engine/reports/goal_report.md")
+
+if __name__ == "__main__":
+    main()

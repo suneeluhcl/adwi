@@ -47,3 +47,12 @@ agent-system/memory/vector/chroma_store/
 .playwright-mcp/
 
 
+
+# Large binary/model files (too big for GitHub)
+brain/memory/vector/.hf_cache/
+brain/memory/vector/chroma_store/
+spine/backups/
+*.tar.gz
+*.gz
+*.bin
+*.safetensors
