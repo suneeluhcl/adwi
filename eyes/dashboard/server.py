@@ -29,7 +29,7 @@ from widgets.autolab_status import get_autolab_status
 from widgets.readme_health import get_readme_health, get_readme_priority, get_readme_trends
 
 WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOG_DIR = os.path.join(WORKSPACE, "agent-system", "logs")
+LOG_DIR = os.path.join(WORKSPACE, "blood", "logs")
 HISTORY_FILE = os.path.join(LOG_DIR, "execution_history.jsonl")
 os.makedirs(LOG_DIR, exist_ok=True)
 
@@ -355,7 +355,7 @@ async def api_health() -> Any:
 @app.get("/api/telemetry")
 async def api_telemetry() -> Any:
     try:
-        sys.path.insert(0, os.path.join(WORKSPACE, "agent-system", "telemetry"))
+        sys.path.insert(0, os.path.join(WORKSPACE, "blood", "telemetry"))
         from telemetry_query import summary
         return summary(days=7)
     except Exception as e:
