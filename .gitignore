@@ -76,6 +76,10 @@ blood/logs/readme-nightly.out.log
 blood/logs/readme-nightly.err.log
 blood/logs/auto_commit.log
 blood/logs/MAINTENANCE_LOG.md
+blood/logs/dashboard.log
+
+# Auto-generated automation reports (regenerated on every repair/status run)
+hands/automation/reports/
 
 # Auto-repair state (regenerated on every readme-repair run)
 spine/readme_repair_report.json
