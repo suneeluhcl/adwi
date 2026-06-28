@@ -91,6 +91,36 @@ For each failure, provide a specific fix. Respond ONLY in JSON array:
     return []
 
 
+# Directories the repair loop is allowed to create files in (LLM-generated paths)
+_ALLOWED_CREATE_DIRS = ("tests/", "blood/logs/", "lab/autolab/experiments/")
+_CONTROLLED_QUEUE = "blood/logs/repair_loop_controlled_queue.json"
+
+
+def _path_within_workspace(relative: str) -> str | None:
+    """Return resolved absolute path only if it stays inside WORKSPACE, else None."""
+    if not relative or os.path.isabs(relative) or "\x00" in relative:
+        return None
+    parts = relative.replace("\\", "/").split("/")
+    if ".." in parts:
+        return None
+    ws_real = os.path.realpath(WORKSPACE)
+    full = os.path.realpath(os.path.join(WORKSPACE, relative))
+    if full == ws_real or full.startswith(ws_real + os.sep):
+        return full
+    return None
+
+
+def _queue_controlled_fix(fix: dict) -> None:
+    path = os.path.join(WORKSPACE, _CONTROLLED_QUEUE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        existing = json.load(open(path)) if os.path.exists(path) else []
+    except Exception:
+        existing = []
+    existing.append({**fix, "queued_at": datetime.now(timezone.utc).isoformat()})
+    json.dump(existing, open(path, "w"), indent=2)
+
+
 def apply_fix(fix: dict) -> bool:
     if fix.get("execution_level") != "SAFE":
         return False
@@ -103,27 +133,34 @@ def apply_fix(fix: dict) -> bool:
 
     try:
         if fix_type == "create_dir" and target:
-            full = os.path.join(WORKSPACE, target)
+            full = _path_within_workspace(target)
+            if not full:
+                print(f"    Rejected (traversal/absolute): {target}")
+                return False
             os.makedirs(full, exist_ok=True)
             print(f"    Created dir: {target}")
             return True
 
         elif fix_type == "create_file" and target and command:
-            full = os.path.join(WORKSPACE, target)
+            full = _path_within_workspace(target)
+            if not full:
+                print(f"    Rejected (traversal/absolute): {target}")
+                return False
+            if not any(target.startswith(d) for d in _ALLOWED_CREATE_DIRS):
+                print(f"    Rejected (not in allowed dirs): {target}")
+                _queue_controlled_fix(fix)
+                return False
             os.makedirs(os.path.dirname(full), exist_ok=True)
             with open(full, "w") as f:
                 f.write(command)
             print(f"    Created file: {target}")
             return True
 
-        elif fix_type == "fix_symlink" and target and command:
-            link_path = os.path.join(WORKSPACE, "hands/bin", target)
-            if os.path.islink(link_path):
-                os.unlink(link_path)
-            os.symlink(command, link_path)
-            os.chmod(link_path, 0o755)
-            print(f"    Fixed symlink: {target}")
-            return True
+        elif fix_type == "fix_symlink":
+            # Never auto-apply symlink fixes from LLM output — queue for human review
+            _queue_controlled_fix(fix)
+            print(f"    Queued for human review (symlink): {target}")
+            return False
 
     except Exception as e:
         print(f"    Fix failed: {e}")
