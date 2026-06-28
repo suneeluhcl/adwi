@@ -1,3 +1,4 @@
+import html
 import requests
 
 
@@ -12,9 +13,9 @@ def get_data() -> dict:
 def render_html() -> str:
     data = get_data()
     installed = data.get("installed", False)
-    version = data.get("version", "not installed")
-    skills = data.get("skill_count", 0)
-    status = data.get("status", "unknown")
+    version = html.escape(str(data.get("version", "not installed")))
+    skills = int(data.get("skill_count", 0) or 0)
+    status = html.escape(str(data.get("status", "unknown")))
 
     status_icon = "🟢" if installed else "🔴"
     status_color = "var(--accent-green)" if installed else "var(--accent-red)"

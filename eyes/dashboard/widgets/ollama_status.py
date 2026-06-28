@@ -1,5 +1,6 @@
-import urllib.request
+import html
 import json
+import urllib.request
 
 
 def get_data() -> dict:
@@ -22,7 +23,7 @@ def render_html() -> str:
 
     model_list_html = ""
     if models:
-        model_names = [m.get("name", "?") for m in models[:4]]
+        model_names = [html.escape(str(m.get("name", "?"))) for m in models[:4]]
         model_list_html = "<div style=\"color:var(--text-dim);font-size:10px;color:var(--text-dim);padding:1px 0\">" + \
             ", ".join(model_names) + \
             ("…" if len(models) > 4 else "") + "</div>"
