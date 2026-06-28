@@ -1,0 +1,31 @@
+{
+  "agent": "hermes",
+  "version": "1.0",
+  "organ": "dna",
+  "purpose": "Self-improving AI agent that learns from every session and creates reusable skills",
+  "provides": {
+    "skill_documents": "dna/agents/hermes/skills/",
+    "persistent_memory": "~/.hermes/memory/",
+    "autonomous_execution": "hermes CLI",
+    "mcp_client": "connects to nervous/mcp/"
+  },
+  "needs": {
+    "mcp_server": "nervous/mcp/server/main.py",
+    "workspace_root": "~/SuneelWorkSpace",
+    "model_config": "~/.hermes/config.yaml"
+  },
+  "cli_commands": {
+    "hermes": "start interactive session",
+    "hermes --continue": "resume last session",
+    "hermes doctor": "diagnose installation",
+    "hermes model": "switch model",
+    "hermes skills search <topic>": "find community skills",
+    "hermes update": "update to latest version"
+  },
+  "integration_points": {
+    "mcp": "nervous/mcp/server/config/resource_map.json",
+    "night_shift": "hands/automation/dag/pipelines/night_shift.yaml",
+    "model_router": "heart/model_router/model_registry.json",
+    "evolution": "lab/evolution/engine.py"
+  }
+}

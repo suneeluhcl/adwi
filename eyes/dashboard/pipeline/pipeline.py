@@ -70,23 +70,25 @@ class Pipeline:
         await self._log("info", "🧠", f"Brainstorming: {self.prompt[:80]}")
         await self._progress("brainstorm", 20, "Extracting intent...")
 
-        # Classify intent via dispatcher
+        # Classify intent via dispatcher (optional — skipped silently if not installed)
         intent_data: dict = {}
-        try:
-            sys.path.insert(0, os.path.join(WORKSPACE, "dispatcher"))
-            from intent_classifier import classify
-            results = classify(self.prompt)
-            if results:
-                name, conf, entry = results[0]
-                intent_data = {
-                    "intent": name,
-                    "confidence": round(conf, 3),
-                    "command": entry.get("command", ""),
-                    "description": entry.get("description", ""),
-                }
-                await self._log("info", "🎯", f"Intent: {name} ({int(conf*100)}% confidence)")
-        except Exception as e:
-            await self._log("warn", "⚠️", f"Intent classification skipped: {e}")
+        dispatcher_dir = os.path.join(WORKSPACE, "dispatcher")
+        if os.path.isdir(dispatcher_dir):
+            try:
+                sys.path.insert(0, dispatcher_dir)
+                from intent_classifier import classify
+                results = classify(self.prompt)
+                if results:
+                    name, conf, entry = results[0]
+                    intent_data = {
+                        "intent": name,
+                        "confidence": round(conf, 3),
+                        "command": entry.get("command", ""),
+                        "description": entry.get("description", ""),
+                    }
+                    await self._log("info", "🎯", f"Intent: {name} ({int(conf*100)}% confidence)")
+            except Exception as e:
+                await self._log("warn", "⚠️", f"Intent classification error: {e}")
 
         # Pull brain context
         brain_context = ""
@@ -245,7 +247,7 @@ class Pipeline:
         await self._progress("wire", 50, "Updating session handoff...")
 
         # Update SESSION_HANDOFF.md
-        handoff_path = os.path.join(WORKSPACE, "agent-system", "memory", "SESSION_HANDOFF.md")
+        handoff_path = os.path.join(WORKSPACE, "brain", "memory", "SESSION_HANDOFF.md")
         try:
             ts = datetime.now().strftime("%Y-%m-%d %H:%M")
             entry = (

@@ -1,0 +1,38 @@
+# Hermes Agent — SuneelWorkSpace Integration Config
+# This file documents how Hermes is configured for this workspace
+
+agent:
+  name: "SuneelWorkSpace Hermes"
+  workspace_root: "~/SuneelWorkSpace"
+  primary_organ: "dna"
+
+model:
+  # Mirrors heart/model_router/model_registry.json priority order
+  # Hermes uses its own model config at ~/.hermes/config.yaml
+  # This file is documentation only
+
+mcp_integration:
+  server: "nervous/mcp/server/main.py"
+  resources_exposed:
+    - "workspace://brain/memory"
+    - "workspace://heart/goals"
+    - "workspace://blood/telemetry"
+    - "workspace://spine/health"
+    - "workspace://nervous/registry"
+
+skill_sync:
+  # Hermes skills are stored at ~/.hermes/skills/
+  # Symlinked to dna/agents/hermes/skills/ for workspace visibility
+  hermes_skills_path: "~/.hermes/skills/"
+  workspace_skills_path: "dna/agents/hermes/skills/"
+
+learning_integration:
+  # When Hermes creates a new skill, notify the nervous system
+  notify_organ: "dna"
+  notify_event: "hermes_skill_created"
+
+night_shift_integration:
+  # Hermes runs during night shift
+  # Wired into hands/automation/dag/pipelines/night_shift.yaml
+  commands:
+    - "hermes --continue --non-interactive 'Run workspace health check and report findings'"
