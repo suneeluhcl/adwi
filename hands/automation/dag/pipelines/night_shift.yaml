@@ -80,3 +80,21 @@ steps:
     execution_level: SAFE
     on_failure:
       action: continue
+
+  - id: daily_evolve
+    name: "Daily Evolution Pass (log-learn + skills + curator)"
+    command: python3
+    args: ["lab/autolab/daily_evolve.py"]
+    depends_on: [readme_sync]
+    execution_level: SAFE
+    on_failure:
+      action: continue
+
+  - id: vault_sync
+    name: "Sync Obsidian Vault Organ Notes"
+    command: python3
+    args: ["brain/vault/vault_sync.py"]
+    depends_on: [daily_evolve]
+    execution_level: SAFE
+    on_failure:
+      action: continue

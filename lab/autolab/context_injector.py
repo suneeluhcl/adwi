@@ -103,6 +103,20 @@ Ollama models: suneelworkspace (llama3.3:70b base), codellama, llama3.1, mistral
     return full_context
 
 
+_SIDECAR_URL = "http://127.0.0.1:11435"
+
+
+def _sidecar_available() -> bool:
+    """Return True if the reasoning sidecar is up and responding."""
+    import urllib.request as _ur
+    try:
+        req = _ur.Request(f"{_SIDECAR_URL}/health", method="GET")
+        with _ur.urlopen(req, timeout=1):
+            return True
+    except Exception:
+        return False
+
+
 def ask_ollama_with_context(
     prompt: str,
     model: str = "suneelworkspace",
@@ -111,9 +125,35 @@ def ask_ollama_with_context(
     temperature: float = 0.2,
     num_ctx: int = 8192,
 ) -> str:
-    """Drop-in replacement for ask_ollama() — injects workspace context."""
-    import urllib.request
+    """Drop-in replacement for ask_ollama() — injects workspace context.
 
+    Routes through the reasoning sidecar (port 11435) when running for faster
+    context retrieval, falling back to direct Ollama (port 11434) when not.
+    """
+    import urllib.request as _ur
+
+    # Try sidecar first — it pre-caches context and avoids rebuilding on every call
+    if _sidecar_available():
+        try:
+            payload = json.dumps({
+                "prompt": prompt,
+                "model": model,
+                "task_type": task_type,
+                "temperature": temperature,
+                "num_ctx": num_ctx,
+            }).encode()
+            req = _ur.Request(
+                f"{_SIDECAR_URL}/query",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with _ur.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read()).get("response", "").strip()
+        except Exception:
+            pass  # fall through to direct Ollama
+
+    # Direct Ollama path
     context = build_context(task_type)
     system = f"""You are an AI engine inside SuneelWorkSpace — a living, self-maintaining local AI workspace.
 
@@ -137,7 +177,6 @@ def ask_ollama_with_context(
         },
     }).encode()
 
-    import urllib.request as _ur
     req = _ur.Request(
         "http://localhost:11434/api/generate",
         data=payload,

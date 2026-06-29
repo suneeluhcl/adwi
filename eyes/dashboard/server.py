@@ -837,6 +837,22 @@ async def run_repair_loop_api(background_tasks: BackgroundTasks) -> Any:
     return {"status": "started", "job_id": job_id}
 
 
+@app.post("/api/tests/event")
+async def receive_test_event(request: Request) -> Any:
+    """Receive a test event from test_daemon.py and broadcast to all WS clients."""
+    try:
+        event = await request.json()
+    except Exception:
+        return JSONResponse({"error": "invalid JSON"}, status_code=400)
+    # Broadcast to all connected dashboard clients
+    await manager.broadcast({
+        "type": "test_daemon_event",
+        "event": event,
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"received": True}
+
+
 @app.get("/widgets/tests")
 async def widget_tests() -> HTMLResponse:
     reports_dir = os.path.join(WORKSPACE, "tests/reports")
